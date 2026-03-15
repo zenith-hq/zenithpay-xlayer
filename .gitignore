@@ -1,0 +1,27 @@
+# dependencies
+node_modules/
+
+# build outputs
+dist/
+build/
+.next/
+out/
+
+# env
+.env
+.env.*
+!.env.example
+
+# foundry
+contracts/cache/
+contracts/out/
+
+# os
+.DS_Store
+
+# bun
+bun.lockb
+
+# internal context
+.context/
+/resources/
