@@ -1,3 +1,5 @@
+![ZenithPay banner](web/public/banner.png)
+
 ## ZenithPay
 
 > Your agent spends. You own the rules.
