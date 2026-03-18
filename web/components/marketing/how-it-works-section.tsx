@@ -183,13 +183,13 @@ function StepCard({
       <span className="shine absolute -top-1/2 -left-full h-[200%] w-3/4 skew-x-[-20deg] bg-linear-to-r from-transparent via-white/40 to-transparent pointer-events-none z-20" />
 
       {/* Step number */}
-      <div className="absolute top-3 right-3 size-6 rounded-full border border-border bg-background flex items-center justify-center font-mono text-[9px] text-muted-foreground z-10">
+      <div className="absolute top-3 right-3 size-6 rounded-full border border-border group-hover:border-brand-accent bg-background flex items-center justify-center font-mono text-[9px] text-muted-foreground group-hover:text-brand-accent transition-colors duration-300 z-10">
         {step.number}
       </div>
 
       {/* Main content */}
       <div className="flex flex-col flex-1 p-5 pb-6 pr-10">
-        <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-mono">
+        <span className="text-[10px] uppercase tracking-[0.2em] text-brand-accent font-mono">
           {step.label}
         </span>
         <h3 className="text-[20px] font-bold tracking-tight text-foreground leading-tight mt-1.5">
@@ -201,10 +201,10 @@ function StepCard({
       </div>
 
       {/* Corner brackets */}
-      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-foreground border-b border-r bottom-0 right-0 transition-colors duration-300" />
-      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-foreground border-b border-l bottom-0 left-0 transition-colors duration-300" />
-      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-foreground border-t border-r top-0 right-0 transition-colors duration-300" />
-      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-foreground border-t border-l top-0 left-0 transition-colors duration-300" />
+      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-brand-accent border-b border-r bottom-0 right-0 transition-colors duration-300" />
+      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-brand-accent border-b border-l bottom-0 left-0 transition-colors duration-300" />
+      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-brand-accent border-t border-r top-0 right-0 transition-colors duration-300" />
+      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-brand-accent border-t border-l top-0 left-0 transition-colors duration-300" />
     </motion.div>
   );
 }
@@ -224,7 +224,7 @@ export function HowItWorksSection() {
     >
       <div className="px-5 py-16 sm:px-8 lg:px-12">
         <div className="mb-12">
-          <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-mono">
+          <span className="text-xs uppercase tracking-[0.2em] text-brand-accent font-mono">
             [02] How it works
           </span>
           <h2 className="mt-3 text-[28px] sm:text-[36px] font-bold tracking-tight">

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useConnect, useConnectors, useConnection } from "wagmi";
+import { useConnect, useConnection, useConnectors } from "wagmi";
 import { LogoMark } from "@/components/logo-mark";
 import ModeToggle from "./theme-toggle/mode-toggle";
 import { Button } from "./ui/button";
@@ -40,7 +40,6 @@ export default function SignIn({
               Manage your agents, set spending policies, and more.
             </p>
           </div>
-
 
           <div className="flex flex-col gap-4 w-sm my-5">
             <div className="relative w-full group">

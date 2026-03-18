@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SignInVisual } from "@/components/signin-visual";
 import SignIn from "@/components/signin";
+import { SignInVisual } from "@/components/signin-visual";
 
 const TARGET_COLS = 8;
 const TARGET_ROWS = 8;

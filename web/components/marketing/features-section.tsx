@@ -204,7 +204,7 @@ function MicroHeroOne({ className }: { className?: string }) {
 
       <div className="absolute top-0 bottom-0 left-0 right-[140px] flex flex-col justify-between p-5">
         <div>
-          <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-brand-accent">
             Spend Policy
           </span>
           <h2 className="text-[20px] font-bold tracking-tight text-foreground leading-tight mt-1.5">
@@ -250,10 +250,10 @@ function MicroHeroOne({ className }: { className?: string }) {
         )}
       </div>
 
-      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-foreground border-b border-r bottom-0 right-0 transition-colors duration-300" />
-      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-foreground border-b border-l bottom-0 left-0 transition-colors duration-300" />
-      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-foreground border-t border-r top-0 right-0 transition-colors duration-300" />
-      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-foreground border-t border-l top-0 left-0 transition-colors duration-300" />
+      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-brand-accent border-b border-r bottom-0 right-0 transition-colors duration-300" />
+      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-brand-accent border-b border-l bottom-0 left-0 transition-colors duration-300" />
+      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-brand-accent border-t border-r top-0 right-0 transition-colors duration-300" />
+      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-brand-accent border-t border-l top-0 left-0 transition-colors duration-300" />
     </motion.div>
   );
 }
@@ -277,7 +277,7 @@ function MicroHeroTwo({ className }: { className?: string }) {
 
       <div className="absolute top-0 left-0 right-0 bottom-[52px] p-5 flex flex-col justify-between">
         <div>
-          <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-brand-accent">
             Agent Wallets
           </span>
           <h2 className="text-[20px] font-bold tracking-tight text-foreground leading-tight mt-1.5">
@@ -333,10 +333,10 @@ function MicroHeroTwo({ className }: { className?: string }) {
         </span> */}
       </div>
 
-      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-foreground border-b border-r bottom-0 right-0 transition-colors duration-300" />
-      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-foreground border-b border-l bottom-0 left-0 transition-colors duration-300" />
-      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-foreground border-t border-r top-0 right-0 transition-colors duration-300" />
-      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-foreground border-t border-l top-0 left-0 transition-colors duration-300" />
+      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-brand-accent border-b border-r bottom-0 right-0 transition-colors duration-300" />
+      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-brand-accent border-b border-l bottom-0 left-0 transition-colors duration-300" />
+      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-brand-accent border-t border-r top-0 right-0 transition-colors duration-300" />
+      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-brand-accent border-t border-l top-0 left-0 transition-colors duration-300" />
     </motion.div>
   );
 }
@@ -365,7 +365,7 @@ function MicroHeroThree({ className }: { className?: string }) {
       <span className="shine absolute -top-1/2 -left-full h-[200%] w-3/4 skew-x-[-20deg] bg-linear-to-r from-transparent via-white/40 to-transparent pointer-events-none z-20" />
 
       <div className="p-5 pb-0">
-        <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+        <span className="text-[10px] uppercase tracking-[0.2em] text-brand-accent">
           Auto-Swap
         </span>
         <h2 className="text-[20px] font-bold tracking-tight text-foreground leading-tight mt-1.5">
@@ -419,10 +419,10 @@ function MicroHeroThree({ className }: { className?: string }) {
 
       <div className="absolute bottom-0 left-0 right-0 h-[36px] flex items-center px-5" />
 
-      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-foreground border-b border-r bottom-0 right-0 transition-colors duration-300" />
-      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-foreground border-b border-l bottom-0 left-0 transition-colors duration-300" />
-      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-foreground border-t border-r top-0 right-0 transition-colors duration-300" />
-      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-foreground border-t border-l top-0 left-0 transition-colors duration-300" />
+      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-brand-accent border-b border-r bottom-0 right-0 transition-colors duration-300" />
+      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-brand-accent border-b border-l bottom-0 left-0 transition-colors duration-300" />
+      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-brand-accent border-t border-r top-0 right-0 transition-colors duration-300" />
+      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-brand-accent border-t border-l top-0 left-0 transition-colors duration-300" />
     </motion.div>
   );
 }
@@ -456,7 +456,7 @@ function MicroHeroFour({ className }: { className?: string }) {
       <span className="shine absolute -top-1/2 -left-full h-[200%] w-3/4 skew-x-[-20deg] bg-linear-to-r from-transparent via-white/40 to-transparent pointer-events-none z-20" />
 
       <div className="p-5 pb-2">
-        <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+        <span className="text-[10px] uppercase tracking-[0.2em] text-brand-accent">
           Audit Trail
         </span>
         <h2 className="text-[20px] font-bold tracking-tight text-foreground leading-tight mt-1.5">
@@ -477,7 +477,7 @@ function MicroHeroFour({ className }: { className?: string }) {
             <span
               className={cn("size-1.5 rounded-full shrink-0", {
                 "bg-destructive": tx.status === "blocked",
-                "bg-foreground/30": tx.status === "allowed",
+                "bg-brand-accent/70": tx.status === "allowed",
               })}
             />
             <ScrambleText
@@ -508,10 +508,10 @@ function MicroHeroFour({ className }: { className?: string }) {
         ))}
       </div>
 
-      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-foreground border-b border-r bottom-0 right-0 transition-colors duration-300" />
-      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-foreground border-b border-l bottom-0 left-0 transition-colors duration-300" />
-      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-foreground border-t border-r top-0 right-0 transition-colors duration-300" />
-      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-foreground border-t border-l top-0 left-0 transition-colors duration-300" />
+      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-brand-accent border-b border-r bottom-0 right-0 transition-colors duration-300" />
+      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-brand-accent border-b border-l bottom-0 left-0 transition-colors duration-300" />
+      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-brand-accent border-t border-r top-0 right-0 transition-colors duration-300" />
+      <span className="absolute h-2.5 w-2.5 border-foreground/30 group-hover:border-brand-accent border-t border-l top-0 left-0 transition-colors duration-300" />
     </motion.div>
   );
 }
@@ -531,7 +531,7 @@ export function FeaturesSection() {
     >
       <div className="px-5 py-16 sm:px-8 lg:px-12">
         <div className="mb-12">
-          <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-mono">
+          <span className="text-xs uppercase tracking-[0.2em] text-brand-accent font-mono">
             [01] Features
           </span>
           <h2 className="mt-3 text-[28px] sm:text-[36px] font-bold tracking-tight">

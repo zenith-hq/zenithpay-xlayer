@@ -2,8 +2,18 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { ZenithDither } from "@/components/bg/zenith-dither";
 
-const WORDS = ["SPEND", "POLICY", "ENFORCED", "ON-CHAIN", "X LAYER", "CONTROL", "PAYMENT", "AGENTS"];
+const WORDS = [
+  "SPEND",
+  "POLICY",
+  "ENFORCED",
+  "ON-CHAIN",
+  "X LAYER",
+  "CONTROL",
+  "PAYMENT",
+  "AGENTS",
+];
 
 const STATS = [
   { label: "per-tx cap", value: "$5.00" },
@@ -23,6 +33,7 @@ export function SignInVisual() {
 
   return (
     <div className="relative h-full w-full flex items-center justify-center overflow-hidden">
+      <ZenithDither opacity={0.14} />
       {/* Scan line sweep */}
       <motion.div
         className="absolute inset-x-0 h-[1px] bg-foreground/5 pointer-events-none"
@@ -94,8 +105,8 @@ export function SignInVisual() {
         {/* Status dot */}
         <div className="flex items-center gap-2">
           <span className="relative flex size-1.5">
-            <span className="absolute inline-flex size-full animate-ping rounded-full bg-foreground/30 duration-1000" />
-            <span className="relative inline-flex size-1.5 rounded-full bg-foreground/50" />
+            <span className="absolute inline-flex size-full animate-ping rounded-full bg-brand-accent/50 duration-1000" />
+            <span className="relative inline-flex size-1.5 rounded-full bg-brand-accent" />
           </span>
           <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-muted-foreground/40">
             policy engine

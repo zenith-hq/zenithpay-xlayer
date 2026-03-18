@@ -102,20 +102,20 @@ export function FAQsSection() {
         <div className="flex flex-col lg:flex-row lg:gap-16 xl:gap-24">
           {/* Left: heading */}
           <div className="mb-10 lg:mb-0 lg:w-[340px] xl:w-[400px] lg:shrink-0 lg:pt-1">
-            <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-mono">
+            <span className="text-xs uppercase tracking-[0.2em] text-brand-accent font-mono">
               [04] FAQs
             </span>
-            <h2 className="mt-3 text-[32px] sm:text-[40px] lg:text-[44px] font-bold tracking-tight leading-[1.05]">
+            <h2 className="mt-3 text-[32px] sm:text-[36px] font-bold tracking-tight leading-[1.05]">
               Frequently asked questions.
             </h2>
           </div>
 
           {/* Right: accordion with corner brackets */}
           <div className="relative flex-1 min-w-0">
-            <span className="absolute h-2.5 w-2.5 border-foreground/30 border-t border-l top-0 left-0 z-10" />
-            <span className="absolute h-2.5 w-2.5 border-foreground/30 border-t border-r top-0 right-0 z-10" />
-            <span className="absolute h-2.5 w-2.5 border-foreground/30 border-b border-l bottom-0 left-0 z-10" />
-            <span className="absolute h-2.5 w-2.5 border-foreground/30 border-b border-r bottom-0 right-0 z-10" />
+            <span className="absolute h-2.5 w-2.5 border-brand-accent border-t border-l top-0 left-0 z-10" />
+            <span className="absolute h-2.5 w-2.5 border-brand-accent border-t border-r top-0 right-0 z-10" />
+            <span className="absolute h-2.5 w-2.5 border-brand-accent border-b border-l bottom-0 left-0 z-10" />
+            <span className="absolute h-2.5 w-2.5 border-brand-accent border-b border-r bottom-0 right-0 z-10" />
 
             <div className="border-t border-border">
               {FAQS.map(({ question, answer }, i) => (

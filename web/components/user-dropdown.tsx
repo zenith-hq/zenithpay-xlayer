@@ -2,7 +2,7 @@
 
 import { LogOut } from "lucide-react";
 import Link from "next/link";
-import { useConnect, useConnectors, useConnection, useDisconnect } from "wagmi";
+import { useConnect, useConnection, useConnectors, useDisconnect } from "wagmi";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,

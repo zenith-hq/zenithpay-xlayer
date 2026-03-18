@@ -23,7 +23,7 @@ export function LandingFooter() {
         <div className="flex flex-col gap-3 sm:flex-row sm:h-full sm:items-center sm:justify-between">
           <div className="flex flex-col justify-center gap-1">
             <Link href="/" className="group w-fit">
-              <span className="text-sm font-semibold tracking-tight text-foreground group-hover:text-foreground/80 transition-colors">
+              <span className="text-sm font-semibold tracking-tight text-foreground group-hover:text-brand-accent transition-colors">
                 ZenithPay
               </span>
             </Link>
@@ -50,7 +50,7 @@ export function LandingFooter() {
 
           <div className="flex items-center gap-2">
             <a
-              href="https://x.com/Zenith_Pay"
+              href="https://x.com/ZenithPayHQ"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors"

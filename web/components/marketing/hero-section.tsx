@@ -4,6 +4,7 @@ import { ArrowRight, ArrowRightIcon } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useConnection } from "wagmi";
+import { ZenithDither } from "@/components/bg/zenith-dither";
 import { LogoMark } from "@/components/logo-mark";
 import { TechGrid } from "@/components/tech-grid";
 import { Badge } from "@/components/ui/badge";
@@ -31,22 +32,17 @@ function GetStartedButton() {
   const { isConnected } = useConnection();
 
   return (
-    <div className="relative w-fit group">
-      <Button
-        asChild
-        className="rounded-none cursor-pointer relative overflow-hidden focus-visible:ring-0 h-9 px-4"
-      >
-        <Link href={isConnected ? "/dashboard" : "/signin"}>
-          <span className="shine absolute -top-1/2 -left-full h-[200%] w-3/4 skew-x-[-20deg] bg-linear-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
-          Get started
-          <ArrowRightIcon className="size-4 w-0 opacity-0 group-hover:w-4 group-hover:opacity-100 transition-all duration-200" />
-        </Link>
-      </Button>
-      <span className="absolute h-2 w-2 border-foreground border-dashed border-b border-r bottom-0 right-0" />
-      <span className="absolute h-2 w-2 border-foreground border-dashed border-b border-l bottom-0 left-0" />
-      <span className="absolute h-2 w-2 border-foreground border-dashed border-t border-r top-0 right-0" />
-      <span className="absolute h-2 w-2 border-foreground border-dashed border-t border-l top-0 left-0" />
-    </div>
+    <Button
+      asChild
+      style={{ background: "var(--brand-accent)", color: "var(--background)" }}
+      className="rounded-none cursor-pointer relative overflow-hidden focus-visible:ring-0 h-9 px-4 hover:opacity-90 transition-opacity group"
+    >
+      <Link href={isConnected ? "/dashboard" : "/signin"}>
+        <span className="shine absolute -top-1/2 -left-full h-[200%] w-3/4 skew-x-[-20deg] bg-linear-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
+        Get started
+        <ArrowRightIcon className="size-4 w-0 opacity-0 group-hover:w-4 group-hover:opacity-100 transition-all duration-200" />
+      </Link>
+    </Button>
   );
 }
 
@@ -104,7 +100,7 @@ function HeroTerminal() {
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
-      className="w-full max-w-[480px] overflow-hidden border border-border"
+      className="w-full overflow-hidden border border-border sm:max-w-[480px]"
     >
       {/* macOS window chrome — no bg, minimal dots */}
       <div className="relative flex items-center px-3 h-8 border-b border-border">
@@ -168,11 +164,16 @@ function HeroTerminal() {
                   <span className="text-white/50 text-[11px] shrink-0 leading-[1.7]">
                     zenith@xlayer ~ $
                   </span>
-                  <span className="text-white/90 text-[11px]">{line.text}</span>
+                  <span className="text-white/90 text-[11px] break-all">
+                    {line.text}
+                  </span>
                 </>
               )}
               {line.type === "success" && (
-                <span className="text-white/50 text-[11px]">{line.text}</span>
+                <span className="text-[11px]">
+                  <span style={{ color: "var(--brand-accent)" }}>✓</span>
+                  <span className="text-white/50">{line.text?.slice(1)}</span>
+                </span>
               )}
               {line.type === "info" && (
                 <span className="text-white/25 text-[11px]">{line.text}</span>
@@ -187,7 +188,8 @@ function HeroTerminal() {
 
 export function HeroSection() {
   return (
-    <section className="mx-auto flex w-full lg:h-(--hero-height) max-w-7xl min-w-0 flex-col border-x md:min-h-0 lg:flex-row">
+    <section className="relative overflow-hidden mx-auto flex w-full lg:h-(--hero-height) max-w-7xl min-w-0 flex-col border-x md:min-h-0 lg:flex-row">
+      <ZenithDither opacity={0.18} />
       {/* Left: headline + CTAs + TechGrid */}
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex flex-1 flex-col items-start justify-center px-5 pt-16 pb-8 sm:px-8 sm:pt-20 sm:pb-10 lg:px-10 xl:px-12">
@@ -203,7 +205,7 @@ export function HeroSection() {
           >
             Your Agent Spends.
             <br />
-            <span className="text-[36px] sm:text-[48px] text-muted-foreground/60">
+            <span className="text-[36px] sm:text-[48px] leading-[1.05] tracking-tight text-muted-foreground/80">
               You Own the Rules.
             </span>
           </motion.h1>
@@ -214,9 +216,9 @@ export function HeroSection() {
             transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
             className="mt-5 max-w-md text-base leading-relaxed text-muted-foreground sm:text-[18px]"
           >
-            The payment infrastructure for AI agents. Give any agent a wallet,
-            a budget, and an audit trail — safe, controlled, and enforced
-            on-chain on X Layer.
+            The payment infrastructure for AI agents. Give any agent a wallet, a
+            budget, and an audit trail — safe, controlled, and enforced on-chain
+            on X Layer.
           </motion.p>
 
           <motion.div
