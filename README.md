@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="web/public/banner.png" alt="ZenithPay" width="100" />
+<img src="web/public/banner.png" alt="ZenithPay"/>
 
 # ZenithPay
 
@@ -9,9 +9,10 @@
 **The spend control layer for AI agents on X Layer — enabling safe, controlled agent payments through built-in, trustless spend enforcement, policy control, and x402-native routing.**
 
 <a href="">Docs</a> &nbsp;·&nbsp;
+<a href="">Skill.md</a> &nbsp;·&nbsp;
 <a href="">Live Demo</a> &nbsp;·&nbsp;
 <a href="">Video Demo</a> &nbsp;·&nbsp;
-<a href="">Skill.md</a> &nbsp;·&nbsp;
+<a href="">TX Proof</a> &nbsp;·&nbsp;
 
 ![Network](https://img.shields.io/badge/Network-X%20Layer-0052FF?style=flat-square&logoColor=white)
 ![Payments](https://img.shields.io/badge/Payments-x402-FF69B4?style=flat-square&logoColor=white)
@@ -247,14 +248,6 @@ zenithpay-xlayer/
 
 - [ ] AgentCard
 - [ ] AgentCredit
-
----
-
-## Hackathon Submission
-
-**Agentic Payments**
-
-## **Proof of Transaction Hash:**
 
 ---
 
