@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ZenithPay — The Spend Management Layer for AI Agents",
+  title: "ZenithPay — The Spend Control Layer for AI Agents",
   description:
     "ZenithPay enables safe, controlled agent payments with trustless spend enforcement, on-chain policies, and x402-native routing for AI agents.",
   icons: [
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     },
   ],
   openGraph: {
-    title: "ZenithPay — The Spend Management Layer for AI Agents",
+    title: "ZenithPay — The Spend Control Layer for AI Agents",
     description:
       "ZenithPay enables safe, controlled agent payments with trustless spend enforcement, on-chain policies, and x402-native routing for AI agents.",
     siteName: "ZenithPay",
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "ZenithPay — The Spend Management Layer for AI Agents",
+    title: "ZenithPay — The Spend Control Layer for AI Agents",
     description:
       "ZenithPay enables safe, controlled agent payments with trustless spend enforcement, on-chain policies, and x402-native routing for AI agents.",
     images: ["/og.png"],
