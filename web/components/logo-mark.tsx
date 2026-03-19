@@ -20,7 +20,7 @@ export function LogoMark({ className }: LogoMarkProps) {
       alt="ZenithPay icon"
       width={size}
       height={size}
-      className={cn("size-4 shrink-0", className)}
+      className={cn("size-5 shrink-0", className)}
       priority
     />
   );

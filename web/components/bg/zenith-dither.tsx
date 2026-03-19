@@ -10,7 +10,7 @@ interface ZenithDitherProps {
   className?: string;
 }
 
-export function ZenithDither({ opacity = 0.14, className }: ZenithDitherProps) {
+export function ZenithDither({ opacity = 0.28, className }: ZenithDitherProps) {
   return (
     <div
       aria-hidden="true"
@@ -21,9 +21,9 @@ export function ZenithDither({ opacity = 0.14, className }: ZenithDitherProps) {
           opacity,
           animation: "dither-breathe 6s ease-in-out infinite",
           maskImage:
-            "radial-gradient(ellipse 82% 88% at 50% 50%, transparent 38%, rgba(0,0,0,0.3) 60%, black 88%)",
+            "radial-gradient(ellipse 110% 120% at 50% 50%, transparent 20%, rgba(0,0,0,0.4) 50%, black 80%)",
           WebkitMaskImage:
-            "radial-gradient(ellipse 82% 88% at 50% 50%, transparent 38%, rgba(0,0,0,0.3) 60%, black 88%)",
+            "radial-gradient(ellipse 110% 120% at 50% 50%, transparent 20%, rgba(0,0,0,0.4) 50%, black 80%)",
         } as React.CSSProperties
       }
     >

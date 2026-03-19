@@ -180,11 +180,7 @@ Commit after every meaningful unit. Deploy commits must include contract address
 
 ## Scope (v1)
 
-- **Core:** ZenithPay (REST API + MCP server + agent skill) + Integrations (OnchainOS + X Layer + x402 payment routing / ERC-8004 identity)
-
-## Scope (v2)
-
-- Token API — token allowlist validation UI (v2)
+- **Core:** ZenithPay (REST API + MCP server + agent skill) + Integrations (OnchainOS + X Layer + x402 payment routing )
 
 ## Requirements
 
@@ -230,6 +226,110 @@ These are callable right now in-conversation for live data and development verif
 | Get trending/hot tokens         | `token_trending` + `token_hot_tokens`                 | Dashboard enrichment              |
 | Get agent wallet PnL            | `market_portfolio_overview`                           | ZenithCredit scoring (future)     |
 | Get supported chains            | `gateway_chains` / `swap_chains` / `portfolio_chains` | Config verification               |
+
+## Core Products — OnchainOS API Map
+
+This maps each ZenithPay product to the exact OnchainOS APIs and MCP tools used. Reference this before building any provider file.
+
+### Product 1 — Agent Wallet
+
+> Built on: OKX Agentic Wallet + Wallet Check Balance API + Wallet Transaction History API
+
+| What we need          | OnchainOS API                                                         | MCP Tool to call                                     |
+| --------------------- | --------------------------------------------------------------------- | ---------------------------------------------------- |
+| Create agent wallet   | Agentic Wallet `wallet-login` (email OTP)                             | `wallet_login`, `wallet_verify`                      |
+| Create sub-wallets    | Agentic Wallet `wallet-create`                                        | `wallet_create`                                      |
+| Agent's own balance   | Agentic Wallet `wallet-balance`                                       | `wallet_balance`                                     |
+| Any address balance   | Check Balance API `/api/v6/dex/balance/all-token-balances-by-address` | `portfolio_all_balances`, `portfolio_token_balances` |
+| Total portfolio value | Check Balance API `/api/v6/dex/balance/total-value`                   | `portfolio_total_value`                              |
+| Tx history            | Transaction History API `/api/v6/dex/transaction/transaction-list`    | `wallet_history`                                     |
+| Security scan         | Agentic Wallet `security-tx-scan`                                     | `security_tx_scan`                                   |
+
+Provider file: `providers/onchainos/balance.ts` + `providers/onchainos/history.ts`
+Skill to read first: `okx-wallet-portfolio`, `okx-agentic-wallet`
+
+---
+
+### Product 2 — Agent Pay
+
+> Built on: OKX Payments API (x402) + OKX DEX Swap API + Wallet Transaction API
+
+| What we need                   | OnchainOS API                             | MCP Tool to call    |
+| ------------------------------ | ----------------------------------------- | ------------------- |
+| Verify x402 payment            | Payments API `POST /api/v6/x402/verify`   | REST call directly  |
+| Settle x402 payment (zero gas) | Payments API `POST /api/v6/x402/settle`   | REST call directly  |
+| Check x402 support             | Payments API `GET /api/v6/x402/supported` | REST call directly  |
+| Swap OKB → USDC quote          | DEX Swap API `swap_quote`                 | `swap_quote`        |
+| Approve token for swap         | DEX Swap API `swap_approve`               | `swap_approve`      |
+| Execute swap                   | DEX Swap API `swap_swap`                  | `swap_swap`         |
+| Simulate tx pre-flight         | Transaction API `gateway_simulate`        | `gateway_simulate`  |
+| Broadcast fallback tx          | Transaction API `gateway_broadcast`       | `gateway_broadcast` |
+| Track order status             | Transaction API `gateway_orders`          | `gateway_orders`    |
+
+Provider files: `providers/onchainos/payments.ts`, `providers/onchainos/swap.ts`, `providers/onchainos/gateway.ts`
+Skills to read first: `okx-dex-swap`, `okx-onchain-gateway`
+
+---
+
+### Product 3 — Spend Policy
+
+> Built on: SpendPolicy.sol (Solidity + Foundry) on X Layer
+
+No OnchainOS API needed for enforcement — the contract IS the enforcement layer.
+OnchainOS tools used alongside:
+
+| What we need                  | OnchainOS API                       | MCP Tool to call                    |
+| ----------------------------- | ----------------------------------- | ----------------------------------- |
+| Gas estimate for setPolicy()  | Transaction API `gateway_gas`       | `gateway_gas`, `gateway_gas_limit`  |
+| Simulate setPolicy()          | Transaction API `gateway_simulate`  | `gateway_simulate`                  |
+| Token safety before allowlist | Token API `token_advanced_info`     | `token_advanced_info`, `token_info` |
+| Security check merchant URL   | Agentic Wallet `security-dapp-scan` | `security_dapp_scan`                |
+
+Contract: `contracts/src/SpendPolicy.sol`
+Skills to read first: `web3-foundry`, `web3-solidity-patterns`, `okx-security`
+
+---
+
+### Dashboard + Market Data (all products)
+
+> Built on: OKX Market API + OKX Token API
+
+| What we need              | OnchainOS API                                    | MCP Tool to call                     |
+| ------------------------- | ------------------------------------------------ | ------------------------------------ |
+| Token prices on dashboard | Market Price API `market_price`                  | `market_price`                       |
+| Trending tokens           | Token API `token_trending`                       | `token_trending`, `token_hot_tokens` |
+| Token metadata            | Token API `token_search`                         | `token_search`                       |
+| Portfolio PnL             | Market Portfolio API `market_portfolio_overview` | `market_portfolio_overview`          |
+
+Provider files: `providers/onchainos/market.ts`, `providers/onchainos/token.ts`
+Skills to read first: `okx-dex-market`, `okx-dex-token`
+
+---
+
+## Updated Agentic Wallet Skills Map
+
+Add to the existing Skills section:
+
+| Trigger                                        | Skill                |
+| ---------------------------------------------- | -------------------- |
+| Creating agent wallet (onboarding)             | `okx-agentic-wallet` |
+| Writing `providers/onchainos/agenticWallet.ts` | `okx-agentic-wallet` |
+| Security scan before any tx                    | `okx-security`       |
+| Merchant URL safety check                      | `okx-security`       |
+
+## Updated MCP Tools Map — Agentic Wallet additions
+
+Add to existing MCP tools table:
+
+| Task                           | MCP Tool                         | Used in ZenithPay                     |
+| ------------------------------ | -------------------------------- | ------------------------------------- |
+| Agent wallet login (email OTP) | `wallet_login` + `wallet_verify` | Agent onboarding — creates TEE wallet |
+| Create sub-wallet              | `wallet_create`                  | Multi-agent support                   |
+| Agent's own balance            | `wallet_balance`                 | Pre-payment check (own wallet)        |
+| Agent wallet tx history        | `wallet_history`                 | Ledger — agent's own txs              |
+| Scan tx for risk               | `security_tx_scan`               | Pre-payment security gate             |
+| Scan merchant URL              | `security_dapp_scan`             | Allowlist validation                  |
+| Send from agent wallet         | `wallet_send`                    | Fallback payment execution            |
 
 ### Skills — when to invoke
 

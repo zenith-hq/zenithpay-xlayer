@@ -56,31 +56,31 @@ function LandingNavActions() {
 const PRODUCTS = [
   {
     label: "Agent Wallet",
-    desc: "Real USDC wallet for any AI agent",
+    desc: "A real account for every agent",
     href: "/docs#agent-wallet",
     soon: false,
   },
   {
     label: "Agent Pay",
-    desc: "Policy-gated x402 payments",
+    desc: "Policy-gated x402 payments.",
     href: "/docs#agent-pay",
     soon: false,
   },
   {
-    label: "Spend Policy",
-    desc: "On-chain per-tx & daily limits",
+    label: "Agent Policy",
+    desc: "Hard limits, enforced onchain",
     href: "/docs#spend-policy",
     soon: false,
   },
   {
     label: "Agent Card",
-    desc: "Virtual card for agent purchases",
+    desc: "Virtual cards for agent purchases",
     href: "#",
     soon: true,
   },
   {
     label: "Agent Credit",
-    desc: "Credit lines backed by on-chain history",
+    desc: "Onchain credit lines for agents",
     href: "#",
     soon: true,
   },
@@ -189,7 +189,7 @@ export function LandingNav() {
         <nav className="relative flex h-(--nav-height) items-center justify-between px-4 sm:px-6">
           <Link
             href="/"
-            className="flex items-center gap-2 font-pixel-square text-[20px] font-semibold"
+            className="flex items-center gap-2 font-pixel-square text-[22px] font-semibold"
           >
             <LogoMark />
             <span>ZenithPay</span>

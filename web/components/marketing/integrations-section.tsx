@@ -179,7 +179,7 @@ const CODE: Record<Tab, React.ReactNode> = {
 			</div>
 			<div className="mt-1">
 				<Val>Set up </Val>
-				<Str>https://api.usezenithpay.xyz/skill.md</Str>
+				<Str>curl -s https://api.usezenithpay.xyz/skill.md</Str>
 			</div>
 			<div className="mt-4 border-t border-white/8 pt-3">
 				<Cm>{"// Your agent reads the skill file and gets 3 tools:"}</Cm>
@@ -228,16 +228,18 @@ export function IntegrationsSection() {
 	return (
 		<section id="integrations" className="mx-auto w-full max-w-7xl border-x border-t">
 			<div className="px-5 py-16 sm:px-8 lg:px-12">
-				<div className="flex flex-col lg:flex-row lg:gap-12 xl:gap-16">
-					{/* Left: heading + tabs */}
-					<div className="mb-10 lg:mb-0 lg:w-[320px] xl:w-[360px] lg:shrink-0">
-						<span className="text-xs uppercase tracking-[0.2em] text-brand-accent font-mono">
-							[03] Integrations
-						</span>
-						<h2 className="mt-3 text-[28px] sm:text-[36px] font-bold tracking-tight leading-[1.05]">
-							Add spend policy in minutes.
-						</h2>
+				<div className="mb-12">
+					<span className="text-xs uppercase tracking-[0.2em] text-brand-accent font-mono">
+						[03] Integrations
+					</span>
+					<h2 className="mt-3 text-[28px] sm:text-[36px] font-bold tracking-tight leading-[1.05]">
+						Secure your agent in minutes.
+					</h2>
+				</div>
 
+				<div className="flex flex-col lg:flex-row lg:gap-12 xl:gap-16 overflow-hidden">
+					{/* Left: description + tabs + works with */}
+					<div className="mb-10 lg:mb-0 lg:w-[300px] xl:w-[340px] lg:shrink-0">
 						<AnimatePresence mode="wait">
 							<motion.p
 								key={activeTab}
@@ -245,7 +247,7 @@ export function IntegrationsSection() {
 								animate={{ opacity: 1, y: 0 }}
 								exit={{ opacity: 0, y: -4 }}
 								transition={{ duration: 0.2 }}
-								className="mt-3 text-sm text-muted-foreground leading-relaxed"
+								className="text-sm text-muted-foreground leading-relaxed"
 							>
 								{TAB_DESCRIPTIONS[activeTab]}
 							</motion.p>
@@ -319,7 +321,7 @@ export function IntegrationsSection() {
 					</div>
 
 					{/* Right: code panel */}
-					<div className="relative flex-1 min-w-0">
+					<div className="relative flex-1 min-w-0 overflow-hidden">
 						{/* Code window chrome */}
 						<div className="border border-border overflow-hidden">
 							<div className="relative flex items-center px-3 h-8 border-b border-border bg-background">

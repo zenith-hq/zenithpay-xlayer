@@ -11,7 +11,7 @@ export function CTASection() {
 
   return (
     <section className="relative overflow-hidden mx-auto w-full max-w-7xl border-x border-t">
-      <ZenithDither opacity={0.15} />
+      <ZenithDither opacity={0.22} />
       <div className="px-5 py-20 sm:px-8 lg:px-12 flex flex-col items-center text-center">
         <span className="text-xs uppercase tracking-[0.2em] text-brand-accent font-mono mb-3">
           [05] Get started
