@@ -1,0 +1,20 @@
+# Compiler files
+cache/
+out/
+lib/
+forge-std/
+openzeppelin-contracts/
+
+# Ignores development broadcast logs
+/broadcast/
+
+# Docs
+docs/
+
+# Dotenv file
+.env
+
+# If Forge created a nested repo inside contracts/, never commit it
+.git/
+.gitmodules
+.github/

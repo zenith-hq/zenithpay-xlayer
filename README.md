@@ -12,9 +12,9 @@
 <a href="">Skill.md</a> &nbsp;·&nbsp;
 <a href="">Live Demo</a> &nbsp;·&nbsp;
 <a href="">Video Demo</a> &nbsp;·&nbsp;
-<a href="">TX Proof</a> &nbsp;·&nbsp;
+<a href="">TX Proof</a>
 
-![Network](https://img.shields.io/badge/Network-X%20Layer-0052FF?style=flat-square&logoColor=white)
+![Network](https://img.shields.io/badge/Network-X%20Layer-19191A?style=flat-square&logoColor=white)
 ![Payments](https://img.shields.io/badge/Payments-x402-FF69B4?style=flat-square&logoColor=white)
 ![OKX OnchainOS](https://img.shields.io/badge/OKX%20OnchainOS-000000?style=flat-square&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
