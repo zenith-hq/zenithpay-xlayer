@@ -12,7 +12,7 @@
 <a href="https://api.usezenithpay.xyz/skill.md">Skill.md</a> &nbsp;·&nbsp;
 <a href="https://usezenithpay.xyz">Live Demo</a> &nbsp;·&nbsp;
 <a href="">Video Demo</a> &nbsp;·&nbsp;
-<a href="">TX Proof</a>
+<a href="https://www.oklink.com/xlayer/tx/0xf0be30b27021c475fcdfcb8657f8d392617ebc25454a329af9240df3ded22ae9">TX Proof</a>
 
 ![Network](https://img.shields.io/badge/Network-X%20Layer-19191A?style=flat-square&logoColor=white)
 ![Payments](https://img.shields.io/badge/Payments-x402-FF69B4?style=flat-square&logoColor=white)
@@ -415,9 +415,9 @@ cd api && bun dev   # :3001
 
 ## Deployed Contracts
 
-| Contract     | Source                                                           | Network                        | Address                     |
-| ------------ | ---------------------------------------------------------------- | ------------------------------ | --------------------------- |
-| Spend Policy | [`contracts/src/SpendPolicy.sol`](contracts/src/SpendPolicy.sol) | X Layer mainnet (chain ID 196) | _TBD — update after deploy_ |
+| Contract     | Source                                                           | Network                        | Address                                                                                                                                          | TX                                                                                                                                                                               |
+| ------------ | ---------------------------------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Spend Policy | [`contracts/src/SpendPolicy.sol`](contracts/src/SpendPolicy.sol) | X Layer mainnet (chain ID 196) | [`0xF5875F25ccEB2edDc57F218eaF1F71c5CF161f21`](https://www.oklink.com/xlayer/address/0xF5875F25ccEB2edDc57F218eaF1F71c5CF161f21) | [`0xf0be30b...22ae9`](https://www.oklink.com/xlayer/tx/0xf0be30b27021c475fcdfcb8657f8d392617ebc25454a329af9240df3ded22ae9) |
 
 ---
 
