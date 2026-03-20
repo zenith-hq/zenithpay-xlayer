@@ -1,0 +1,27 @@
+---
+title: Agent Skill
+description: Integration via skill.md
+---
+The fastest integration: your agent loads a single skill file and gains access to ZenithPay's six policy-gated tools.
+## Skill URL
+`https://api.usezenithpay.xyz/skill.md`
+
+Your agent reads the skill file as context and gets immediate access to ZenithPay's six tools (via the agent environment).
+
+## Tools exposed
+- `zenithpay_balance`
+- `zenithpay_pay_service`
+- `zenithpay_set_limits`
+- `zenithpay_ledger`
+- `zenithpay_get_limits`
+- `zenithpay_verify_merchant`
+
+## How the skill guides the agent
+The skill is written to enforce safe spending habits:
+- Check policy limits before spending (`zenithpay_get_limits`)
+- Verify new merchants (`zenithpay_verify_merchant`)
+- Check wallet balance before paying (`zenithpay_balance`)
+- Include a clear `intent` string in every payment
+- Handle blocked payments without retrying the same request
+
+Approval threshold actions (`GET /approvals`, approve/deny) are REST-only; the agent does not approve its own payments.

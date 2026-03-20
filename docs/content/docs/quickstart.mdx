@@ -1,0 +1,51 @@
+---
+title: Quick Start
+description: Getting Started with ZenithPay
+---
+Get from a local checkout to a policy-gated agent in minutes.
+## Prerequisites
+- `bun`
+- `foundry` (`forge`)
+- OKX OnchainOS access (API key)
+- A deployed `SpendPolicy.sol` on X Layer
+
+## 1. Clone and install
+```bash
+git clone https://github.com/zenith-hq/zenithpay-xlayer.git
+cd zenithpay-xlayer
+bun install
+```
+
+## 2. Configure environment variables
+Copy env templates:
+```bash
+cp api/.env.example api/.env
+cp web/.env.example web/.env.local
+```
+
+At minimum you need:
+- `XLAYER_RPC_URL`
+- `OKX_API_KEY`, `OKX_SECRET_KEY`, `OKX_PASSPHRASE`
+- `SPEND_POLICY_ADDRESS` (after deployment)
+
+## 3. Deploy `SpendPolicy.sol`
+```bash
+cd contracts
+forge build
+forge test
+forge script script/Deploy.s.sol --rpc-url $XLAYER_RPC_URL --broadcast --slow
+```
+
+Copy the deployed policy address into `api/.env` as `SPEND_POLICY_ADDRESS`.
+
+## 4. Run locally
+```bash
+cd web && bun dev   # http://localhost:3000
+cd api && bun dev   # http://localhost:3001
+```
+
+## 5. Create an agent and pay
+- `POST /wallet/genesis`: create a TEE-secured agent wallet
+- `POST /pay`: execute a policy-gated x402 payment
+
+Full request/response examples are in `REST API`.

@@ -1,0 +1,189 @@
+openapi: 3.1.0
+info:
+  title: ZenithPay REST API
+  version: 0.1.0
+servers:
+  - url: https://api.usezenithpay.xyz
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+    WalletGenesisRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          example: agent@yourdomain.com
+        label:
+          type: string
+          example: research-agent-01
+      required: [email]
+    WalletGenesisResponse:
+      type: object
+      properties:
+        agentAddress:
+          type: string
+          example: "0xcadf...1a9"
+        label:
+          type: string
+          example: research-agent-01
+        balances:
+          type: object
+          additionalProperties:
+            type: string
+          example: {USDC: "0.00", OKB: "0.00"}
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+    PayRequest:
+      type: object
+      properties:
+        agentAddress:
+          type: string
+          example: "0xcadf...1a9"
+        serviceUrl:
+          type: string
+          example: https://exa.ai/search
+        maxAmount:
+          type: string
+          example: "0.25"
+        intent:
+          type: string
+          example: Research DeFi trends on X Layer
+      required: [agentAddress, serviceUrl, maxAmount, intent]
+    PayApprovedResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: approved
+        txHash:
+          type: string
+          example: "0xabc123..."
+        amount:
+          type: string
+          example: "0.10"
+        currency:
+          type: string
+          example: USDC
+        merchant:
+          type: string
+          example: exa.ai
+        intent:
+          type: string
+          example: Research DeFi trends on X Layer
+        swapUsed:
+          type: boolean
+          example: false
+        okbSpent:
+          nullable: true
+          type: string
+          example: null
+        remainingDailyBudget:
+          type: string
+          example: "1.65"
+        settledAt:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+    PayPendingResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: pending
+        approvalId:
+          type: string
+          example: apr_01abc
+        amount:
+          type: string
+          example: "0.50"
+        merchant:
+          type: string
+          example: exa.ai
+        intent:
+          type: string
+          example: Research DeFi trends on X Layer
+        message:
+          type: string
+          example: Payment exceeds approval threshold. Awaiting human review at GET /approvals.
+    PayBlockedResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: blocked
+        reason:
+          type: string
+          example: daily_budget_exceeded
+        amount:
+          type: string
+          example: "0.10"
+        merchant:
+          type: string
+          example: exa.ai
+        onchainEvent:
+          type: string
+          example: PaymentBlocked
+        txHash:
+          type: string
+          example: "0xdef456..."
+paths:
+  /health:
+    get:
+      summary: Health check
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+  /wallet/genesis:
+    post:
+      summary: Create a TEE-secured agent wallet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WalletGenesisRequest"
+      responses:
+        "200":
+          description: Wallet created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletGenesisResponse"
+  /pay:
+    post:
+      summary: Execute a policy-gated x402 payment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PayRequest"
+      responses:
+        "200":
+          description: Payment result
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/PayApprovedResponse"
+                  - $ref: "#/components/schemas/PayPendingResponse"
+                  - $ref: "#/components/schemas/PayBlockedResponse"
+

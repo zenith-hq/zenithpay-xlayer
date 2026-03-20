@@ -1,0 +1,34 @@
+---
+title: MCP Server
+description: Getting Started via MCP Server
+---
+ZenithPay can be registered as an MCP server so MCP-compatible agents (Claude Code, Cursor, Codex, etc.) can call policy-gated tools.
+## MCP server URL
+`https://api.usezenithpay.xyz/mcp`
+
+## Required env vars
+- `AGENT_ADDRESS`: the agent wallet address this MCP session manages
+- `ZENITHPAY_API_KEY`: your human-scoped REST API key (used for authorization on the server side)
+
+## Example MCP config
+```json
+{
+  "mcpServers": {
+    "zenithpay": {
+      "url": "https://api.usezenithpay.xyz/mcp",
+      "env": {
+        "AGENT_ADDRESS": "0xcadf...1a9",
+        "ZENITHPAY_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
+```
+
+## Tools exposed to your agent
+- `zenithpay_balance`: returns `{ USDC, OKB, remainingDailyBudget }`
+- `zenithpay_get_limits`: returns the agent's on-chain `perTxLimit`, `dailyBudget`, and `allowlist`
+- `zenithpay_verify_merchant`: OKX security scan + allowlist check for a merchant URL
+- `zenithpay_pay_service`: policy-gated x402 payment to an x402-compatible service (includes OKB -> USDC auto-swap when needed)
+- `zenithpay_set_limits`: deploy/update `SpendPolicy.sol` (human EOA authorized)
+- `zenithpay_ledger`: on-chain + internal audit trail for the agent's payments

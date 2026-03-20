@@ -1,0 +1,29 @@
+---
+title: Auto-Swap
+description: OKB -> USDC funding after policy gate
+---
+
+Auto-swap lets an agent pay USDC-required x402 services even when its wallet holds OKB instead of USDC.
+
+The swap is strictly a funding step: ZenithPay never swaps before `SpendPolicy.sol` approves the payment.
+
+## Auto-swap (funding mechanism)
+
+Auto-swap exists to help agents pay services that require USDC when the agent's wallet holds OKB.
+
+### Key rule: policy first, never swap first
+ZenithPay always checks `SpendPolicy.sol` for the USDC-denominated `maxAmount` before any swap happens.
+
+If policy fails, the payment is rejected immediately (`status: "blocked"`). If the payment is above the human review threshold, it is paused for approval (`status: "pending"`). No swap occurs in either case.
+
+### When swap happens
+Swap is only attempted if USDC is insufficient to cover the requested payment amount.
+
+### Correct execution order (pay service)
+1. SpendPolicy check (USDC amount)
+2. USDC balance check
+3. If needed: `swap_quote` -> `swap_approve` -> `swap_swap` for the exact required USDC
+4. x402 `/verify` -> `/settle`
+
+### Why exact amount matters
+ZenithPay approves only what it needs for the payment, so slippage can't accidentally push spending above the policy-gated USDC cap.

@@ -1,0 +1,58 @@
+---
+title: Rest API
+description: Getting Started with Rest API
+---
+ZenithPay's REST API lets any backend integration trigger policy-gated x402 payments.
+## Base URL
+`https://api.usezenithpay.xyz`
+
+## Authentication
+All REST endpoints require an API key passed as a Bearer token in the `Authorization` header (except `GET /health`).
+
+```http
+Authorization: Bearer $ZENITHPAY_API_KEY
+```
+
+## Endpoints (high level)
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `GET` | `/health` | Health check |
+| `POST` | `/wallet/genesis` | Create a TEE-secured agent wallet |
+| `GET` | `/wallet/balance` | Wallet balances + remaining daily budget |
+| `GET` | `/wallet/agents` | List agent addresses under your account |
+| `POST` | `/pay` | Policy-gated x402 payment (swap OKB->USDC if needed) |
+| `GET` | `/limits` | Read current spend policy |
+| `POST` | `/limits` | Deploy/update `SpendPolicy.sol` (requires human signature) |
+| `GET` | `/approvals` | Payments paused for human review |
+| `POST` | `/approvals/:id/approve` | Approve and execute |
+| `POST` | `/approvals/:id/deny` | Deny and cancel |
+| `GET` | `/ledger` | Transaction audit trail |
+
+## Example: create an agent wallet
+```bash
+curl -X POST https://api.usezenithpay.xyz/wallet/genesis \
+  -H "Authorization: Bearer $ZENITHPAY_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "agent@yourdomain.com",
+    "label": "research-agent-01"
+  }'
+```
+
+## Example: pay a service
+```bash
+curl -X POST https://api.usezenithpay.xyz/pay \
+  -H "Authorization: Bearer $ZENITHPAY_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agentAddress": "0xcadf...1a9",
+    "serviceUrl": "https://exa.ai/search",
+    "maxAmount": "0.25",
+    "intent": "Research DeFi trends on X Layer"
+  }'
+```
+
+Possible `POST /pay` outcomes:
+- `approved`: returns `txHash`
+- `pending`: returns `status: \"pending\"` + `approvalId` when above `approvalThreshold`
+- `blocked`: returns `status: \"blocked\"` + hard-rejection reason (`PaymentBlocked`)

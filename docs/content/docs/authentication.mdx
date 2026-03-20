@@ -1,0 +1,57 @@
+---
+title: Authentication
+description: Auth
+---
+ZenithPay supports three integration modes: REST API, MCP Server, and Agent Skill.
+## REST API (Bearer auth)
+All REST endpoints require an API key passed as a Bearer token in the `Authorization` header (except `GET /health`).
+
+```http
+Authorization: Bearer $ZENITHPAY_API_KEY
+```
+
+API keys are scoped to a human EOA account. Each key can manage one or more agent addresses registered under that account.
+
+### Example: `POST /pay`
+```bash
+curl -X POST https://api.usezenithpay.xyz/pay \
+  -H "Authorization: Bearer $ZENITHPAY_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agentAddress": "0xcadf...1a9",
+    "serviceUrl": "https://exa.ai/search",
+    "maxAmount": "0.25",
+    "intent": "Research DeFi trends on X Layer"
+  }'
+```
+
+## MCP Server (agent-scoped env)
+Register ZenithPay as an MCP server at:
+`https://api.usezenithpay.xyz/mcp`
+
+Your MCP config includes:
+- `AGENT_ADDRESS`: the agent wallet address the session manages
+- `ZENITHPAY_API_KEY`: your human-scoped API key
+
+```json
+{
+  "mcpServers": {
+    "zenithpay": {
+      "url": "https://api.usezenithpay.xyz/mcp",
+      "env": {
+        "AGENT_ADDRESS": "0xcadf...1a9",
+        "ZENITHPAY_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
+```
+
+## Agent Skill (embedded tool config)
+The skill file is served at:
+`https://api.usezenithpay.xyz/skill.md`
+
+Agents that load this skill get the same six tools through the agent environment. In this integration mode, the agent does not directly handle your human API key.
+
+## Human approvals (REST-only)
+Approval queue actions (`GET /approvals`, `POST /approvals/:id/approve`, `POST /approvals/:id/deny`) are REST-only by design. Agents cannot approve their own payments.

@@ -1,0 +1,22 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+/* Brand theming for fumadocs-ui.
+   Sidebar + tab hovers are driven by --color-fd-accent / --color-fd-primary tokens. */
+:root {
+  --color-fd-accent: oklch(0.55 0.13 57 / 0.5);
+  --color-fd-accent-foreground: oklch(0.145 0 0);
+
+  --color-fd-primary: oklch(0.55 0.13 57);
+  --color-fd-primary-foreground: oklch(0.145 0 0);
+}
+
+.dark {
+  --color-fd-accent: oklch(0.65 0.13 57 / 0.3);
+  --color-fd-accent-foreground: oklch(0.97 0 0);
+
+  --color-fd-primary: oklch(0.65 0.13 57);
+  --color-fd-primary-foreground: oklch(0.97 0 0);
+}
+

@@ -1,0 +1,29 @@
+---
+title: Spend Policy
+description: On-chain spend limits for agents
+---
+
+SpendPolicy.sol is an on-chain spend control contract deployed per agent on X Layer.
+
+ZenithPay uses it as the authoritative gate: policy is checked before any swap or x402 settlement happens.
+
+## SpendPolicy.sol: on-chain enforcement
+
+ZenithPay's spend control is enforced by `SpendPolicy.sol` on X Layer.
+
+### Policy fields (v1)
+| Field | Meaning | Enforcement |
+| --- | --- | --- |
+| `perTxLimit` | Max USDC allowed per transaction | Hard block on-chain |
+| `dailyBudget` | Max cumulative USDC spend per day | Hard block on-chain |
+| `allowlist` | Allowed merchant hostnames (service URLs) | Hard block on-chain (when set) |
+| `approvalThreshold` | USDC amount above which payments require human review | Off-chain “pause” queue (not a contract override) |
+
+### What happens when a payment is attempted
+1. **Approved**: payment passes hard policy and executes.
+2. **Pending**: payment exceeds `approvalThreshold` and is paused for human review (`GET /approvals`).
+3. **Blocked**: payment violates hard policy and is rejected immediately (e.g. `per_tx_limit_exceeded`, `daily_budget_exceeded`, `merchant_not_allowlisted`).
+
+### On-chain proofs
+- `PaymentExecuted` for approvals
+- `PaymentBlocked` for hard rejections

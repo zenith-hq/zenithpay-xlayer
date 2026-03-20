@@ -1,0 +1,34 @@
+---
+title: Agent Wallet
+description: TEE-secured agent wallets on X Layer
+---
+
+ZenithPay's agent wallet is built using OKX Agentic Wallet (TEE).
+
+Each agent gets its own wallet address on X Layer, with private keys kept inside the TEE (the server never handles raw keys).
+
+## OKX Agentic Wallet (TEE)
+
+ZenithPay uses the OKX Agentic Wallet to create a real wallet for each AI agent on X Layer.
+
+The important security property is simple:
+private keys stay inside the TEE. The ZenithPay API never handles raw wallet private keys.
+
+### Onboarding: `POST /wallet/genesis`
+REST onboarding delegates wallet creation to OKX Agentic Wallet via the agent environment.
+
+Example:
+```bash
+curl -X POST https://api.usezenithpay.xyz/wallet/genesis \
+  -H "Authorization: Bearer $ZENITHPAY_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "agent@yourdomain.com",
+    "label": "research-agent-01"
+  }'
+```
+
+The response includes the agent wallet address and initial balances.
+
+## Agent tools (MCP + Skill)
+For agents, the wallet lifecycle is managed through tools exposed by ZenithPay's MCP server and Agent Skill (e.g. `zenithpay_balance` and `zenithpay_pay_service`).

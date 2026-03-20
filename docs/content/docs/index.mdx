@@ -1,0 +1,43 @@
+---
+title: Introduction
+description: Spend control layer for AI agents on X Layer
+---
+
+ZenithPay is the spend control layer for AI agents on X Layer:
+
+per-tx limits, daily budgets, merchant allowlists, optional human approvals, x402-native payment routing, and (when needed) OKB -> USDC auto-swap — all backed by on-chain policy enforcement.
+
+## Core products
+1. `Agent Wallet`: a TEE-secured agent wallet (OKX Agentic Wallet) that holds real USDC/OKB on X Layer.
+2. `Agent Pay`: one call to pay an x402-compatible service, with policy enforcement before any spend happens.
+3. `Spend Policy`: on-chain hard limits (per-tx cap, daily budget, merchant allowlist) plus an optional human approval threshold.
+4. `Agent Card` (coming soon): virtual spend cards backed by the same policy engine.
+5. `Agent Credit` (coming soon): credit lines powered by on-chain spend history.
+
+## How ZenithPay keeps agents safe
+Agents are new kinds of risk. If you rely on off-chain checks, you're trusting a database.
+
+ZenithPay makes the chain the source of truth:
+- Limits are enforced by `SpendPolicy.sol` (hard blocks).
+- Approvals are a human-in-the-loop queue for large payments (paused, not overridden).
+- Every outcome is logged so you have a permanent audit trail.
+
+## Payment flow (Agent Pay)
+1. Your agent calls `POST /pay` with `{ serviceUrl, maxAmount, intent }`.
+2. ZenithPay checks `SpendPolicy.sol` on-chain for the USDC-denominated amount.
+3. If the agent doesn't have enough USDC, ZenithPay swaps OKB -> USDC (exact amount only) after the policy gate.
+4. ZenithPay verifies + settles the x402 payment (zero-gas on X Layer).
+5. The ledger is written and the agent receives `txHash` (or a pending approval id / block reason).
+
+## REST example
+```bash
+curl -X POST https://api.usezenithpay.xyz/pay \
+  -H "Authorization: Bearer $ZENITHPAY_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agentAddress": "0xcadf...1a9",
+    "serviceUrl": "https://exa.ai/search",
+    "maxAmount": "0.25",
+    "intent": "Research DeFi trends on X Layer"
+  }'
+```
