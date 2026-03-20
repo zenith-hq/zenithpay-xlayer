@@ -436,6 +436,16 @@ contract SpendPolicyTest is Test {
         policy.executePayment(address(0), PER_TX, INTENT);
     }
 
+    function test_executePayment_revertsIfInsufficientAllowance() public {
+        _registerAgent(false);
+        usdc.mint(agent, PER_TX);
+        // Deliberately do NOT call approve
+
+        vm.prank(agent);
+        vm.expectRevert("insufficient_allowance");
+        policy.executePayment(merchant, PER_TX, INTENT);
+    }
+
     // ─────────────────────────────────────────────────────────
     // checkPayment view tests
     // ─────────────────────────────────────────────────────────

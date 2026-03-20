@@ -35,6 +35,7 @@ import "@openzeppelin/contracts/utils/Pausable.sol";
  * - O(1) allowlist lookup via nested mapping
  * - Rolling 24h spend window (not calendar day — prevents double-spend at midnight)
  * - Two-step protocol ownership transfer
+ * - Non-custodial: this contract never holds funds. It only moves USDC from agent → merchant via safeTransferFrom.
  */
 contract SpendPolicy is ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
@@ -77,6 +78,9 @@ contract SpendPolicy is ReentrancyGuard, Pausable {
 
     /// @notice agent → merchant → allowed (O(1) lookup)
     mapping(address => mapping(address => bool)) private _merchantAllowed;
+
+    /// @notice USDC uses 6 decimal places — all amount parameters are in USDC units (1e6 = 1 USDC)
+    uint8 public constant USDC_DECIMALS = 6;
 
     // ─────────────────────────────────────────────────────────
     // Events
@@ -399,6 +403,12 @@ contract SpendPolicy is ReentrancyGuard, Pausable {
         if (amount > remaining) {
             emit PaymentBlocked(agent, merchant, amount, intentHash, "exceeds_daily_limit");
             revert ExceedsDailyLimit(amount, remaining);
+        }
+
+        // Allowance pre-flight check — gives API a clean revert reason before safeTransferFrom
+        if (usdc.allowance(agent, address(this)) < amount) {
+            emit PaymentBlocked(agent, merchant, amount, intentHash, "insufficient_allowance");
+            revert("insufficient_allowance");
         }
 
         // ── EFFECTS ─────────────────────────────────────────
