@@ -6,11 +6,11 @@
 
 > Your Agent spends. You Own the Rules.
 
-**The spend control layer for AI agents on X Layer — enabling safe, controlled agent payments through built-in, trustless spend enforcement, policy control, and x402-native routing.**
+**Security middleware for AI agents that spend money — hard limits enforced at the smart contract level, x402-native payment routing, auto-swap, and a human approval queue. Built on X Layer and OKX OnchainOS.**
 
-<a href="">Docs</a> &nbsp;·&nbsp;
-<a href="">Skill.md</a> &nbsp;·&nbsp;
-<a href="">Live Demo</a> &nbsp;·&nbsp;
+<a href="https://docs.usezenithpay.xyz">Docs</a> &nbsp;·&nbsp;
+<a href="https://api.usezenithpay.xyz/skill.md">Skill.md</a> &nbsp;·&nbsp;
+<a href="https://usezenithpay.xyz">Live Demo</a> &nbsp;·&nbsp;
 <a href="">Video Demo</a> &nbsp;·&nbsp;
 <a href="">TX Proof</a>
 
@@ -25,9 +25,11 @@
 
 ## The Problem
 
-X Layer is unlocking an agent economy, but agents still need a safe way to hold funds and pay for services without risking runaway spend.
+X Layer is unlocking an agent economy, but agents that spend money are a new kind of risk. Give them unlimited access and you lose control. Rely on off-chain guardrails and you're trusting a database — one that can be changed, bypassed, or go down entirely.
 
-ZenithPay is the missing payment infrastructure layer: built directly on X Layer and powered by OKX OnchainOS, it gives agents a real wallet, spending controls and limits, and an onchain audit trail. By enabling x402-native routing and onchain-enforced policies, builders can ship agents that spend safely onchain within clear budgets, without rebuilding the rails every time.
+ZenithPay is security middleware for AI agents that spend money. It sits between your agent and every service it pays, enforcing hard limits at the smart contract level — limits that no API call can override and no server outage can remove.
+
+Think of it as a corporate card spend policy system, but for AI agents instead of employees: per-transaction limits, daily budgets, merchant allowlists, and a human approval queue for anything above your threshold. Built directly on X Layer and powered by OKX OnchainOS.
 
 ---
 
@@ -35,13 +37,13 @@ ZenithPay is the missing payment infrastructure layer: built directly on X Layer
 
 Five products. Three live. Two in roadmap. Built on OKX OnchainOS.
 
-**Agent Wallet** — Every agent gets a real TEE-secured wallet on X Layer. Email login, zero gas, and private keys protected by OKX Agentic Wallet infrastructure. Agents hold actual USDC balances.
+**Agent Wallet** — Every agent gets a real TEE-secured wallet on X Layer. Email login, zero gas, private keys protected by OKX Agentic Wallet infrastructure. Agents hold actual USDC balances — not simulated floats.
 
-**Agent Pay** — Agents pay any x402-compatible HTTP service directly in USDC. Zero gas on X Layer via the OKX Payments API. If the agent holds OKB, ZenithPay auto-swaps to USDC before the payment goes out — no manual intervention.
+**Agent Pay** — Agents pay any x402-compatible HTTP service directly in USDC. Zero gas on X Layer via the OKX Payments API. If the agent holds OKB, ZenithPay auto-swaps to USDC before payment — no manual intervention, no failed transactions.
 
-**Agent Policy** — Builders define per-transaction limits, daily budgets, and merchant allowlists. Rules are enforced onchain before any payment executes. Every approved and blocked payment is logged with its reason, amount, and agent intent.
+**Spend Policy** — Hard limits deployed onchain via smart contract. No API can override them — even if ZenithPay goes down, the rules hold. Per-transaction cap, daily budget, merchant allowlist. Plus an approval threshold: payments above it are paused for human review, giving builders a human-in-the-loop control without blocking routine spending. Every approved, blocked, and pending payment is logged with agent intent.
 
-**Agent Card** _(Coming Soon)_ — Virtual cards for AI agents. Same policy engine, working anywhere credit cards are accepted.
+**Agent Card** _(Coming Soon)_ — Virtual cards for AI agents. Same policy engine, working anywhere cards are accepted.
 
 **Agent Credit** _(Coming Soon)_ — Credit lines for AI agents backed by onchain spend history.
 
@@ -50,97 +52,134 @@ Five products. Three live. Two in roadmap. Built on OKX OnchainOS.
 ## How It Works
 
 ```
-1. Register & fund your agent
-   Agent logs in via email → OKX Agentic Wallet creates TEE-secured wallet
+1. Create & fund your agent
+   POST /wallet/genesis → OKX Agentic Wallet creates TEE-secured wallet
    → Real EVM address on X Layer, zero gas, private key never exposed
 
 2. Set spend policy
-   Builder defines: $0.25/tx · $3/day · allowlist: [exa.ai, firecrawl.dev]
-   → Policy deployed onchain via SpendPolicy.sol
+   Builder defines: $0.25/tx · $3/day · allowlist: [service.xyz] · approval above $0.10
+   → Policy deployed onchain via smart contract
 
-3. Auto-swap when needed
-   Agent holds OKB but service requires USDC?
-   → ZenithPay swaps via OKX DEX (500+ sources) before payment executes
-
-4. Agent pays safely
+3. Agent pays — one call, ZenithPay handles the rest
    Agent calls zenithpay_pay_service({ url, maxAmount, intent })
-   → SpendPolicy.sol checks limits onchain
-   → ALLOWED: OKX Payments API settles x402 payment, zero gas, txHash returned
-   → BLOCKED: PaymentBlocked event onchain, error returned to agent
+   → Policy check runs first — limits, budget, allowlist checked onchain
+   → If agent holds OKB: auto-swaps exact amount via OKX DEX (500+ sources)
+   → APPROVED: x402 payment settles zero gas — PaymentExecuted event onchain
+   → PENDING:  Above approval threshold — queued for human review
+   → BLOCKED:  PaymentBlocked event onchain, reason returned to agent
+   Every outcome is permanent onchain proof — verifiable on OKLink
 
-5. Full audit trail
+5. Human reviews (optional)
+   Dashboard shows pending payments → approve or deny
+   → Approved: executes immediately
+   → Denied: cancelled and logged
+
+6. Full audit trail
    Every payment logged: time · merchant · amount · intent · status · tx hash
    Visible in dashboard and queryable via API
 ```
 
+---
+
 ## Architecture
 
----
-
-## Tech Stack
-
-| Layer              | Technology                                                                      |
-| ------------------ | ------------------------------------------------------------------------------- |
-| Frontend           | Next.js 16, Tailwind v4, shadcn/ui, Motion                                      |
-| Backend API        | Bun, Hono                                                                       |
-| Database           | PostgreSQL, Supabase, Drizzle                                                   |
-| Wallet Connect     | wagmi, OKX Wallet (EIP-6963)                                                    |
-| Smart Contracts    | Solidity, Foundry, OpenZeppelin                                                 |
-| Blockchain         | X Layer mainnet (chain ID 196)                                                  |
-| Payment            | x402 protocol — OKX OnchainOS facilitator                                       |
-| Agent Wallet       | OKX Agentic Wallet                                                              |
-| OKX OnchainOS APIs | Wallet API, Portfolio API, DEX Swap API, Onchain Gateway, Market API, Token API |
-
----
-
-# Quick Start
-
-All run with `bun`. Each workspace has its own `bun.lock`.
-
-```bash
-# Web (Next.js) — cd web/
-bun dev              # dev server :3000
-bun build            # production build
-bun lint             # biome check
-bun format           # biome format --write
-bun check            # biome check --write
-
-# Contracts (Foundry) — cd contracts/
-forge build
-forge test
-forge test --match-test <TestName>
-forge script script/Deploy.s.sol --rpc-url $XLAYER_RPC_URL --broadcast --slow
-
-# API (Bun + Hono) — cd api/
-bun dev              # dev server :3001
-bun test             # run tests
 ```
-
-### Required env vars
-
-```bash
-# api/
-AGENT_PRIVATE_KEY=0x...
-XLAYER_RPC_URL=https://rpc.xlayer.tech
-OKX_API_KEY=...
-OKX_SECRET_KEY=...
-OKX_PASSPHRASE=...
-SPEND_POLICY_ADDRESS=0x...
-SUPABASE_URL=...
-SUPABASE_SERVICE_KEY=...
-
-# web/
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_API_URL=http://localhost:3001
+┌──────────────────────────────────────────────────────────────────────────┐
+│                            Any agent                                     │
+│  Claude Code · Claude Desktop · Cursor · Codex · Gemini CLI · OpenClaw  │
+│                                                                          │
+│                  Agent wallet  (USDC / OKB on X Layer)                   │
+└──────────────┬────────────────────────┬────────────────────┬─────────────┘
+               │                        │                    │
+         MCP server               Agent Skill            REST API
+               │                        │                    │
+               └────────────────────────┴────────────────────┘
+                                         │
+                              zenithpay_pay_service()
+                                         │
+┌────────────────────────────────────────▼────────────────────────────────┐
+│                           ZenithPay API                                  │
+│                                                                          │
+│   Wallet  │  Payment  │  Limits  │  Approvals  │  Ledger                 │
+│                                                                          │
+│   ┌──────────────────────────────────────────────────────────────────┐  │
+│   │  Enforcement gate — policy check always runs first               │  │
+│   │  APPROVED → execute   PENDING → queue   BLOCKED → reject         │  │
+│   └──────────────────────────────────────────────────────────────────┘  │
+└──────────┬──────────────────────────────────────────────────────────────┘
+           │                                              │
+    OKB → USDC auto-swap                        x402 payment (zero gas)
+    (if agent holds OKB)                         USDC transfer
+           │                                              │
+┌──────────▼──────────────┐              ┌───────────────▼──────────────────┐
+│     OKX OnchainOS       │              │         x402 Service             │
+│                         │              │                                  │
+│  DEX Swap  · Gateway    │              │  Any x402-compatible endpoint    │
+│  Agentic Wallet (TEE)   │              │  search · data · AI tools · APIs │
+│  Market · Token APIs    │              │                                  │
+└──────────┬──────────────┘              └───────────────┬──────────────────┘
+           │                                              │
+           └──────────────────────┬───────────────────────┘
+                                  │
+┌─────────────────────────────────▼───────────────────────────────────────┐
+│                    X Layer mainnet  ·  chain ID 196                      │
+│         SpendPolicy.sol  ·  PaymentExecuted / PaymentBlocked events      │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Integration / Agent Tools
+## Spend Policy
+
+Spend limits are enforced at the smart contract level on X Layer — no API override possible.
+
+| Field               | Enforcement               | Behaviour                                                                                |
+| ------------------- | ------------------------- | ---------------------------------------------------------------------------------------- |
+| `perTxLimit`        | On-chain — smart contract | Blocks if payment exceeds per-transaction cap                                            |
+| `dailyBudget`       | On-chain — smart contract | Blocks if agent has exceeded daily spend                                                 |
+| `allowlist`         | On-chain — smart contract | Blocks if merchant not in approved list                                                  |
+| `approvalThreshold` | Off-chain — ZenithPay API | Pauses for human review if exceeded. Blank = no approvals. `"0"` = all require approval. |
+
+**Preset rules (dashboard):**
+
+| Preset       | perTxLimit | dailyBudget | approvalThreshold |
+| ------------ | ---------- | ----------- | ----------------- |
+| Conservative | $5         | $25         | $1                |
+| Balanced     | $25        | $100        | $10               |
+| Open         | $100       | $500        | $50               |
+
+---
+
+## Built for Any Agent
+
+ZenithPay is not tied to a single agent or framework. Any agent — Claude Code, Claude Desktop, Cursor, Codex, Gemini CLI, OpenClaw, or a custom bot — can integrate ZenithPay through MCP, Agent Skill, or REST API and immediately gain policy-enforced payments on X Layer.
+
+```
+Claude Code     → MCP server   → zenithpay_pay_service()
+Claude Desktop  → MCP server   → zenithpay_pay_service()
+Cursor          → MCP server   → zenithpay_pay_service()
+Codex           → MCP server   → zenithpay_pay_service()
+Gemini CLI      → Agent Skill  → zenithpay_pay_service()
+OpenClaw        → Agent Skill  → zenithpay_pay_service()
+Custom agent    → REST API     → POST /pay
+Any agent       → one line     → policy-gated x402 payments on X Layer
+```
+
+Each agent gets its own isolated SpendPolicy.sol — independent limits, allowlists, and approval thresholds enforced onchain per agent. One human can own and monitor multiple agents from a single dashboard.
+
+This is what makes ZenithPay ecosystem infrastructure: every developer building an agent on X Layer gets a production-ready payment and enforcement layer without rebuilding it from scratch.
+
+---
+
+## Agent Integration
 
 Three ways to connect any agent to ZenithPay.
 
-**MCP Server** — Register ZenithPay as an MCP server. Works with Claude Code, Claude Desktop, Cursor, Codex, Gemini CLI, OpenClaw.
+**Base URL:** `https://api.usezenithpay.xyz`
+
+### 1. MCP Server
+
+Works with Claude Code, Claude Desktop, Cursor, Codex, Gemini CLI, OpenClaw.
 
 ```json
 {
@@ -148,106 +187,293 @@ Three ways to connect any agent to ZenithPay.
 		"zenithpay": {
 			"url": "https://api.usezenithpay.xyz/mcp",
 			"env": {
-				"AGENT_ADDRESS": "0xcadf...1a9"
+				"AGENT_ADDRESS": "0xcadf...1a9",
+				"ZENITHPAY_API_KEY": "your_key_here"
 			}
 		}
 	}
 }
 ```
 
-**Agent Skill** — One line. Agent reads the skill file and gets three tools instantly.
+### 2. Agent Skill
 
-```
-Set up curl -s https://api.usezenithpay.xyz/skill.md
+One line. Agent reads the skill and gets all six tools instantly.
+
+```bash
+curl -s https://api.usezenithpay.xyz/skill.md
 ```
 
-**Rest API** — Direct REST integration. Any language, any framework.
+### 3. REST API
+
+Direct HTTP integration. Any language, any framework.
 
 ```bash
 curl -X POST https://api.usezenithpay.xyz/pay \
   -H "Authorization: Bearer $ZENITHPAY_API_KEY" \
-  -d '{ "serviceUrl": "https://exa.ai/search", "maxAmount": "0.25", "intent": "Research DeFi trends" }'
+  -H "Content-Type: application/json" \
+  -d '{
+    "agentAddress": "0xcadf...1a9",
+    "serviceUrl": "https://service.xyz/api",
+    "maxAmount": "0.25",
+    "intent": "Research DeFi trends"
+  }'
 ```
-
-ZenithPay gives agents controlled access to money — check balance, spend under policies, set limits, and verify every transaction.
-
-**Four tools exposed to your agent:**
-
-| Tool                    | What it does                                |
-| ----------------------- | ------------------------------------------- |
-| `zenithpay_balance`     | Wallet balance + remaining budget           |
-| `zenithpay_pay_service` | Policy-gated x402 payment                   |
-| `zenithpay_set_limits`  | Set per-tx cap + daily budget               |
-| `zenithpay_ledger`      | Onchain spend audit trail & transaction log |
 
 ---
 
 ## API Reference
 
+Authentication: `Authorization: Bearer $ZENITHPAY_API_KEY` on all endpoints except `/health`.
+
+| Method | Route                    | Description                                                          |
+| ------ | ------------------------ | -------------------------------------------------------------------- |
+| `GET`  | `/health`                | Health check — no auth required                                      |
+| `POST` | `/wallet/genesis`        | Create TEE-secured agent wallet                                      |
+| `GET`  | `/wallet/balance`        | Agent USDC + OKB balance + remaining daily budget                    |
+| `GET`  | `/wallet/agents`         | List all agents under authenticated account                          |
+| `POST` | `/pay`                   | Execute policy-gated x402 payment                                    |
+| `GET`  | `/limits`                | Get current spend policy for agent(s)                                |
+| `POST` | `/limits`                | Deploy / update spend policy contract — requires human EOA signature |
+| `GET`  | `/ledger`                | Full transaction audit trail                                         |
+| `GET`  | `/approvals`             | Pending payments awaiting human review                               |
+| `POST` | `/approvals/:id/approve` | Approve pending payment — executes immediately                       |
+| `POST` | `/approvals/:id/deny`    | Deny pending payment — cancels and logs                              |
+
+### POST /pay — response shapes
+
+```jsonc
+// Approved
+{
+  "status": "approved",
+  "txHash": "0xabc...",
+  "amount": "0.10",
+  "currency": "USDC",
+  "merchant": "service.xyz",
+  "swapUsed": false,
+  "okbSpent": null,
+  "remainingDailyBudget": "1.65"
+}
+
+// Pending — above approvalThreshold
+{
+  "status": "pending",
+  "approvalId": "apr_01abc",
+  "amount": "0.50",
+  "merchant": "service.xyz",
+  "intent": "Research DeFi trends"
+}
+
+// Blocked
+{
+  "status": "blocked",
+  "reason": "per_tx_limit_exceeded",
+  // also: daily_budget_exceeded · merchant_not_allowlisted · insufficient_balance
+  "onchainEvent": "PaymentBlocked"
+}
+```
+
+Full endpoint documentation with all request schemas → [docs.usezenithpay.xyz](https://docs.usezenithpay.xyz)
+
+---
+
+## Agent Tools
+
+Six tools available via MCP server and Agent Skill. Approvals are REST-only by design — agents cannot approve their own payments.
+
+| Tool                        | Input                                                                           | What it does                                      |
+| --------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `zenithpay_balance`         | —                                                                               | USDC + OKB balance + remaining daily budget       |
+| `zenithpay_pay_service`     | `serviceUrl`, `maxAmount`, `intent`                                             | Policy-gated x402 payment with auto-swap          |
+| `zenithpay_get_limits`      | —                                                                               | Read current spend policy                         |
+| `zenithpay_set_limits`      | `perTxLimit`, `dailyBudget`, `allowlist`, `approvalThreshold`, `humanSignature` | Deploy / update onchain spend policy              |
+| `zenithpay_verify_merchant` | `merchantUrl`                                                                   | OKX security scan + allowlist check before paying |
+| `zenithpay_ledger`          | `limit?`, `offset?`, `status?`                                                  | Onchain + internal spend audit trail              |
+
+**Recommended pre-payment call order:**
+
+```
+zenithpay_get_limits()         → understand policy before spending
+zenithpay_balance()            → confirm funds available
+zenithpay_verify_merchant()    → safety check the merchant
+zenithpay_pay_service()        → pay
+```
+
+---
+
+## Quick Start
+
+**Prerequisites:** [Bun](https://bun.sh) · [Foundry](https://getfoundry.sh) · [OKX API key](https://web3.okx.com/onchain-os/dev-portal) · [Supabase](https://supabase.com) project
+
+### 1. Clone and install
+
+```bash
+git clone https://github.com/zenith-hq/zenithpay-xlayer.git
+cd zenithpay-xlayer
+bun install
+```
+
+### 2. Set environment variables
+
+```bash
+cp api/.env.example api/.env
+cp web/.env.example web/.env.local
+```
+
+`api/.env`:
+
+```bash
+XLAYER_RPC_URL=https://rpc.xlayer.tech
+OKX_API_KEY=...                   # get at web3.okx.com/onchain-os/dev-portal
+OKX_SECRET_KEY=...
+OKX_PASSPHRASE=...
+SUPABASE_URL=...
+SUPABASE_SERVICE_KEY=...
+SPEND_POLICY_ADDRESS=0x...        # fill after step 4
+ZENITHPAY_API_KEY_SECRET=...
+```
+
+`contracts/.env`:
+
+```bash
+DEPLOYER_PRIVATE_KEY=0x...        # EOA used to deploy SpendPolicy.sol
+XLAYER_RPC_URL=https://rpc.xlayer.tech
+```
+
+`web/.env.local`:
+
+```bash
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:3001
+```
+
+### 3. Deploy contracts to X Layer
+
+```bash
+cd contracts
+forge build
+forge test
+forge script script/Deploy.s.sol --rpc-url $XLAYER_RPC_URL --broadcast --slow
+```
+
+Copy the deployed address → `SPEND_POLICY_ADDRESS` in `api/.env`, then run migrations:
+
+```bash
+cd api && bun run db:migrate
+```
+
+### 4. Run locally
+
+```bash
+cd web && bun dev   # :3000
+cd api && bun dev   # :3001
+```
+
+### 5. Deploy to production
+
+| Service | Host                           | Config                                                      |
+| ------- | ------------------------------ | ----------------------------------------------------------- |
+| `api/`  | [Railway](https://railway.app) | Root dir: `api/` · add env vars · CNAME `api` → Railway URL |
+| `web/`  | [Vercel](https://vercel.com)   | Root dir: `web/` · add env vars · auto-deploys on push      |
+| `docs/` | [Vercel](https://vercel.com)   | Root dir: `docs/` · auto-deploys on push                    |
+
+---
+
+## Tech Stack
+
+| Layer           | Technology                                                                       |
+| --------------- | -------------------------------------------------------------------------------- |
+| Frontend        | Next.js 16, Tailwind v4, shadcn/ui, Motion                                       |
+| Backend API     | Bun, Hono                                                                        |
+| Database        | PostgreSQL, Supabase, Drizzle ORM                                                |
+| Wallet Connect  | wagmi, OKX Wallet (EIP-6963)                                                     |
+| Smart Contracts | Solidity, Foundry, OpenZeppelin                                                  |
+| Blockchain      | X Layer mainnet (chain ID 196)                                                   |
+| Payment         | x402 — OKX Payments API (zero gas on X Layer)                                    |
+| Agent Wallet    | OKX Agentic Wallet (TEE)                                                         |
+| Agent Protocol  | MCP (Model Context Protocol)                                                     |
+| OKX OnchainOS   | Wallet API · Portfolio API · DEX Swap · Onchain Gateway · Market API · Token API |
+| Web Deploy      | Vercel                                                                           |
+| API Deploy      | Railway                                                                          |
+
+---
+
+## OKX OnchainOS Usage
+
+| Capability                | OnchainOS API                                    |
+| ------------------------- | ------------------------------------------------ |
+| Agent wallet creation     | OKX Agentic Wallet — TEE, email OTP, gas-free    |
+| Balance queries           | Wallet Check Balance API                         |
+| x402 payments             | Payments API — `/api/v6/x402/verify` + `/settle` |
+| Auto-swap OKB → USDC      | DEX Swap API — 500+ liquidity sources            |
+| Tx simulation + broadcast | Wallet Transaction API                           |
+| Market + price data       | Market API                                       |
+| Token safety checks       | Token API                                        |
+| Merchant security scan    | Agentic Wallet — `security_dapp_scan`            |
+
 ---
 
 ## Deployed Contracts
 
----
-
-## Onchain OS APIs Usage
-
-| Layer           | Provider                                             |
-| --------------- | ---------------------------------------------------- |
-| Agent wallet    | OKX Agentic Wallet (TEE, email OTP, gas-free)        |
-| Balance queries | OKX Wallet Check Balance API                         |
-| x402 payments   | OKX Payments API (`/api/v6/x402/verify` + `/settle`) |
-| Auto-swap       | OKX DEX Swap API (500+ liquidity sources)            |
-| Tx broadcast    | OKX Wallet Transaction API                           |
-| Market data     | OKX Market API                                       |
-| Token safety    | OKX Token API                                        |
+| Contract     | Source                                                           | Network                        | Address                     |
+| ------------ | ---------------------------------------------------------------- | ------------------------------ | --------------------------- |
+| Spend Policy | [`contracts/src/SpendPolicy.sol`](contracts/src/SpendPolicy.sol) | X Layer mainnet (chain ID 196) | _TBD — update after deploy_ |
 
 ---
 
-## File Structure
+## Project Structure
 
 ```
 zenithpay-xlayer/
-├── api/
-│ └── src/
-│ ├── providers/
-│ │ ├── wallet.ts ←okx agentic wallet
-│ │ ├── onchainos/
-│ │ │ ├── balance.ts ← Wallet Check Balance API
-│ │ │ ├── gateway.ts ← Wallet Transaction API (simulate + broadcast)
-│ │ │ ├── history.ts ← Wallet Transaction History API
-│ │ │ ├── swap.ts ← Trade Swap API (auto-swap OKB→USDC)
-│ │ │ ├── payments.ts ← Payments API (x402, zero gas)
-│ │ │ ├── market.ts ← Market API (prices, token data)
-│ │ │ └── token.ts ← Market Token API (safety checks)
-│ ├── service/
-│ │ ├── policy/ ← SpendPolicy.sol interaction
-│ │ ├── payment/ ← x402 routing + auto-swap
-│ │ └── ledger/ ← audit trail
-│ ├── utils/ ← helper functions, constants
-│ ├── mcp/ ← MCP server logic
-│ ├── types/ ← TypeScript types & interfaces
-│ ├── db/ ← database connection / ORM setup
-│ ├── config/
-│ │ └── chains.ts ← X Layer config
-│ ├── env.ts ← environment variables
-│ ├── index.ts ← main entry point
-│ └── routes/ ← REST endpoints + MCP server
+│
+├── api/                                   # Bun + Hono — REST API · MCP server · Agent Skill
+│   └── src/
+│       ├── app.ts                         # Entry — /health · /mcp · /skill.md mounted inline
+│       │
+│       ├── providers/onchainos/           # ★ OKX OnchainOS — all external API calls live here
+│       │   ├── agentic-wallet.ts          # ★ OKX Agentic Wallet — wallet_login · wallet_create (TEE)
+│       │   ├── balance.ts                 # ★ OKX Wallet Check Balance API — portfolio_token_balances
+│       │   ├── swap.ts                    # ★ OKX DEX Swap API — OKB→USDC auto-swap (500+ sources)
+│       │   ├── payments.ts                # ★ OKX Payments API — x402 verify + settle (zero gas)
+│       │   ├── gateway.ts                 # ★ OKX Onchain Gateway — simulate · broadcast · orders
+│       │   ├── market.ts                  # ★ OKX Market API — token prices · portfolio overview
+│       │   └── token.ts                   # ★ OKX Token API — token safety · security_dapp_scan
+│       │
+│       ├── modules/
+│       │   ├── payment/payment.service.ts # Core spend flow — policy gate → auto-swap → x402 settle
+│       │   ├── wallet/wallet.service.ts   # Agent wallet creation via OKX Agentic Wallet TEE
+│       │   ├── limits/limits.service.ts   # SpendPolicy.sol read/write via viem on X Layer
+│       │   ├── approvals/                 # Human review queue — approve · deny pending payments
+│       │   ├── balance/                   # Agent balance reads
+│       │   └── ledger/                    # Audit trail — every payment logged with intent
+│       │
+│       ├── mcp/
+│       │   ├── server.ts                  # ★ MCP server — StreamableHTTPTransport at /mcp
+│       │   └── tools/                     # 6 tools: balance · pay · get/set limits · verify · ledger
+│       │
+│       └── routes/                        # REST endpoints — wallet · pay · limits · ledger · approvals
+│
 ├── contracts/
-│ └── src/SpendPolicy.sol ← onchain enforcement
-└── web/ ← Next.js dashboard
-└── app/
-├── page.tsx ← landing
-├── signin/ ← OKX Wallet connect
-└── dashboard/ ← balance · policy · ledger
+│   └── src/SpendPolicy.sol                # ★ X Layer — onchain enforcement · PaymentExecuted/Blocked events
+│
+├── skills/
+│   └── spend-agent/SKILL.md               # ★ Agent Skill — curl https://api.usezenithpay.xyz/skill.md
+│
+├── web/                                   # Next.js 16 — marketing + dashboard
+│   └── app/
+│       ├── (marketing)/                   # Landing page
+│       └── (dashboard)/                   # Wallet · Pay · Limits · Approvals · Ledger
+│
+└── docs/                                  # Fumadocs — docs.usezenithpay.xyz
 ```
 
 ---
 
 ## Roadmap
 
-- [ ] AgentCard
-- [ ] AgentCredit
+- [ ] Smart accounts + session keys (ERC-4337) — scoped, expiring agent permissions
+- [ ] skills.sh — `npx skills add zenithpay/spend-agent`
+- [ ] Agent Card — virtual cards backed by SpendPolicy engine
+- [ ] Agent Credit — credit lines backed by onchain spend history
 
 ---
 
