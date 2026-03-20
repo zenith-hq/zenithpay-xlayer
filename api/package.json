@@ -1,0 +1,33 @@
+{
+	"name": "zenithpay-api",
+	"scripts": {
+		"dev": "bun run --hot src/index.ts",
+		"start": "bun run src/index.ts",
+		"lint": "biome check .",
+		"format": "biome format --write .",
+		"typecheck": "tsc --noEmit",
+		"check": "biome check --write .",
+		"db:generate": "bun run --env-file=.env drizzle-kit generate",
+		"db:push": "bun run --env-file=.env drizzle-kit push",
+		"db:migrate": "bun run --env-file=.env drizzle-kit migrate",
+		"db:studio": "bun run --env-file=.env drizzle-kit studio"
+	},
+	"dependencies": {
+		"@hono/zod-validator": "^0.7.6",
+		"@supabase/supabase-js": "^2.99.1",
+		"@x402/fetch": "^2.6.0",
+		"@x402/hono": "^2.6.0",
+		"dotenv": "^17.3.1",
+		"drizzle-orm": "^0.45.1",
+		"hono": "^4.12.7",
+		"postgres": "^3.4.8",
+		"viem": "^2.47.2",
+		"vitest": "^4.1.0",
+		"zod": "^4.3.6"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.4.7",
+		"@types/bun": "latest",
+		"drizzle-kit": "^0.31.9"
+	}
+}
