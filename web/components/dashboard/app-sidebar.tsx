@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  ArrowLeftRight,
   CreditCard,
   LayoutDashboard,
   ScrollText,
@@ -89,25 +88,6 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Integration</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Agent Skill">
-                  <Link
-                    href="https://api.usezenithpay.xyz/skill.md"
-                    target="_blank"
-                  >
-                    <ArrowLeftRight className="size-4" />
-                    <span>Agent Skill</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
