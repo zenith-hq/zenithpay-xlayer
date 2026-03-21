@@ -63,12 +63,12 @@ describe("Payment service", () => {
   it("approved path: sufficient USDC, no swap needed", async () => {
     mockGetTokenBalances.mockResolvedValue([
       {
-        tokenAddress: "0x74b7f16337b8972027f6196a17a631ac6de26d22",
+        tokenContractAddress: "0x74b7f16337b8972027f6196a17a631ac6de26d22",
         symbol: "USDC",
         balance: "5.00",
       },
       {
-        tokenAddress: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        tokenContractAddress: "",
         symbol: "OKB",
         balance: "1.00",
       },
@@ -96,12 +96,12 @@ describe("Payment service", () => {
   it("blocked path: insufficient balance (no OKB)", async () => {
     mockGetTokenBalances.mockResolvedValue([
       {
-        tokenAddress: "0x74b7f16337b8972027f6196a17a631ac6de26d22",
+        tokenContractAddress: "0x74b7f16337b8972027f6196a17a631ac6de26d22",
         symbol: "USDC",
         balance: "0.01",
       },
       {
-        tokenAddress: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        tokenContractAddress: "",
         symbol: "OKB",
         balance: "0",
       },
@@ -155,12 +155,12 @@ describe("Payment service", () => {
   it("auto-swap triggered when USDC insufficient but OKB available", async () => {
     mockGetTokenBalances.mockResolvedValue([
       {
-        tokenAddress: "0x74b7f16337b8972027f6196a17a631ac6de26d22",
+        tokenContractAddress: "0x74b7f16337b8972027f6196a17a631ac6de26d22",
         symbol: "USDC",
         balance: "0.01",
       },
       {
-        tokenAddress: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        tokenContractAddress: "",
         symbol: "OKB",
         balance: "5.00",
       },
@@ -205,12 +205,12 @@ describe("Payment service", () => {
   it("swap NOT triggered when USDC is sufficient", async () => {
     mockGetTokenBalances.mockResolvedValue([
       {
-        tokenAddress: "0x74b7f16337b8972027f6196a17a631ac6de26d22",
+        tokenContractAddress: "0x74b7f16337b8972027f6196a17a631ac6de26d22",
         symbol: "USDC",
         balance: "10.00",
       },
       {
-        tokenAddress: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        tokenContractAddress: "",
         symbol: "OKB",
         balance: "5.00",
       },
@@ -239,7 +239,7 @@ describe("Payment service", () => {
   it("blocked path: x402 payment failure", async () => {
     mockGetTokenBalances.mockResolvedValue([
       {
-        tokenAddress: "0x74b7f16337b8972027f6196a17a631ac6de26d22",
+        tokenContractAddress: "0x74b7f16337b8972027f6196a17a631ac6de26d22",
         symbol: "USDC",
         balance: "5.00",
       },

@@ -127,13 +127,11 @@ export async function executePayment(
   let usdcBalance = 0;
   let okbBalance = 0;
   for (const tb of tokenBalances) {
-    if (tb.tokenAddress.toLowerCase() === XLAYER_USDC.toLowerCase()) {
+    const addr = (tb.tokenContractAddress ?? "").toLowerCase();
+    if (addr === XLAYER_USDC.toLowerCase()) {
       usdcBalance = Number.parseFloat(tb.balance);
     }
-    if (
-      tb.tokenAddress.toLowerCase() === OKB_NATIVE.toLowerCase() ||
-      tb.symbol === "OKB"
-    ) {
+    if (addr === "" || addr === OKB_NATIVE.toLowerCase() || tb.symbol === "OKB") {
       okbBalance = Number.parseFloat(tb.balance);
     }
   }

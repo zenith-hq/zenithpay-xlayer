@@ -1,16 +1,22 @@
 import { XLAYER_CHAIN_ID } from "../../config/chains";
-import { okxFetch, okxFetchAll } from "./client";
+import { okxFetchAll } from "./client";
 
-interface TokenBalance {
+export interface TokenBalance {
   chainIndex: string;
-  tokenAddress: string;
+  tokenContractAddress: string;
   symbol: string;
   balance: string;
+  rawBalance: string;
   tokenPrice: string;
-  tokenType: string;
+  isRiskToken: boolean;
+  address: string;
 }
 
-interface TotalValue {
+interface BalanceWrapper {
+  tokenAssets: TokenBalance[];
+}
+
+interface TotalValueWrapper {
   totalValue: string;
 }
 
@@ -18,31 +24,53 @@ export async function getTokenBalances(
   address: string,
   tokenAddresses?: string[],
 ): Promise<TokenBalance[]> {
-  const params: Record<string, string> = {
-    address,
-    chainIndex: XLAYER_CHAIN_ID,
-  };
   if (tokenAddresses?.length) {
-    params.tokenAddresses = tokenAddresses.join(",");
+    const tokenContractAddresses = tokenAddresses
+      .filter((addr) => addr !== "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+      .map((addr) => ({
+        chainIndex: XLAYER_CHAIN_ID,
+        tokenContractAddress: addr,
+      }));
+
+    tokenContractAddresses.push({
+      chainIndex: XLAYER_CHAIN_ID,
+      tokenContractAddress: "",
+    });
+
+    const wrappers = await okxFetchAll<BalanceWrapper>(
+      "/api/v6/dex/balance/token-balances-by-address",
+      {
+        method: "POST",
+        body: {
+          address,
+          tokenContractAddresses,
+        },
+      },
+    );
+    return wrappers.flatMap((w) => w.tokenAssets ?? []);
   }
 
-  return okxFetchAll<TokenBalance>(
-    "/api/v6/dex/balance/token-balances-by-address",
-    { params },
+  const wrappers = await okxFetchAll<BalanceWrapper>(
+    "/api/v6/dex/balance/all-token-balances-by-address",
+    { params: { address, chains: XLAYER_CHAIN_ID } },
   );
+  return wrappers.flatMap((w) => w.tokenAssets ?? []);
 }
 
 export async function getAllTokenBalances(
   address: string,
 ): Promise<TokenBalance[]> {
-  return okxFetchAll<TokenBalance>(
+  const wrappers = await okxFetchAll<BalanceWrapper>(
     "/api/v6/dex/balance/all-token-balances-by-address",
-    { params: { address, chainIndex: XLAYER_CHAIN_ID } },
+    { params: { address, chains: XLAYER_CHAIN_ID } },
   );
+  return wrappers.flatMap((w) => w.tokenAssets ?? []);
 }
 
-export async function getTotalValue(address: string): Promise<TotalValue> {
-  return okxFetch<TotalValue>("/api/v6/dex/balance/total-value", {
-    params: { address, chainIndex: XLAYER_CHAIN_ID },
-  });
+export async function getTotalValue(address: string): Promise<string> {
+  const wrappers = await okxFetchAll<TotalValueWrapper>(
+    "/api/v6/dex/balance/total-value-by-address",
+    { params: { address, chains: XLAYER_CHAIN_ID } },
+  );
+  return wrappers[0]?.totalValue ?? "0";
 }
