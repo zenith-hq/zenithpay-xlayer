@@ -419,6 +419,17 @@ cd api && bun dev   # :3001
 | ------------ | ---------------------------------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Spend Policy | [`contracts/src/SpendPolicy.sol`](contracts/src/SpendPolicy.sol) | X Layer mainnet (chain ID 196) | [`0xF5875F25ccEB2edDc57F218eaF1F71c5CF161f21`](https://www.oklink.com/xlayer/address/0xF5875F25ccEB2edDc57F218eaF1F71c5CF161f21) | [`0xf0be30b...22ae9`](https://www.oklink.com/xlayer/tx/0xf0be30b27021c475fcdfcb8657f8d392617ebc25454a329af9240df3ded22ae9) |
 
+## Live Transaction Proof
+
+| Description | Chain | TX Hash |
+| --- | --- | --- |
+| x402 payment to stableenrich.dev (Exa search) | X Layer | [`0x6cecdfbd...`](https://www.oklink.com/xlayer/tx/0x6cecdfbd813da3c9792f78ff4bc49e60af976a424b53da7b2f1c78e6192389eb) |
+| x402 payment to stableenrich.dev | X Layer | [`0x141eab48...`](https://www.oklink.com/xlayer/tx/0x141eab489df25fe3b37c9f2cb851417fcbc6f665fdba52e5827b6a6f4c6e0b15) |
+| Real x402 service payment (Exa neural search) | Base | [`0xa8b200a1...`](https://basescan.org/tx/0xa8b200a12812a847d8d3affa1f992ab77ba304e4d5d0f9bbe6031d41f603527f) |
+| SpendPolicy agent registration | X Layer | [`0xf04cc8c1...`](https://www.oklink.com/xlayer/tx/0xf04cc8c1d7d1facf257170a98ad6935b7d0fe825d5bdfbfad443223c5dc99920) |
+
+**Agent Wallet:** [`0x726Cf0C4Fe559DB9A32396161694C7b88C60C947`](https://www.oklink.com/xlayer/address/0x726Cf0C4Fe559DB9A32396161694C7b88C60C947) (OKX Agentic Wallet, TEE-signed)
+
 ---
 
 ## Project Structure
