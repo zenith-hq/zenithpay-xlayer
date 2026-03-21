@@ -51,14 +51,13 @@ app.get("/health", (c) =>
 );
 
 app.get("/skill.md", async (c) => {
-  const file = Bun.file("../skills/spend-agent/SKILL.md");
-  const exists = await file.exists();
-  if (!exists) {
-    return c.text("# ZenithPay Skill\n\nSkill file not found.", 404);
-  }
-  const content = await file.text();
-  c.header("Content-Type", "text/markdown");
-  return c.body(content);
+  const res = await fetch(
+    "https://raw.githubusercontent.com/zenith-hq/zenithpay-xlayer/main/skills/spend-agent/SKILL.md",
+  );
+  const content = await res.text();
+  return c.text(content, 200, {
+    "Content-Type": "text/markdown; charset=utf-8",
+  });
 });
 
 // MCP endpoint — stateless transport, new instance per request
