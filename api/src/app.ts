@@ -20,7 +20,35 @@ app.use("*", cors());
 app.use("*", loggerMiddleware);
 
 // Public endpoints — no auth
-app.get("/health", (c) => c.json({ status: "ok" }));
+app.get("/", (c) =>
+  c.json(
+    {
+      error: "Not found",
+      endpoints: [
+        "/health",
+        "/wallet/genesis",
+        "/wallet/balance",
+        "/wallet/agents",
+        "/pay",
+        "/limits",
+        "/ledger",
+        "/approvals",
+        "/mcp",
+        "/skill.md",
+      ],
+    },
+    404,
+  ),
+);
+
+app.get("/health", (c) =>
+  c.json({
+    status: "ok",
+    service: "zenithpay-api",
+    version: "1.0.0",
+    timestamp: new Date().toISOString(),
+  }),
+);
 
 app.get("/skill.md", async (c) => {
   const file = Bun.file("../skills/spend-agent/SKILL.md");
