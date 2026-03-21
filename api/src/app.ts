@@ -1,10 +1,10 @@
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { logger } from "hono/logger";
+import { rateLimiter } from "hono-rate-limiter";
 import { mcpServer, registerTools } from "./mcp/server";
 import { authMiddleware } from "./middleware/auth";
-import { loggerMiddleware } from "./middleware/logger";
-import { rateLimitMiddleware } from "./middleware/rate-limit";
 import { approvalsRoute } from "./routes/approvals";
 import { ledgerRoute } from "./routes/ledger";
 import { limits } from "./routes/limits";
@@ -28,9 +28,18 @@ const ENDPOINT_LIST = [
 
 const app = new Hono();
 
-// Global middleware
+// Global middleware — logger first, then CORS, then global rate limit
+app.use("*", logger());
 app.use("*", cors());
-app.use("*", loggerMiddleware);
+app.use(
+  "*",
+  rateLimiter({
+    windowMs: 60 * 1000,
+    limit: 100,
+    standardHeaders: "draft-6",
+    keyGenerator: (c) => c.req.header("x-forwarded-for") ?? "unknown",
+  }),
+);
 
 // Public endpoints — no auth
 app.get("/health", (c) =>
@@ -62,17 +71,27 @@ app.all("/mcp", async (c) => {
   return response;
 });
 
+// Stricter rate limit on payment endpoint — 20/min per IP
+app.use(
+  "/pay",
+  rateLimiter({
+    windowMs: 60 * 1000,
+    limit: 20,
+    standardHeaders: "draft-6",
+    keyGenerator: (c) => c.req.header("x-forwarded-for") ?? "unknown",
+  }),
+);
+
 // Protected endpoints — require API key
-// Use both exact path and wildcard to catch root and sub-routes
-app.use("/wallet/*", rateLimitMiddleware, authMiddleware);
-app.use("/pay", rateLimitMiddleware, authMiddleware);
-app.use("/pay/*", rateLimitMiddleware, authMiddleware);
-app.use("/limits", rateLimitMiddleware, authMiddleware);
-app.use("/limits/*", rateLimitMiddleware, authMiddleware);
-app.use("/ledger", rateLimitMiddleware, authMiddleware);
-app.use("/ledger/*", rateLimitMiddleware, authMiddleware);
-app.use("/approvals", rateLimitMiddleware, authMiddleware);
-app.use("/approvals/*", rateLimitMiddleware, authMiddleware);
+app.use("/wallet/*", authMiddleware);
+app.use("/pay", authMiddleware);
+app.use("/pay/*", authMiddleware);
+app.use("/limits", authMiddleware);
+app.use("/limits/*", authMiddleware);
+app.use("/ledger", authMiddleware);
+app.use("/ledger/*", authMiddleware);
+app.use("/approvals", authMiddleware);
+app.use("/approvals/*", authMiddleware);
 
 // Mount routes
 app.route("/wallet", wallet);
