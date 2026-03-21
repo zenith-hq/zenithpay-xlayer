@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useAccount, useConnect, useConnectors, useSignMessage } from "wagmi";
+import { useConnect, useConnection, useConnectors, useSignMessage } from "wagmi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -51,12 +51,18 @@ export function OnboardingFlow() {
   const searchParams = useSearchParams();
   const agentAddress = searchParams.get("agent");
 
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useConnection();
   const { mutate: connect, isPending: connectPending } = useConnect();
   const connectors = useConnectors();
   const { signMessageAsync } = useSignMessage();
 
   const [step, setStep] = useState<Step>(isConnected ? "policy" : "connect");
+
+  useEffect(() => {
+    if (isConnected && step === "connect") {
+      setStep("policy");
+    }
+  }, [isConnected, step]);
   const [selectedPreset, setSelectedPreset] =
     useState<keyof typeof PRESETS>("balanced");
   const [perTxLimit, setPerTxLimit] = useState<string>(PRESETS.balanced.perTxLimit);
@@ -69,12 +75,7 @@ export function OnboardingFlow() {
   const [copied, setCopied] = useState(false);
 
   function handleConnect() {
-    connect(
-      { connector: connectors[0] },
-      {
-        onSuccess: () => setStep("policy"),
-      },
-    );
+    connect({ connector: connectors[0] });
   }
 
   function applyPreset(key: keyof typeof PRESETS) {
