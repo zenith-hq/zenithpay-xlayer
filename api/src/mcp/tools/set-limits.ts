@@ -10,6 +10,8 @@ mcpServer.tool(
     dailyBudget: z.string(),
     allowlist: z.array(z.string()).optional(),
     approvalThreshold: z.string().optional(),
+    autoSwapEnabled: z.boolean().optional(),
+    swapSlippageTolerance: z.string().optional(),
     humanSignature: z.string(),
   },
   async ({
@@ -17,6 +19,8 @@ mcpServer.tool(
     dailyBudget,
     allowlist,
     approvalThreshold,
+    autoSwapEnabled,
+    swapSlippageTolerance,
     humanSignature,
   }) => {
     const agentAddress = process.env.AGENT_ADDRESS ?? "";
@@ -26,6 +30,8 @@ mcpServer.tool(
       dailyBudget,
       allowlist,
       approvalThreshold,
+      autoSwapEnabled,
+      swapSlippageTolerance,
       humanSignature,
     });
     return {

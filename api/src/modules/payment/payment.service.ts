@@ -144,6 +144,27 @@ export async function executePayment(
   if (usdcBalance < amountFloat) {
     const deficit = amountFloat - usdcBalance;
 
+    if (!policy.autoSwapEnabled) {
+      await ledgerService.writeTransaction({
+        agentAddress,
+        merchant,
+        amount: maxAmount,
+        currency: "USDC",
+        intent,
+        status: "blocked",
+        reason: "auto_swap_disabled",
+        swapUsed: false,
+      });
+
+      return {
+        status: "blocked",
+        reason: "auto_swap_disabled",
+        amount: maxAmount,
+        merchant,
+        onchainEvent: "PaymentBlocked",
+      };
+    }
+
     if (okbBalance <= 0) {
       await ledgerService.writeTransaction({
         agentAddress,
@@ -170,6 +191,37 @@ export async function executePayment(
         usdcToUnits(deficit.toFixed(6)).toString(),
         agentAddress,
       );
+
+      // Check slippage tolerance before executing swap
+      // fromTokenAmount is in wei (18 decimals), okbBalance is in UI units
+      const slippageTolerance = Number.parseFloat(
+        policy.swapSlippageTolerance,
+      );
+      const estimatedOkbWei = BigInt(quote.routerResult.fromTokenAmount);
+      const maxOkbWei =
+        estimatedOkbWei + (estimatedOkbWei * BigInt(Math.floor(slippageTolerance * 10000))) / 10000n;
+      const maxOkbUi = Number(maxOkbWei) / 1e18;
+
+      if (maxOkbUi > okbBalance) {
+        await ledgerService.writeTransaction({
+          agentAddress,
+          merchant,
+          amount: maxAmount,
+          currency: "USDC",
+          intent,
+          status: "blocked",
+          reason: "swap_slippage_exceeded",
+          swapUsed: false,
+        });
+
+        return {
+          status: "blocked",
+          reason: "swap_slippage_exceeded",
+          amount: maxAmount,
+          merchant,
+          onchainEvent: "PaymentBlocked",
+        };
+      }
 
       const swapResult = await swapProvider.swapOkbToUsdc(
         quote.routerResult.fromTokenAmount,

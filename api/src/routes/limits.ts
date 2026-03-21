@@ -34,6 +34,8 @@ limits.post(
       dailyBudget: z.string(),
       allowlist: z.array(z.string()).optional(),
       approvalThreshold: z.string().optional(),
+      autoSwapEnabled: z.boolean().optional(),
+      swapSlippageTolerance: z.string().optional(),
       humanSignature: z.string().startsWith("0x"),
     }),
   ),

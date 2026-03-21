@@ -55,6 +55,8 @@ describe("Payment service", () => {
       dailyBudget: "10.00",
       allowlist: [],
       approvalThreshold: null,
+      autoSwapEnabled: true,
+      swapSlippageTolerance: "0.01",
       policyContract: "0xF5875F25ccEB2edDc57F218eaF1F71c5CF161f21",
     });
     mockWriteTransaction.mockResolvedValue({ id: "txn_test" });

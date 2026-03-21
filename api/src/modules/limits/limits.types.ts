@@ -4,6 +4,8 @@ export interface AgentPolicy {
   dailyBudget: string;
   allowlist: string[];
   approvalThreshold: string | null;
+  autoSwapEnabled: boolean;
+  swapSlippageTolerance: string;
   policyContract: string;
 }
 
@@ -13,6 +15,8 @@ export interface SetLimitsRequest {
   dailyBudget: string;
   allowlist?: string[];
   approvalThreshold?: string;
+  autoSwapEnabled?: boolean;
+  swapSlippageTolerance?: string;
   humanSignature: string;
 }
 
@@ -24,4 +28,6 @@ export interface SetLimitsResult {
   perTxLimit: string;
   dailyBudget: string;
   allowlist: string[];
+  autoSwapEnabled: boolean;
+  swapSlippageTolerance: string;
 }

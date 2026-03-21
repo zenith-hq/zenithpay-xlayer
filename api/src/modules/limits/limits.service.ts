@@ -59,6 +59,8 @@ export async function getLimits(agentAddress: string): Promise<AgentPolicy> {
     dailyBudget,
     allowlist: localPolicy?.allowlist ?? [],
     approvalThreshold: localPolicy?.approvalThreshold ?? null,
+    autoSwapEnabled: localPolicy?.autoSwapEnabled ?? true,
+    swapSlippageTolerance: localPolicy?.swapSlippageTolerance ?? "0.01",
     policyContract: SPEND_POLICY_ADDRESS,
   };
 }
@@ -94,6 +96,8 @@ export async function setLimits(
       dailyBudget: request.dailyBudget,
       allowlist: request.allowlist ?? [],
       approvalThreshold: request.approvalThreshold ?? null,
+      autoSwapEnabled: request.autoSwapEnabled ?? true,
+      swapSlippageTolerance: request.swapSlippageTolerance ?? "0.01",
       contractAddress: SPEND_POLICY_ADDRESS,
     })
     .onConflictDoUpdate({
@@ -103,6 +107,8 @@ export async function setLimits(
         dailyBudget: request.dailyBudget,
         allowlist: request.allowlist ?? [],
         approvalThreshold: request.approvalThreshold ?? null,
+        autoSwapEnabled: request.autoSwapEnabled ?? true,
+        swapSlippageTolerance: request.swapSlippageTolerance ?? "0.01",
       },
     });
 
@@ -118,5 +124,7 @@ export async function setLimits(
     perTxLimit: request.perTxLimit,
     dailyBudget: request.dailyBudget,
     allowlist: request.allowlist ?? [],
+    autoSwapEnabled: request.autoSwapEnabled ?? true,
+    swapSlippageTolerance: request.swapSlippageTolerance ?? "0.01",
   };
 }
