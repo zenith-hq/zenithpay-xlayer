@@ -1,5 +1,5 @@
 export interface GenesisWalletRequest {
-  email: string;
+  email?: string;
   label?: string;
 }
 

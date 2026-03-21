@@ -11,27 +11,31 @@ wallet.post(
   zValidator(
     "json",
     z.object({
-      email: z.string().email(),
+      email: z.string().email().optional(),
       label: z.string().optional(),
     }),
   ),
   async (c) => {
-    const { email, label } = c.req.valid("json");
-    // ownerEoa is provided by the caller via X-Owner-Address header (human EOA that owns this agent)
+    const body = c.req.valid("json");
     const ownerEoa =
       c.req.header("X-Owner-Address") ??
       "0x0000000000000000000000000000000000000000";
 
     try {
-      const result = await walletService.createGenesisWallet(
-        { email, label },
-        ownerEoa,
-      );
+      const result = await walletService.createGenesisWallet(body, ownerEoa);
       return c.json(result, 201);
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Wallet creation failed";
-      return c.json({ error: "internal_error", message, status: 500 }, 500);
+        error instanceof Error ? error.message : "Wallet registration failed";
+      const status = message.includes("already registered") ? 409 : 500;
+      return c.json(
+        {
+          error: status === 409 ? "conflict" : "internal_error",
+          message,
+          status,
+        },
+        status,
+      );
     }
   },
 );

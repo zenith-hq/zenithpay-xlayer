@@ -8,24 +8,42 @@ export async function createGenesisWallet(
   request: GenesisWalletRequest,
   ownerEoa: string,
 ): Promise<GenesisWalletResult> {
-  // OKX Agentic Wallet login initiates email OTP flow — the OTP verification step
-  // requires user interaction and is handled by the dashboard before calling this endpoint.
-  const loginResult = await agenticWallet.walletLogin(request.email);
-  const walletResult = await agenticWallet.walletCreate(
-    loginResult.sessionToken,
-    request.label,
-  );
-
   const db = getDb();
+
+  const session = await agenticWallet.akLogin();
+
+  const xlayerAddr = session.addressList.find(
+    (a) => a.chainIndex === "196",
+  );
+  const agentAddress = xlayerAddr?.address ?? session.addressList[0]?.address;
+
+  if (!agentAddress) {
+    throw new Error("No wallet address available from OKX Agentic Wallet");
+  }
+
+  const existing = await db
+    .select()
+    .from(agents)
+    .where(eq(agents.address, agentAddress));
+
+  if (existing.length > 0) {
+    return {
+      agentAddress,
+      label: existing[0].label,
+      balances: { USDC: "0.00", OKB: "0.00" },
+      createdAt: existing[0].createdAt?.toISOString() ?? new Date().toISOString(),
+    };
+  }
+
   await db.insert(agents).values({
-    address: walletResult.address,
+    address: agentAddress,
     label: request.label ?? null,
     ownerEoa,
-    email: request.email,
+    email: request.email ?? null,
   });
 
   return {
-    agentAddress: walletResult.address,
+    agentAddress,
     label: request.label ?? null,
     balances: { USDC: "0.00", OKB: "0.00" },
     createdAt: new Date().toISOString(),

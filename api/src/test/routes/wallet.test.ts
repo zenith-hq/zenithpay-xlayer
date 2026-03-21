@@ -41,23 +41,26 @@ describe("Wallet routes", () => {
     const res = await app.request("/wallet/genesis", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: "test@test.com" }),
+      body: JSON.stringify({}),
     });
     expect(res.status).toBe(401);
     const body = await res.json();
     expect(body.error).toBe("unauthorized");
   });
 
-  it("POST /wallet/genesis with auth, missing email → 400", async () => {
+  it("POST /wallet/genesis with auth, valid body → 201", async () => {
     const res = await app.request("/wallet/genesis", {
       method: "POST",
       headers: { ...AUTH_HEADER, "Content-Type": "application/json" },
-      body: JSON.stringify({}),
+      body: JSON.stringify({ label: "test-agent" }),
     });
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(201);
+    const body = await res.json();
+    expect(body.agentAddress).toBeDefined();
+    expect(body.label).toBe("test-agent");
   });
 
-  it("POST /wallet/genesis with auth, valid body → 201", async () => {
+  it("POST /wallet/genesis with optional email → 201", async () => {
     const res = await app.request("/wallet/genesis", {
       method: "POST",
       headers: { ...AUTH_HEADER, "Content-Type": "application/json" },
@@ -66,7 +69,6 @@ describe("Wallet routes", () => {
     expect(res.status).toBe(201);
     const body = await res.json();
     expect(body.agentAddress).toBeDefined();
-    expect(body.label).toBe("test-agent");
   });
 
   it("GET /wallet/balance without auth → 401", async () => {
