@@ -106,14 +106,14 @@ export async function setLimits(
       },
     });
 
-  // TODO: broadcast on-chain tx using humanSignature to call registerAgent/updatePolicy
-  // For hackathon, the human signs from the dashboard and we broadcast via gateway
-  const txHash = `0x${"0".repeat(64)}` as `0x${string}`;
-
+  // Hard limits (perTxLimit, dailyBudget) are enforced on-chain via SpendPolicy.sol.
+  // The human EOA must call registerAgent/updatePolicy directly from the dashboard
+  // using humanSignature — the API stores off-chain components (approvalThreshold, allowlist)
+  // and returns the contract address for the dashboard to construct the on-chain tx.
   return {
     status: "deployed",
     policyContract: SPEND_POLICY_ADDRESS,
-    txHash,
+    txHash: null,
     agentAddress: request.agentAddress,
     perTxLimit: request.perTxLimit,
     dailyBudget: request.dailyBudget,

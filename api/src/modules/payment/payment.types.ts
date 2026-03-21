@@ -36,6 +36,7 @@ export interface PaymentBlocked {
   merchant: string;
   onchainEvent: "PaymentBlocked";
   txHash?: string;
+  message?: string;
 }
 
 export type PaymentResult = PaymentApproved | PaymentPending | PaymentBlocked;

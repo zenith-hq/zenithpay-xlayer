@@ -2,6 +2,13 @@ import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { mcpServer } from "./mcp/server";
+// Tool files import mcpServer and self-register — must come after server import
+import "./mcp/tools/balance";
+import "./mcp/tools/pay-service";
+import "./mcp/tools/get-limits";
+import "./mcp/tools/set-limits";
+import "./mcp/tools/verify-merchant";
+import "./mcp/tools/ledger";
 import { authMiddleware } from "./middleware/auth";
 import { loggerMiddleware } from "./middleware/logger";
 import { rateLimitMiddleware } from "./middleware/rate-limit";

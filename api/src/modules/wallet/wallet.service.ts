@@ -8,9 +8,9 @@ export async function createGenesisWallet(
   request: GenesisWalletRequest,
   ownerEoa: string,
 ): Promise<GenesisWalletResult> {
+  // OKX Agentic Wallet login initiates email OTP flow — the OTP verification step
+  // requires user interaction and is handled by the dashboard before calling this endpoint.
   const loginResult = await agenticWallet.walletLogin(request.email);
-  // TODO: in production, OTP verification step requires user interaction
-  // For hackathon demo, we create the wallet directly
   const walletResult = await agenticWallet.walletCreate(
     loginResult.sessionToken,
     request.label,

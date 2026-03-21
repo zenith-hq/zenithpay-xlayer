@@ -34,16 +34,18 @@ export async function executePayment(
   // ── STEP 1: SpendPolicy.sol check ──
   const policy = await getLimits(agentAddress);
 
+  // Merchant is identified by URL in this flow; zero address is the on-chain placeholder.
+  // If merchantAllowlistEnabled=false (default), the contract skips the merchant check.
+  // If enabled, the human must allowlist specific EVM addresses via the dashboard.
+  const ZERO_ADDRESS =
+    "0x0000000000000000000000000000000000000000" as `0x${string}`;
+
   try {
     const [allowed, reason] = (await viemClient.readContract({
       address: SPEND_POLICY_ADDRESS,
       abi: SPEND_POLICY_ABI,
       functionName: "checkPayment",
-      args: [
-        agentAddress as `0x${string}`,
-        agentAddress as `0x${string}`, // merchant address placeholder — on-chain uses address, API uses URL
-        amountUnits,
-      ],
+      args: [agentAddress as `0x${string}`, ZERO_ADDRESS, amountUnits],
     })) as [boolean, string];
 
     if (!allowed) {
@@ -68,9 +70,28 @@ export async function executePayment(
         onchainEvent: "PaymentBlocked",
       };
     }
-  } catch {
-    // Contract not yet deployed — skip on-chain check for hackathon demo
-    // TODO: remove this fallback once SpendPolicy.sol is deployed to mainnet
+  } catch (error) {
+    // RPC failure — fail closed: block the payment rather than skip the policy check
+    const message =
+      error instanceof Error ? error.message : "Policy check failed";
+    await ledgerService.writeTransaction({
+      agentAddress,
+      merchant,
+      amount: maxAmount,
+      currency: "USDC",
+      intent,
+      status: "blocked",
+      reason: "policy_check_failed",
+      swapUsed: false,
+    });
+    return {
+      status: "blocked",
+      reason: "policy_check_failed",
+      amount: maxAmount,
+      merchant,
+      onchainEvent: "PaymentBlocked",
+      message,
+    };
   }
 
   // Check approval threshold (off-chain soft gate)

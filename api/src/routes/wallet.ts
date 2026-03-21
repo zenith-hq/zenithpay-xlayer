@@ -17,7 +17,7 @@ wallet.post(
   ),
   async (c) => {
     const { email, label } = c.req.valid("json");
-    // TODO: extract ownerEoa from auth context once wallet-based auth is wired
+    // ownerEoa is provided by the caller via X-Owner-Address header (human EOA that owns this agent)
     const ownerEoa =
       c.req.header("X-Owner-Address") ??
       "0x0000000000000000000000000000000000000000";

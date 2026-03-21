@@ -7,10 +7,10 @@
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
     "check": "biome check --write .",
-    "db:generate": "bun run --env-file=.env drizzle-kit generate",
-    "db:push": "bun run --env-file=.env drizzle-kit push",
-    "db:migrate": "bun run --env-file=.env drizzle-kit migrate",
-    "db:studio": "bun run --env-file=.env drizzle-kit studio"
+    "db:generate": "bunx --env-file=.env drizzle-kit generate --config=drizzle.config.ts",
+    "db:push": "bunx --env-file=.env drizzle-kit push --config=drizzle.config.ts",
+    "db:migrate": "bunx --env-file=.env drizzle-kit migrate --config=drizzle.config.ts",
+    "db:studio": "bunx --env-file=.env drizzle-kit studio --config=drizzle.config.ts"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.7.6",

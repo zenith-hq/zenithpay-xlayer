@@ -19,7 +19,7 @@ export interface SetLimitsRequest {
 export interface SetLimitsResult {
   status: "deployed";
   policyContract: string;
-  txHash: string;
+  txHash: string | null;
   agentAddress: string;
   perTxLimit: string;
   dailyBudget: string;

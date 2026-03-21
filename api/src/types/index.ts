@@ -23,4 +23,5 @@ export type BlockReason =
   | "insufficient_balance"
   | "swap_quote_failed"
   | "payment_failed"
-  | "agent_not_active";
+  | "agent_not_active"
+  | "policy_check_failed";
