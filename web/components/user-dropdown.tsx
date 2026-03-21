@@ -64,7 +64,7 @@ export function UserDropdown() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild className="rounded-none">
-          <Link href="/dashboard">Dashboard</Link>
+          <Link href="/overview">Dashboard</Link>
         </DropdownMenuItem>
         <DropdownMenuItem className="rounded-none" onClick={() => disconnect()}>
           <LogOut className="mr-2 size-4" />

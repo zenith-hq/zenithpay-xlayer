@@ -1,6 +1,7 @@
 "use client";
 
 import { CTASection } from "../components/marketing/cta-section";
+import { EntryPoints } from "../components/marketing/entry-points";
 import { FAQsSection } from "../components/marketing/faqs-section";
 import { FeaturesSection } from "../components/marketing/features-section";
 import { HeroSection } from "../components/marketing/hero-section";
@@ -22,6 +23,7 @@ export default function Home() {
 
         <div className="flex flex-col min-w-0">
           <HeroSection />
+          <EntryPoints />
           <FeaturesSection />
           <HowItWorksSection />
           <IntegrationsSection />

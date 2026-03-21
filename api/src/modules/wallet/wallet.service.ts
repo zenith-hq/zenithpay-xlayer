@@ -32,6 +32,7 @@ export async function createGenesisWallet(
       label: existing[0].label,
       balances: { USDC: "0.00", OKB: "0.00" },
       createdAt: existing[0].createdAt?.toISOString() ?? new Date().toISOString(),
+      message: `Wallet created. Activate at https://usezenithpay.xyz/onboarding?agent=${agentAddress}`,
     };
   }
 
@@ -47,6 +48,7 @@ export async function createGenesisWallet(
     label: request.label ?? null,
     balances: { USDC: "0.00", OKB: "0.00" },
     createdAt: new Date().toISOString(),
+    message: `Wallet created. Activate at https://usezenithpay.xyz/onboarding?agent=${agentAddress}`,
   };
 }
 

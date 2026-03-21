@@ -4,16 +4,17 @@ description: >
   Use this skill when an agent needs to make payments, check wallet balance,
   verify merchants, set or read spending limits, query transaction history,
   review pending approvals, or interact with any x402-compatible service on
-  X Layer. Trigger on: pay for service, execute payment, check balance, check
-  funds, verify merchant, set limits, update policy, spending policy, view
-  ledger, audit trail, approve payment, deny payment, x402 payment, USDC
-  payment, agent wallet, spend policy, daily budget, per-transaction limit,
-  merchant allowlist, approval threshold, ZenithPay, zenithpay_pay_service,
+  X Layer. Also trigger on: setup ZenithPay, create agent wallet, onboard,
+  first time setup, I don't have a wallet, zenithpay setup, activate agent.
+  Trigger on: pay for service, execute payment, check balance, check funds,
+  verify merchant, set limits, update policy, spending policy, view ledger,
+  audit trail, approve payment, deny payment, x402 payment, USDC payment,
+  agent wallet, spend policy, daily budget, per-transaction limit, merchant
+  allowlist, approval threshold, ZenithPay, zenithpay_pay_service,
   zenithpay_balance, zenithpay_get_limits, zenithpay_set_limits,
   zenithpay_verify_merchant, zenithpay_ledger. Security middleware for AI
   agents that spend money — policy-enforced x402 payments on X Layer via
-  ZenithPay. Do NOT use for non-payment tasks. Do NOT use for wallet creation
-  — that is a human action via POST /wallet/genesis.
+  ZenithPay. Do NOT use for non-payment tasks.
 user-invocable: true
 metadata:
   author: zenithpay
@@ -26,6 +27,121 @@ metadata:
 Security middleware for AI agents that spend money. Policy-enforced x402 payments on X Layer.
 
 **Base URL:** `https://api.usezenithpay.xyz`
+
+---
+
+## Onboarding
+
+Run this check at the start of every session before anything else.
+
+### Step 1 — Check for existing wallet
+
+```bash
+cat ~/.zenithpay/config.json 2>/dev/null
+```
+
+If the file exists and contains a valid `agentAddress` — load it and skip to Step 5.
+
+If the file does not exist or is empty — continue to Step 2.
+
+### Step 2 — Create agent wallet
+
+Ask the user for their email address:
+
+```
+To create your ZenithPay agent wallet, I need your email address.
+This creates a TEE-secured wallet via OKX Agentic Wallet.
+No private key will be stored on your machine — the key lives in OKX's secure enclave.
+
+What is your email?
+```
+
+Once the user provides their email, call:
+
+```bash
+curl -s -X POST https://api.usezenithpay.xyz/wallet/genesis \
+  -H "Content-Type: application/json" \
+  -d '{"email": "<user-email>", "label": "agent-wallet"}'
+```
+
+On success you receive `{ agentAddress, label, createdAt, message }`.
+
+### Step 3 — Store config locally
+
+```bash
+mkdir -p ~/.zenithpay
+cat > ~/.zenithpay/config.json << EOF
+{
+  "agentAddress": "<agentAddress from response>",
+  "createdAt": "<createdAt from response>"
+}
+EOF
+```
+
+Tell the user:
+
+```
+✅ Agent wallet created: <agentAddress>
+
+No private key is stored — your wallet is secured by OKX TEE infrastructure.
+Compare: other tools store raw private keys locally. ZenithPay stores only your address.
+```
+
+### Step 4 — Activate agent (human must do this)
+
+The agent wallet exists but cannot spend yet. A human must set the spend policy onchain.
+
+Tell the user:
+
+```
+⚠️  This agent cannot spend yet.
+
+A human must activate it by setting a spend policy.
+Open this link in your browser:
+
+→ https://usezenithpay.xyz/onboarding?agent=<agentAddress>
+
+Steps:
+1. Connect your wallet (OKX Web Wallet or MetaMask)
+2. Set spend limits (or choose a preset)
+3. Sign the transaction onchain
+4. Return here when done
+
+This ensures you remain in control of how the agent uses funds.
+The policy is enforced by a smart contract on X Layer — ZenithPay cannot override it.
+```
+
+Wait for the user to confirm they have completed the dashboard step before continuing.
+
+### Step 5 — Verify policy is active
+
+```bash
+curl -s "https://api.usezenithpay.xyz/limits?address=<agentAddress>" \
+  -H "Authorization: Bearer $ZENITHPAY_API_KEY"
+```
+
+If `perTxLimit` and `dailyBudget` are non-zero — policy is active. Tell the user:
+
+```
+✅ Policy detected. Agent is ready to spend.
+
+Limits:
+- Per transaction: $<perTxLimit>
+- Daily budget: $<dailyBudget>
+- Remaining today: $<remainingDailyBudget>
+```
+
+If policy is still zero — ask the user to complete the dashboard step and try again.
+
+### Setup complete
+
+Set these in the agent environment from config:
+
+```bash
+export AGENT_ADDRESS=$(cat ~/.zenithpay/config.json | grep agentAddress | cut -d'"' -f4)
+```
+
+The agent is now ready to use all ZenithPay tools.
 
 ---
 

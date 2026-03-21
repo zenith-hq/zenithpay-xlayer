@@ -20,80 +20,145 @@ export async function apiFetch<T>(
   return res.json() as Promise<T>;
 }
 
-export interface AgentBalance {
-  balance: string;
-  walletAddress: string;
-  policy: AgentPolicy | null;
-  remainingBudget: string | null;
-}
-
 export interface AgentPolicy {
+  address: string;
   perTxLimit: string;
   dailyBudget: string;
-  dailySpent: string;
   allowlist: string[];
+  approvalThreshold: string | null;
+  autoSwapEnabled: boolean;
+  swapSlippageTolerance: string;
+  policyContract: string;
 }
 
-export interface AgentTransaction {
+export interface BalanceResult {
+  agentAddress: string;
+  usdcBalance: string;
+  okbBalance: string;
+  remainingDailyBudget: string | null;
+}
+
+export interface LedgerEntry {
   id: string;
   agentAddress: string;
-  merchantAddress: string;
+  merchant: string;
   amount: string;
-  amountUsdc: string;
-  status: "allowed" | "blocked" | "pending";
-  reason: string | null;
+  currency: string;
   intent: string | null;
-  xlayerTxId: string | null;
-  onchainTxHash: string | null;
+  status: "approved" | "blocked" | "pending" | "denied";
+  reason: string | null;
+  txHash: string | null;
+  swapUsed: boolean;
+  okbSpent: string | null;
   createdAt: string;
 }
 
-export interface Agent {
+export interface PendingApproval {
   id: string;
-  name: string;
-  walletAddress: string;
-  ownerAddress: string;
-  createdAt: string;
+  agentAddress: string;
+  merchant: string;
+  serviceUrl: string;
+  amount: string;
+  intent: string;
+  status: "pending" | "approved" | "denied";
+  requestedAt: string;
+  resolvedAt: string | null;
 }
 
-export interface AgentCreationResult {
-  walletAddress: string;
-  ownerAddress: string;
-  privateKey: string;
-  apiKey: string;
-  agentId: string;
+export interface PaymentResult {
+  status: "approved" | "blocked" | "pending";
+  txHash?: string;
+  amount?: string;
+  merchant?: string;
+  reason?: string;
+  approvalId?: string;
+  swapUsed?: boolean;
+  okbSpent?: string | null;
+  remainingDailyBudget?: string;
+}
+
+export interface GenesisResult {
+  agentAddress: string;
+  label: string;
+  balances: { USDC: string; OKB: string };
+  createdAt: string;
+  message: string;
 }
 
 export function getBalance(agentAddress: string) {
-  return apiFetch<AgentBalance>(`/balance?agentAddress=${agentAddress}`);
-}
-
-export function getPolicy(agentAddress: string) {
-  return apiFetch<{ policy: AgentPolicy | null }>(
-    `/policy?agentAddress=${agentAddress}`,
+  return apiFetch<BalanceResult>(
+    `/wallet/balance?address=${agentAddress}`,
   );
 }
 
-export function getTransactions(agentAddress: string) {
-  return apiFetch<{ transactions: AgentTransaction[] }>(
-    `/transactions?agentAddress=${agentAddress}`,
+export function getLimits(agentAddress: string) {
+  return apiFetch<{ agents: AgentPolicy[] }>(
+    `/limits?address=${agentAddress}`,
   );
 }
 
-export function setPolicy(params: {
+export function getLimitsForOwner(ownerAddress: string) {
+  return apiFetch<{ agents: AgentPolicy[] }>("/limits", {
+    headers: { "X-Owner-Address": ownerAddress },
+  });
+}
+
+export function setLimits(params: {
   agentAddress: string;
   perTxLimit: string;
   dailyBudget: string;
-  allowlist: string[];
+  allowlist?: string[];
+  approvalThreshold?: string;
+  autoSwapEnabled?: boolean;
+  swapSlippageTolerance?: string;
+  humanSignature: string;
 }) {
-  return apiFetch<{ success: boolean; txHash?: string }>("/policy", {
+  return apiFetch<AgentPolicy>("/limits", {
     method: "POST",
     body: JSON.stringify(params),
   });
 }
 
-export function createAgent(params: { name: string; ownerAddress: string }) {
-  return apiFetch<AgentCreationResult>("/agents/register", {
+export function getLedger(agentAddress: string) {
+  return apiFetch<{ transactions: LedgerEntry[] }>(
+    `/ledger?agent=${agentAddress}`,
+  );
+}
+
+export function getApprovals(agentAddress?: string) {
+  const query = agentAddress ? `?agent=${agentAddress}` : "";
+  return apiFetch<{ approvals: PendingApproval[] }>(`/approvals${query}`);
+}
+
+export function approvePayment(approvalId: string) {
+  return apiFetch<PaymentResult>(`/approvals/${approvalId}/approve`, {
+    method: "POST",
+  });
+}
+
+export function denyPayment(approvalId: string) {
+  return apiFetch<{ status: string }>(`/approvals/${approvalId}/deny`, {
+    method: "POST",
+  });
+}
+
+export function executePayment(params: {
+  agentAddress: string;
+  serviceUrl: string;
+  maxAmount: string;
+  intent: string;
+}) {
+  return apiFetch<PaymentResult>("/pay", {
+    method: "POST",
+    body: JSON.stringify(params),
+  });
+}
+
+export function createGenesisWallet(params: {
+  email: string;
+  label?: string;
+}) {
+  return apiFetch<GenesisResult>("/wallet/genesis", {
     method: "POST",
     body: JSON.stringify(params),
   });

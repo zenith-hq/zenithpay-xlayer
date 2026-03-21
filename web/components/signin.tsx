@@ -19,7 +19,7 @@ export default function SignIn({
 
   useEffect(() => {
     if (isConnected) {
-      router.push("/dashboard");
+      router.push("/overview");
     }
   }, [isConnected, router]);
 

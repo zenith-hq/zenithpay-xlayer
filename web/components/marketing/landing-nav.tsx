@@ -43,7 +43,7 @@ function LandingNavActions() {
         style={{ background: "var(--brand-accent)", color: "var(--background)" }}
         className="rounded-none cursor-pointer relative overflow-hidden focus-visible:ring-0 h-9 px-4 hover:opacity-90 transition-opacity"
       >
-        <Link href="/dashboard">
+        <Link href="/overview">
           <span className="shine absolute -top-1/2 -left-full h-[200%] w-3/4 skew-x-[-20deg] bg-linear-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
           Dashboard
         </Link>

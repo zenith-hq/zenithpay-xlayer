@@ -11,4 +11,5 @@ export interface GenesisWalletResult {
     OKB: string;
   };
   createdAt: string;
+  message: string;
 }
