@@ -5,6 +5,7 @@ import {
   CreditCard,
   LayoutDashboard,
   ScrollText,
+  Settings,
   Shield,
   ShieldCheck,
   Wallet,
@@ -23,30 +24,50 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { UserDropdown } from "@/components/user-dropdown";
 
 const navItems = [
-  { title: "Overview", href: "/overview", icon: LayoutDashboard },
-  { title: "Wallet", href: "/wallet", icon: Wallet },
-  { title: "Pay", href: "/pay", icon: CreditCard },
-  { title: "Limits", href: "/limits", icon: Shield },
-  { title: "Ledger", href: "/ledger", icon: ScrollText },
-  { title: "Approvals", href: "/approvals", icon: ShieldCheck },
+  { title: "Overview", href: "/dashboard", icon: LayoutDashboard, exact: true },
+  { title: "Wallet", href: "/dashboard/wallet", icon: Wallet, exact: false },
+  { title: "Pay", href: "/dashboard/pay", icon: CreditCard, exact: false },
+  { title: "Limits", href: "/dashboard/limits", icon: Shield, exact: false },
+  { title: "Ledger", href: "/dashboard/ledger", icon: ScrollText, exact: false },
+  { title: "Approvals", href: "/dashboard/approvals", icon: ShieldCheck, exact: false },
+];
+
+const bottomNavItems = [
+  { title: "Settings", href: "/dashboard/settings", icon: Settings, exact: false },
 ];
 
 export function AppSidebar() {
   const pathname = usePathname();
 
+  function isActive(href: string, exact: boolean) {
+    if (exact) return pathname === href;
+    return pathname.startsWith(href);
+  }
+
   return (
-    <Sidebar>
-      <SidebarHeader className="border-b border-border px-4 py-3">
-        <Link href="/" className="flex items-center gap-2">
-          <LogoMark />
-          <span className="font-[family-name:var(--font-pixel-square)] text-sm tracking-wider">
-            ZenithPay
+    <Sidebar collapsible="icon">
+      <SidebarHeader className="border-b border-border">
+        <div className="flex items-center justify-between px-2 py-2">
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2 group-data-[collapsible=icon]:hidden"
+          >
+            <LogoMark />
+            <span className="font-[family-name:var(--font-pixel-square)] text-sm tracking-wider">
+              ZenithPay
+            </span>
+          </Link>
+          <span className="hidden group-data-[collapsible=icon]:flex">
+            <LogoMark />
           </span>
-        </Link>
+          <SidebarTrigger className="ml-auto group-data-[collapsible=icon]:ml-0" />
+        </div>
       </SidebarHeader>
 
       <SidebarContent>
@@ -56,7 +77,11 @@ export function AppSidebar() {
             <SidebarMenu>
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton asChild isActive={pathname === item.href}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.href, item.exact)}
+                    tooltip={item.title}
+                  >
                     <Link href={item.href}>
                       <item.icon className="size-4" />
                       <span>{item.title}</span>
@@ -73,7 +98,7 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton asChild tooltip="Agent Skill">
                   <Link
                     href="https://api.usezenithpay.xyz/skill.md"
                     target="_blank"
@@ -86,11 +111,35 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Account</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {bottomNavItems.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.href, item.exact)}
+                    tooltip={item.title}
+                  >
+                    <Link href={item.href}>
+                      <item.icon className="size-4" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter className="border-t border-border p-4">
         <UserDropdown />
       </SidebarFooter>
+
+      <SidebarRail />
     </Sidebar>
   );
 }

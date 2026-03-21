@@ -167,27 +167,48 @@ export function OnboardingFlow() {
       </Card>
 
       {/* Progress */}
-      <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-        <span
-          className={step === "connect" ? "text-foreground font-medium" : ""}
-        >
-          Connect
-        </span>
-        <ChevronRight className="size-3" />
-        <span
-          className={step === "policy" ? "text-foreground font-medium" : ""}
-        >
-          Policy
-        </span>
-        <ChevronRight className="size-3" />
-        <span className={step === "fund" ? "text-foreground font-medium" : ""}>
-          Fund
-        </span>
-        <ChevronRight className="size-3" />
-        <span className={step === "done" ? "text-foreground font-medium" : ""}>
-          Done
-        </span>
-      </div>
+      {(() => {
+        const steps: { key: Step; label: string }[] = [
+          { key: "connect", label: "Connect" },
+          { key: "policy", label: "Policy" },
+          { key: "fund", label: "Fund" },
+          { key: "done", label: "Done" },
+        ];
+        const currentIdx = steps.findIndex((s) => s.key === step || (step === "signing" && s.key === "policy"));
+        return (
+          <div className="flex items-center gap-0">
+            {steps.map((s, idx) => {
+              const isDone = idx < currentIdx;
+              const isActive = idx === currentIdx;
+              return (
+                <div key={s.key} className="flex items-center">
+                  <div
+                    className={`flex size-6 items-center justify-center border text-[10px] font-mono ${
+                      isDone
+                        ? "border-foreground bg-foreground text-background"
+                        : isActive
+                          ? "border-foreground text-foreground"
+                          : "border-border text-muted-foreground"
+                    }`}
+                  >
+                    {isDone ? <Check className="size-3" /> : idx + 1}
+                  </div>
+                  <span
+                    className={`ml-1.5 text-[10px] uppercase tracking-wider ${
+                      isActive ? "text-foreground font-medium" : "text-muted-foreground"
+                    }`}
+                  >
+                    {s.label}
+                  </span>
+                  {idx < steps.length - 1 && (
+                    <div className="mx-3 h-px w-6 bg-border" />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })()}
 
       {/* Step 1: Connect */}
       {step === "connect" && (
@@ -240,10 +261,10 @@ export function OnboardingFlow() {
                 <button
                   key={key}
                   type="button"
-                  className={`rounded-md border p-3 text-left transition-colors ${
+                  className={`border p-3 text-left transition-colors ${
                     selectedPreset === key
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:border-primary/50"
+                      ? "border-foreground bg-foreground/5"
+                      : "border-border hover:border-foreground/50"
                   }`}
                   onClick={() => applyPreset(key)}
                 >
@@ -389,8 +410,8 @@ export function OnboardingFlow() {
       {step === "done" && (
         <Card>
           <CardContent className="py-8 text-center space-y-4">
-            <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-green-500/10">
-              <Check className="size-6 text-green-500" />
+            <div className="mx-auto flex size-12 items-center justify-center border border-emerald-600 bg-emerald-500/10">
+              <Check className="size-6 text-emerald-600" />
             </div>
             <div>
               <h2 className="text-lg font-semibold">Agent Activated</h2>
@@ -400,8 +421,8 @@ export function OnboardingFlow() {
               </p>
             </div>
             <div className="flex gap-2 justify-center">
-              <Button variant="outline" asChild>
-                <a href="/overview">Open Dashboard</a>
+              <Button variant="outline" className="rounded-none" asChild>
+                <a href="/dashboard">Open Dashboard</a>
               </Button>
             </div>
           </CardContent>
