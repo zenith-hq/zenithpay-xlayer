@@ -9,6 +9,7 @@ export interface PendingApproval {
   status: "pending" | "approved" | "denied";
   requestedAt: string;
   resolvedAt?: string | null;
+  txHash?: string | null;
 }
 
 export interface CreateApprovalRequest {

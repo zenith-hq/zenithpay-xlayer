@@ -11,5 +11,5 @@
     "types": ["bun-types"]
   },
   "include": ["src/**/*", "drizzle.config.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "src/test"]
 }

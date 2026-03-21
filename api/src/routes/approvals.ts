@@ -24,7 +24,7 @@ approvalsRoute.post("/:id/approve", async (c) => {
     return c.json({
       id: result.id,
       status: "approved",
-      txHash: "0x",
+      txHash: result.txHash ?? null,
       amount: result.amount,
       merchant: result.merchant,
       settledAt: result.resolvedAt,

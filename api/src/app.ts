@@ -13,6 +13,19 @@ import { wallet } from "./routes/wallet";
 
 registerTools();
 
+const ENDPOINT_LIST = [
+  "/health",
+  "/wallet/genesis",
+  "/wallet/balance",
+  "/wallet/agents",
+  "/pay",
+  "/limits",
+  "/ledger",
+  "/approvals",
+  "/mcp",
+  "/skill.md",
+];
+
 const app = new Hono();
 
 // Global middleware
@@ -20,27 +33,6 @@ app.use("*", cors());
 app.use("*", loggerMiddleware);
 
 // Public endpoints — no auth
-app.get("/", (c) =>
-  c.json(
-    {
-      error: "Not found",
-      endpoints: [
-        "/health",
-        "/wallet/genesis",
-        "/wallet/balance",
-        "/wallet/agents",
-        "/pay",
-        "/limits",
-        "/ledger",
-        "/approvals",
-        "/mcp",
-        "/skill.md",
-      ],
-    },
-    404,
-  ),
-);
-
 app.get("/health", (c) =>
   c.json({
     status: "ok",
@@ -71,10 +63,15 @@ app.all("/mcp", async (c) => {
 });
 
 // Protected endpoints — require API key
+// Use both exact path and wildcard to catch root and sub-routes
 app.use("/wallet/*", rateLimitMiddleware, authMiddleware);
+app.use("/pay", rateLimitMiddleware, authMiddleware);
 app.use("/pay/*", rateLimitMiddleware, authMiddleware);
+app.use("/limits", rateLimitMiddleware, authMiddleware);
 app.use("/limits/*", rateLimitMiddleware, authMiddleware);
+app.use("/ledger", rateLimitMiddleware, authMiddleware);
 app.use("/ledger/*", rateLimitMiddleware, authMiddleware);
+app.use("/approvals", rateLimitMiddleware, authMiddleware);
 app.use("/approvals/*", rateLimitMiddleware, authMiddleware);
 
 // Mount routes
@@ -83,5 +80,34 @@ app.route("/pay", pay);
 app.route("/limits", limits);
 app.route("/ledger", ledgerRoute);
 app.route("/approvals", approvalsRoute);
+
+// Global error handler — structured JSON for all unhandled errors
+app.onError((err, c) => {
+  console.error(`Unhandled error: ${err.message}`);
+  return c.json(
+    {
+      error: "internal_error",
+      message:
+        process.env.NODE_ENV === "production"
+          ? "An unexpected error occurred."
+          : err.message,
+      status: 500,
+    },
+    500,
+  );
+});
+
+// Not found handler — structured JSON for unknown routes
+app.notFound((c) =>
+  c.json(
+    {
+      error: "not_found",
+      message: `Route ${c.req.method} ${c.req.path} not found.`,
+      endpoints: ENDPOINT_LIST,
+      status: 404,
+    },
+    404,
+  ),
+);
 
 export { app };

@@ -5,11 +5,11 @@ export const mcpServer = new McpServer({
   version: "1.0.0",
 });
 
-export function registerTools() {
-  require("./tools/balance");
-  require("./tools/pay-service");
-  require("./tools/get-limits");
-  require("./tools/set-limits");
-  require("./tools/verify-merchant");
-  require("./tools/ledger");
+export async function registerTools() {
+  await import("./tools/balance");
+  await import("./tools/pay-service");
+  await import("./tools/get-limits");
+  await import("./tools/set-limits");
+  await import("./tools/verify-merchant");
+  await import("./tools/ledger");
 }

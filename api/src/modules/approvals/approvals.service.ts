@@ -90,7 +90,7 @@ export async function approvePayment(
 
   // Re-execute the payment flow (steps 2-6) via dynamic import to avoid circular deps
   const { executePayment } = await import("../payment/payment.service");
-  await executePayment({
+  const paymentResult = await executePayment({
     agentAddress: row.agentAddress,
     serviceUrl: row.serviceUrl,
     maxAmount: row.amount,
@@ -108,6 +108,7 @@ export async function approvePayment(
     status: "approved",
     requestedAt: row.requestedAt.toISOString(),
     resolvedAt: now.toISOString(),
+    txHash: paymentResult.status === "approved" ? paymentResult.txHash : null,
   };
 }
 
