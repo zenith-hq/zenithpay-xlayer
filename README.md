@@ -127,6 +127,58 @@ Five products. Three live. Two in roadmap. Built on OKX OnchainOS.
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
+### x402 Payment Flow
+
+Four actors, six steps. ZenithPay handles everything between the agent's intent and the settled USDC transfer.
+
+```
+  AI Agent             ZenithPay API          x402 Service         OKX TEE Wallet
+     │                      │                      │                      │
+     │── POST /pay ────────>│                      │                      │
+     │   { serviceUrl,      │                      │                      │
+     │     maxAmount,       │                      │                      │
+     │     intent }         │                      │                      │
+     │                      │                      │                      │
+     │                      │── 1. SpendPolicy ───>│                      │
+     │                      │   check (on-chain)   │                      │
+     │                      │<── ok ───────────────│                      │
+     │                      │                      │                      │
+     │                      │── 2. POST ──────────>│                      │
+     │                      │   (probe request)    │                      │
+     │                      │<── 402 + payment ────│                      │
+     │                      │   requirements       │                      │
+     │                      │                      │                      │
+     │                      │── 3. onchainos ─────────────────────────────>│
+     │                      │   x402-pay           │                      │
+     │                      │   (sign EIP-3009)    │                      │
+     │                      │<── { signature, ─────────────────────────────│
+     │                      │     authorization }  │                      │
+     │                      │                      │                      │
+     │                      │── 4. POST ──────────>│                      │
+     │                      │   X-Payment: base64( │                      │
+     │                      │    { accepted,       │                      │
+     │                      │      payload:        │                      │
+     │                      │       { sig, auth }  │                      │
+     │                      │    })                │                      │
+     │                      │                      │── verify + settle ──>│
+     │                      │                      │   (on-chain USDC     │
+     │                      │                      │    transfer via      │
+     │                      │                      │    EIP-3009)         │
+     │                      │                      │<── txHash ───────────│
+     │                      │<── 200 + data ───────│                      │
+     │                      │   payment-response:  │                      │
+     │                      │   { txHash, success }│                      │
+     │                      │                      │                      │
+     │                      │── 5. ledger write    │                      │
+     │                      │                      │                      │
+     │<── 200 ──────────────│                      │                      │
+     │   { status: approved │                      │                      │
+     │     txHash, amount } │                      │                      │
+     │                      │                      │                      │
+```
+
+The agent calls `POST /pay` with a service URL and budget. ZenithPay enforces spend policy on-chain, probes the service for x402 requirements, signs a USDC `transferWithAuthorization` (EIP-3009) inside the OKX TEE, replays the request with the signed payment header, and returns the result with a settlement txHash. The agent never touches private keys.
+
 ---
 
 ## Spend Policy
