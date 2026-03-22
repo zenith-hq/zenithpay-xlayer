@@ -40,39 +40,44 @@ Run this check at the start of every session before anything else.
 cat ~/.zenithpay/config.json 2>/dev/null
 ```
 
-If the file exists and contains a valid `agentAddress` — load it and skip to Step 5.
+If the file exists and contains both `agentAddress` and `apiKey` — load them and skip to Step 5.
 
-If the file does not exist or is empty — continue to Step 2.
+If the file does not exist, is empty, or is missing `apiKey` — continue to Step 2.
 
 ### Step 2 — Create agent wallet
 
-Ask the user for their email address:
+Ask the user for their email and a name for this agent:
 
 ```
-To create your ZenithPay agent wallet, I need your email address.
-This creates a TEE-secured wallet via OKX Agentic Wallet.
-No private key will be stored on your machine — the key lives in OKX's secure enclave.
+To create your ZenithPay agent wallet, I need two things:
 
-What is your email?
+1. Your email address — used to identify your account
+2. A name for this agent — e.g. "research-agent", "shopping-bot", "my-assistant"
+
+No private key will be stored on your machine. The key lives in OKX's TEE secure enclave.
 ```
 
-Once the user provides their email, call:
+Once the user provides both, call:
 
 ```bash
 curl -s -X POST https://api.usezenithpay.xyz/wallet/genesis \
   -H "Content-Type: application/json" \
-  -d '{"email": "<user-email>", "label": "agent-wallet"}'
+  -d '{"email": "<user-email>", "label": "<agent-name>"}'
 ```
 
-On success you receive `{ agentAddress, label, createdAt, message }`.
+On success you receive `{ agentAddress, apiKey, label, createdAt, message }`.
 
 ### Step 3 — Store config locally
+
+Store the full response — `apiKey` is required to authenticate all future API calls:
 
 ```bash
 mkdir -p ~/.zenithpay
 cat > ~/.zenithpay/config.json << EOF
 {
   "agentAddress": "<agentAddress from response>",
+  "apiKey": "<apiKey from response>",
+  "label": "<label from response>",
   "createdAt": "<createdAt from response>"
 }
 EOF
@@ -82,9 +87,9 @@ Tell the user:
 
 ```
 ✅ Agent wallet created: <agentAddress>
+🔑 API key saved to ~/.zenithpay/config.json — keep this file safe, treat it like a password.
 
 No private key is stored — your wallet is secured by OKX TEE infrastructure.
-Compare: other tools store raw private keys locally. ZenithPay stores only your address.
 ```
 
 ### Step 4 — Activate agent (human must do this)
@@ -116,7 +121,10 @@ Wait for the user to confirm they have completed the dashboard step before conti
 ### Step 5 — Verify policy is active
 
 ```bash
-curl -s "https://api.usezenithpay.xyz/limits?address=<agentAddress>" \
+ZENITHPAY_API_KEY=$(cat ~/.zenithpay/config.json | grep apiKey | cut -d'"' -f4)
+AGENT_ADDRESS=$(cat ~/.zenithpay/config.json | grep agentAddress | cut -d'"' -f4)
+
+curl -s "https://api.usezenithpay.xyz/limits?address=$AGENT_ADDRESS" \
   -H "Authorization: Bearer $ZENITHPAY_API_KEY"
 ```
 
@@ -135,10 +143,11 @@ If policy is still zero — ask the user to complete the dashboard step and try 
 
 ### Setup complete
 
-Set these in the agent environment from config:
+Load credentials from config into the environment:
 
 ```bash
 export AGENT_ADDRESS=$(cat ~/.zenithpay/config.json | grep agentAddress | cut -d'"' -f4)
+export ZENITHPAY_API_KEY=$(cat ~/.zenithpay/config.json | grep apiKey | cut -d'"' -f4)
 ```
 
 The agent is now ready to use all ZenithPay tools.
@@ -150,8 +159,8 @@ The agent is now ready to use all ZenithPay tools.
 Set these environment variables before using ZenithPay tools:
 
 ```
-AGENT_ADDRESS=0x...       # Your agent wallet address on X Layer
-ZENITHPAY_API_KEY=...     # API key from your human account
+AGENT_ADDRESS=0x...       # Your agent wallet address (from ~/.zenithpay/config.json)
+ZENITHPAY_API_KEY=zpk_... # Your API key (from ~/.zenithpay/config.json → apiKey field)
 ```
 
 ---

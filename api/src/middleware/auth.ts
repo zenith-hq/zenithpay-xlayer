@@ -5,7 +5,11 @@ import { agents } from "../db/schema/agents";
 import { env } from "../env";
 
 // Public paths that never require auth
-const PUBLIC_PATHS = new Set(["POST /wallet/genesis", "POST /agents/link"]);
+const PUBLIC_PATHS = new Set([
+  "POST /wallet/genesis",
+  "POST /agents/link",
+  "POST /limits",
+]);
 
 export async function authMiddleware(c: Context, next: Next) {
   const key = `${c.req.method} ${c.req.path}`;
