@@ -2,6 +2,10 @@ import { $ } from "bun";
 import { app } from "./app";
 import { env } from "./env";
 
+// onchainos installs to /root/.local/bin which is not in PATH in Railway's
+// non-login shell. Prepend it so Bun.spawn and Bun.$ both resolve the binary.
+process.env.PATH = `/root/.local/bin:${process.env.PATH}`;
+
 async function authenticateCLI() {
   try {
     const status = await $`onchainos wallet status`.json();
