@@ -10,7 +10,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <AuthGate>
       <div style={{ "--radius": "0rem" } as React.CSSProperties} className="flex min-h-screen w-full">
-        <SidebarProvider style={{ "--sidebar-width": "12rem" } as React.CSSProperties}>
+        <SidebarProvider style={{ "--sidebar-width": "14rem" } as React.CSSProperties}>
           <AgentProvider>
             <AppSidebar />
             <SidebarInset>

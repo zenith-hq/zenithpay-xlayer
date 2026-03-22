@@ -249,11 +249,10 @@ html {
   }
 }
 
-/* Dashboard sidebar — active left accent border + muted brand bg */
+/* Dashboard sidebar — active bottom accent border + muted brand bg */
 [data-sidebar="menu-button"][data-active="true"] {
-  border-left: 2px solid oklch(0.55 0.13 57);
+  border-bottom: 2px solid oklch(0.55 0.13 57);
   background-color: oklch(0.55 0.13 57 / 0.08);
-  padding-left: 6px;
 }
 
 [data-sidebar="menu-button"]:hover:not([data-active="true"]) {
@@ -261,9 +260,8 @@ html {
 }
 
 .dark [data-sidebar="menu-button"][data-active="true"] {
-  border-left: 2px solid oklch(0.65 0.13 57);
+  border-bottom: 2px solid oklch(0.65 0.13 57);
   background-color: oklch(0.65 0.13 57 / 0.12);
-  padding-left: 6px;
 }
 
 .dark [data-sidebar="menu-button"]:hover:not([data-active="true"]) {
