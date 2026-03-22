@@ -154,6 +154,19 @@ export function executePayment(params: {
   });
 }
 
+export function linkAgent(params: {
+  agentAddress: string;
+  ownerAddress: string;
+}) {
+  return apiFetch<{ agentAddress: string; ownerAddress: string }>(
+    "/agents/link",
+    {
+      method: "POST",
+      body: JSON.stringify(params),
+    },
+  );
+}
+
 export function createGenesisWallet(
   params: { email?: string; label?: string },
   ownerAddress?: string,

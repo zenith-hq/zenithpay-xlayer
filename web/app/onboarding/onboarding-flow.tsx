@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { LogoMark } from "@/components/logo-mark"
 import { Check, Copy, ExternalLink, Loader2, Shield, Wallet } from "lucide-react"
-import { createGenesisWallet, setLimits } from "@/lib/api"
+import { linkAgent, setLimits } from "@/lib/api"
 
 type Step = "connect" | "policy" | "signing" | "fund" | "done"
 
@@ -96,7 +96,7 @@ export function OnboardingFlow() {
 			})
 			const signature = await signMessageAsync({ message })
 			setStep("signing")
-			await createGenesisWallet({ label: agentLabel.trim() || undefined }, address)
+			await linkAgent({ agentAddress, ownerAddress: address })
 			await setLimits({
 				agentAddress,
 				perTxLimit,

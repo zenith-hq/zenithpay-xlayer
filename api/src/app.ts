@@ -5,6 +5,7 @@ import { logger } from "hono/logger";
 import { rateLimiter } from "hono-rate-limiter";
 import { mcpServer, registerTools } from "./mcp/server";
 import { authMiddleware } from "./middleware/auth";
+import { agentsRoute } from "./routes/agents";
 import { approvalsRoute } from "./routes/approvals";
 import { ledgerRoute } from "./routes/ledger";
 import { limits } from "./routes/limits";
@@ -15,6 +16,7 @@ registerTools();
 
 const ENDPOINT_LIST = [
   "/health",
+  "/agents/link",
   "/wallet/genesis",
   "/wallet/balance",
   "/wallet/agents",
@@ -94,6 +96,7 @@ app.use("/approvals", authMiddleware);
 app.use("/approvals/*", authMiddleware);
 
 // Mount routes
+app.route("/agents", agentsRoute);
 app.route("/wallet", wallet);
 app.route("/pay", pay);
 app.route("/limits", limits);

@@ -1,8 +1,10 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { getDb } from "../../db/client";
 import { agents } from "../../db/schema/agents";
 import * as agenticWallet from "../../providers/onchainos/agentic-wallet";
 import type { GenesisWalletRequest, GenesisWalletResult } from "./wallet.types";
+
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 export async function createGenesisWallet(
   request: GenesisWalletRequest,
@@ -61,4 +63,38 @@ export async function createGenesisWallet(
 export async function getAgentsByOwner(ownerEoa: string) {
   const db = getDb();
   return db.select().from(agents).where(eq(agents.ownerEoa, ownerEoa));
+}
+
+export async function linkAgent(
+  agentAddress: string,
+  ownerAddress: string,
+): Promise<{ agentAddress: string; ownerAddress: string }> {
+  const db = getDb();
+
+  const rows = await db
+    .select()
+    .from(agents)
+    .where(
+      and(eq(agents.address, agentAddress), eq(agents.ownerEoa, ZERO_ADDRESS)),
+    );
+
+  if (rows.length === 0) {
+    const existing = await db
+      .select()
+      .from(agents)
+      .where(eq(agents.address, agentAddress));
+    if (existing.length === 0) {
+      throw new Error("Agent not found");
+    }
+    throw new Error("Agent already linked to an owner");
+  }
+
+  await db
+    .update(agents)
+    .set({ ownerEoa: ownerAddress })
+    .where(
+      and(eq(agents.address, agentAddress), eq(agents.ownerEoa, ZERO_ADDRESS)),
+    );
+
+  return { agentAddress, ownerAddress };
 }
