@@ -4,7 +4,8 @@ nixPkgs = ["bun", "curl", "bash"]
 [phases.install]
 cmds = [
   "bun install --frozen-lockfile",
-  "curl -sSL https://raw.githubusercontent.com/okx/onchainos-skills/main/install.sh | sh"
+  "curl -sSL https://raw.githubusercontent.com/okx/onchainos-skills/main/install.sh | sh",
+  "ln -sf /root/.local/bin/onchainos /usr/local/bin/onchainos"
 ]
 
 [start]
