@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 
-const TABS = ["SKILL.md", "MCP", "API"] as const
+const TABS = ["SKILL.md", "MCP", "REST API"] as const
 type Tab = (typeof TABS)[number]
 
 function Cm({ children }: { children: React.ReactNode }) {
@@ -154,7 +154,7 @@ const CODE: Record<Tab, React.ReactNode> = {
 		</div>
 	),
 
-	API: (
+	"REST API": (
 		<div className="font-mono text-[11px] leading-[1.85]">
 			<div>
 				<Cm>{"// POST /pay — policy check runs before any funds move"}</Cm>
@@ -250,7 +250,7 @@ const TAB_DESCRIPTIONS: Record<Tab, string> = {
 	"SKILL.md":
 		"One curl command in your terminal. The agent reads SKILL.md, follows the onboarding steps automatically — creates a TEE wallet, guides policy activation onchain, then pays with full enforcement.",
 	MCP: "Register ZenithPay as an MCP server. Your agent gets 6 tools — balance check, policy-gated x402 payment, spend limit read/write, merchant verification, and full audit trail.",
-	API: "Call ZenithPay directly over HTTP. Every payment request hits the onchain SpendPolicy contract before any funds move. Responses include txHash on X Layer.",
+	"REST API": "Call ZenithPay directly over HTTP. Every payment request hits the onchain SpendPolicy contract before any funds move. Responses include txHash on X Layer.",
 }
 
 export function IntegrationsSection() {
@@ -303,6 +303,8 @@ export function IntegrationsSection() {
 											<>
 												<span className="uppercase">SKILL</span>.md
 											</>
+										) : tab === "REST API" ? (
+											<>REST API</>
 										) : (
 											<span className="uppercase">{tab}</span>
 										)}
@@ -372,6 +374,7 @@ export function IntegrationsSection() {
 										: activeTab === "MCP"
 											? ".claude/settings.json"
 											: "zenithpay-pay.ts"}
+
 								</span>
 							</div>
 
