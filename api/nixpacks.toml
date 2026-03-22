@@ -1,8 +1,11 @@
 [phases.setup]
-nixPkgs = ["bun"]
+nixPkgs = ["bun", "curl", "bash"]
 
 [phases.install]
-cmds = ["bun install --frozen-lockfile"]
+cmds = [
+  "bun install --frozen-lockfile",
+  "curl -sSL https://raw.githubusercontent.com/okx/onchainos-skills/main/install.sh | sh"
+]
 
 [start]
 cmd = "bun run src/index.ts"

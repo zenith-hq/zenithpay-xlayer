@@ -5,7 +5,7 @@ import { useConnection } from "wagmi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CreditCard, ScrollText, Shield, Wallet } from "lucide-react";
+import { CreditCard, ExternalLink, Plus, ScrollText, Shield } from "lucide-react";
 import Link from "next/link";
 import {
   type AgentPolicy,
@@ -58,6 +58,14 @@ export default function DashboardPage() {
     load();
   }, [address]);
 
+  const [copied, setCopied] = useState(false);
+
+  function copyAddress() {
+    navigator.clipboard.writeText(AGENT_ADDRESS);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
   const policy = policies[0];
   const recentTx = transactions.slice(0, 5);
   const pendingCount = transactions.filter((t) => t.status === "pending").length;
@@ -77,7 +85,7 @@ export default function DashboardPage() {
             <CardTitle className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
               USDC Balance
             </CardTitle>
-            <Wallet className="size-4 text-muted-foreground" />
+            <CreditCard className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -151,61 +159,92 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card className="rounded-none border">
+      <div className="grid gap-4 lg:grid-cols-5">
+        {/* Fund Agent — spans 2 cols */}
+        <Card className="rounded-none border lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-sm font-medium uppercase tracking-wider">
               Agent Wallet
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-center justify-between border-b border-dashed pb-3">
-              <span className="text-xs text-muted-foreground uppercase tracking-wider">
-                Address
-              </span>
-              <code className="text-xs font-mono">
-                {AGENT_ADDRESS.slice(0, 8)}...{AGENT_ADDRESS.slice(-6)}
+          <CardContent className="space-y-4">
+            {/* Balances */}
+            <div className="space-y-0">
+              <div className="flex items-center justify-between border-b border-dashed py-2.5">
+                <span className="text-xs text-muted-foreground uppercase tracking-wider">
+                  USDC
+                </span>
+                {loading ? (
+                  <Skeleton className="h-4 w-20 rounded-none" />
+                ) : (
+                  <span className="text-sm font-bold font-mono">
+                    ${balance?.usdcBalance ?? "0.00"}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center justify-between border-b border-dashed py-2.5">
+                <span className="text-xs text-muted-foreground uppercase tracking-wider">
+                  OKB
+                </span>
+                {loading ? (
+                  <Skeleton className="h-4 w-16 rounded-none" />
+                ) : (
+                  <span className="text-sm font-mono">
+                    {balance?.okbBalance ?? "0.00"} OKB
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center justify-between py-2.5">
+                <span className="text-xs text-muted-foreground uppercase tracking-wider">
+                  Network
+                </span>
+                <span className="text-xs font-mono">X Layer (196)</span>
+              </div>
+            </div>
+
+            {/* Address + Fund CTA */}
+            <div className="border border-dashed p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                  Agent address
+                </span>
+                <a
+                  href={`https://www.oklink.com/xlayer/address/${AGENT_ADDRESS}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[10px] text-muted-foreground hover:text-foreground"
+                >
+                  <ExternalLink className="size-3" />
+                </a>
+              </div>
+              <code className="text-xs font-mono break-all block text-muted-foreground">
+                {AGENT_ADDRESS}
               </code>
             </div>
-            <div className="flex items-center justify-between border-b border-dashed pb-3">
-              <span className="text-xs text-muted-foreground uppercase tracking-wider">
-                Network
-              </span>
-              <span className="text-xs font-mono">X Layer (196)</span>
-            </div>
-            <div className="flex items-center justify-between border-b border-dashed pb-3">
-              <span className="text-xs text-muted-foreground uppercase tracking-wider">
-                Type
-              </span>
-              <Badge
-                variant="outline"
-                className="rounded-none text-xs font-mono"
-              >
-                OKX TEE Wallet
-              </Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground uppercase tracking-wider">
-                OKB Balance
-              </span>
-              {loading ? (
-                <Skeleton className="h-4 w-16 rounded-none" />
-              ) : (
-                <span className="text-xs font-mono">
-                  {balance?.okbBalance ?? "0.00"} OKB
-                </span>
-              )}
-            </div>
-            <Link
-              href="/dashboard/wallet"
-              className="inline-block pt-2 text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
+
+            <button
+              type="button"
+              onClick={copyAddress}
+              className="w-full flex items-center justify-center gap-2 border border-foreground bg-foreground text-background px-4 py-2.5 text-xs font-medium uppercase tracking-wider hover:opacity-90 transition-opacity"
             >
-              View wallet details →
-            </Link>
+              {copied ? (
+                "Address copied!"
+              ) : (
+                <>
+                  <Plus className="size-3.5" />
+                  Fund Agent Wallet
+                </>
+              )}
+            </button>
+
+            <p className="text-[10px] text-muted-foreground text-center">
+              Send USDC or OKB to the address above on X Layer
+            </p>
           </CardContent>
         </Card>
 
-        <Card className="rounded-none border">
+        {/* Recent Activity — spans 3 cols */}
+        <Card className="rounded-none border lg:col-span-3">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-sm font-medium uppercase tracking-wider">
               Recent Activity
@@ -225,10 +264,16 @@ export default function DashboardPage() {
                 ))}
               </div>
             ) : recentTx.length === 0 ? (
-              <div className="border border-dashed p-6 text-center">
+              <div className="border border-dashed p-8 text-center">
                 <p className="text-xs text-muted-foreground">
                   No transactions yet
                 </p>
+                <Link
+                  href="/dashboard/pay"
+                  className="mt-2 inline-block text-xs underline underline-offset-4 text-muted-foreground hover:text-foreground"
+                >
+                  Execute your first payment →
+                </Link>
               </div>
             ) : (
               <div className="space-y-1">
@@ -243,7 +288,7 @@ export default function DashboardPage() {
                       >
                         {tx.status}
                       </span>
-                      <span className="truncate max-w-[120px] font-mono">
+                      <span className="truncate max-w-[160px] font-mono">
                         {tx.merchant}
                       </span>
                     </div>

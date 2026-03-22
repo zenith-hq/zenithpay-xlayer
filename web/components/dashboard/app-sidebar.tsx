@@ -1,13 +1,13 @@
 "use client";
 
 import {
+  BookOpen,
   CreditCard,
   LayoutDashboard,
   ScrollText,
   Settings,
   Shield,
   ShieldCheck,
-  Wallet,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -28,17 +28,17 @@ import {
 } from "@/components/ui/sidebar";
 import { UserDropdown } from "@/components/user-dropdown";
 
-const navItems = [
+const mainNav = [
   { title: "Overview", href: "/dashboard", icon: LayoutDashboard, exact: true },
-  { title: "Wallet", href: "/dashboard/wallet", icon: Wallet, exact: false },
   { title: "Pay", href: "/dashboard/pay", icon: CreditCard, exact: false },
   { title: "Limits", href: "/dashboard/limits", icon: Shield, exact: false },
   { title: "Ledger", href: "/dashboard/ledger", icon: ScrollText, exact: false },
   { title: "Approvals", href: "/dashboard/approvals", icon: ShieldCheck, exact: false },
 ];
 
-const bottomNavItems = [
-  { title: "Settings", href: "/dashboard/settings", icon: Settings, exact: false },
+const accountNav = [
+  { title: "Docs", href: "https://docs.usezenithpay.xyz", icon: BookOpen, exact: false, external: true },
+  { title: "Settings", href: "/dashboard/settings", icon: Settings, exact: false, external: false },
 ];
 
 export function AppSidebar() {
@@ -71,10 +71,10 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Agent Controls</SidebarGroupLabel>
+          <SidebarGroupLabel>Main</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => (
+              {mainNav.map((item) => (
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton
                     asChild
@@ -96,14 +96,17 @@ export function AppSidebar() {
           <SidebarGroupLabel>Account</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {bottomNavItems.map((item) => (
+              {accountNav.map((item) => (
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton
                     asChild
-                    isActive={isActive(item.href, item.exact)}
+                    isActive={!item.external && isActive(item.href, item.exact)}
                     tooltip={item.title}
                   >
-                    <Link href={item.href}>
+                    <Link
+                      href={item.href}
+                      {...(item.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                    >
                       <item.icon className="size-4" />
                       <span>{item.title}</span>
                     </Link>
