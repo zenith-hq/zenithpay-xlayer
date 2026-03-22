@@ -3,6 +3,7 @@
 import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { useConnect, useConnection, useConnectors, useDisconnect } from "wagmi";
+import ModeToggle from "@/components/theme-toggle/mode-toggle";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -76,6 +77,15 @@ export function UserDropdown() {
         <DropdownMenuItem asChild className="rounded-none">
           <Link href="/dashboard">Dashboard</Link>
         </DropdownMenuItem>
+        <DropdownMenuItem asChild className="rounded-none p-0">
+          <ModeToggle
+            showLabel
+            className="px-2 h-8 text-sm font-normal hover:bg-accent"
+            variant="ghost"
+            size="sm"
+          />
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuItem className="rounded-none" onClick={() => disconnect()}>
           <LogOut className="mr-2 size-4" />
           Sign out
