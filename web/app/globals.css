@@ -250,6 +250,10 @@ html {
 }
 
 /* Dashboard sidebar — active bottom accent border + muted brand bg */
+[data-sidebar="menu-button"]:not([data-active="true"]) {
+  color: oklch(from var(--foreground) l c h / 0.45);
+}
+
 [data-sidebar="menu-button"][data-active="true"] {
   border-bottom: 2px solid oklch(0.55 0.13 57);
   background-color: oklch(0.55 0.13 57 / 0.08);
@@ -257,6 +261,7 @@ html {
 
 [data-sidebar="menu-button"]:hover:not([data-active="true"]) {
   background-color: oklch(0.55 0.13 57 / 0.05);
+  color: var(--foreground);
 }
 
 .dark [data-sidebar="menu-button"][data-active="true"] {
@@ -266,4 +271,5 @@ html {
 
 .dark [data-sidebar="menu-button"]:hover:not([data-active="true"]) {
   background-color: oklch(0.65 0.13 57 / 0.07);
+  color: var(--foreground);
 }

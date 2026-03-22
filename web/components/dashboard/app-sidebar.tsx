@@ -2,6 +2,7 @@
 
 import {
   BookOpen,
+  ExternalLink,
   LayoutDashboard,
   ScrollText,
   Settings,
@@ -35,8 +36,7 @@ const mainNav = [
 ];
 
 const accountNav = [
-  { title: "Docs", href: "https://docs.usezenithpay.xyz", icon: BookOpen, exact: false, external: true },
-  { title: "Settings", href: "/dashboard/settings", icon: Settings, exact: false, external: false },
+  { title: "Settings", href: "/dashboard/settings", icon: Settings, exact: false },
 ];
 
 export function AppSidebar() {
@@ -51,6 +51,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-border">
         <div className="flex items-center justify-between px-2 py-2">
+          {/* Expanded: full logo + trigger on right */}
           <Link
             href="/dashboard"
             className="flex items-center gap-2 group-data-[collapsible=icon]:hidden"
@@ -60,16 +61,15 @@ export function AppSidebar() {
               ZenithPay
             </span>
           </Link>
-          <span className="hidden group-data-[collapsible=icon]:flex">
-            <LogoMark />
-          </span>
-          <SidebarTrigger className="ml-auto group-data-[collapsible=icon]:ml-0" />
+          <SidebarTrigger className="group-data-[collapsible=icon]:hidden" />
+          {/* Collapsed: only trigger, centered */}
+          <SidebarTrigger className="hidden group-data-[collapsible=icon]:flex mx-auto" />
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="px-2">
         <SidebarGroup>
-          <SidebarGroupLabel>Main</SidebarGroupLabel>
+          <SidebarGroupLabel>Agent</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {mainNav.map((item) => (
@@ -98,19 +98,33 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton
                     asChild
-                    isActive={!item.external && isActive(item.href, item.exact)}
+                    isActive={isActive(item.href, item.exact)}
                     tooltip={item.title}
                   >
-                    <Link
-                      href={item.href}
-                      {...(item.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                    >
+                    <Link href={item.href}>
                       <item.icon className="size-4" />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Documentation — standalone at bottom */}
+        <SidebarGroup className="mt-auto">
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Documentation">
+                  <Link href="https://docs.usezenithpay.xyz" target="_blank" rel="noopener noreferrer">
+                    <BookOpen className="size-4" />
+                    <span>Documentation</span>
+                    <ExternalLink className="size-3 ml-auto opacity-50" />
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
