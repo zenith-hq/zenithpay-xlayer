@@ -9,6 +9,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { formatUnits } from "viem";
 import {
   useConnection,
   useReadContract,
@@ -60,11 +61,19 @@ export default function SettingsPage() {
   const [dangerError, setDangerError] = useState<string | null>(null);
   const [confirmRevoke, setConfirmRevoke] = useState(false);
 
-  // Read onchain agent status
+  // Read onchain agent status and policy
   const { data: onchainStatus, refetch: refetchStatus } = useReadContract({
     address: SPEND_POLICY_ADDRESS,
     abi: SPEND_POLICY_ABI,
     functionName: "agentStatus",
+    args: [AGENT_ADDRESS as `0x${string}`],
+    query: { enabled: Boolean(AGENT_ADDRESS) },
+  });
+
+  const { data: onchainPolicy } = useReadContract({
+    address: SPEND_POLICY_ADDRESS,
+    abi: SPEND_POLICY_ABI,
+    functionName: "getPolicy",
     args: [AGENT_ADDRESS as `0x${string}`],
     query: { enabled: Boolean(AGENT_ADDRESS) },
   });
@@ -79,7 +88,6 @@ export default function SettingsPage() {
     }
   }, [dangerTxConfirmed, refetchStatus]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: AGENT_ADDRESS is stable
   useEffect(() => {
     const stored = localStorage.getItem(`zpk_${AGENT_ADDRESS}`);
     setApiKey(stored);
@@ -110,7 +118,19 @@ export default function SettingsPage() {
   }
 
   async function handleSaveSwapSettings() {
-    if (!address || !policy) return;
+    if (!address) return;
+    // Use DB policy if available; fall back to onchain values
+    const perTxLimit =
+      policy?.perTxLimit ??
+      (onchainPolicy?.perTxLimit
+        ? formatUnits(onchainPolicy.perTxLimit, 6)
+        : "0");
+    const dailyBudget =
+      policy?.dailyBudget ??
+      (onchainPolicy?.dailyLimit
+        ? formatUnits(onchainPolicy.dailyLimit, 6)
+        : "0");
+
     setSaving(true);
     setSaveError(null);
     setSaved(false);
@@ -119,18 +139,18 @@ export default function SettingsPage() {
       const timestamp = Date.now();
       const message = JSON.stringify({
         agentAddress: AGENT_ADDRESS,
-        perTxLimit: policy.perTxLimit,
-        dailyBudget: policy.dailyBudget,
+        perTxLimit,
+        dailyBudget,
         timestamp,
       });
       const signature = await signMessageAsync({ message });
 
       const res = await setLimits({
         agentAddress: AGENT_ADDRESS,
-        perTxLimit: policy.perTxLimit,
-        dailyBudget: policy.dailyBudget,
-        allowlist: policy.allowlist,
-        approvalThreshold: policy.approvalThreshold ?? undefined,
+        perTxLimit,
+        dailyBudget,
+        allowlist: policy?.allowlist,
+        approvalThreshold: policy?.approvalThreshold ?? undefined,
         autoSwapEnabled,
         swapSlippageTolerance,
         humanSignature: signature,
@@ -195,6 +215,20 @@ export default function SettingsPage() {
   const isActive = onchainStatus === AgentStatus.Active;
   const isNotRegistered =
     onchainStatus === AgentStatus.NotRegistered || onchainStatus === undefined;
+
+  // Display values: DB first, onchain fallback
+  const displayPerTx =
+    policy?.perTxLimit ??
+    (onchainPolicy?.perTxLimit
+      ? formatUnits(onchainPolicy.perTxLimit, 6)
+      : null);
+  const displayDaily =
+    policy?.dailyBudget ??
+    (onchainPolicy?.dailyLimit
+      ? formatUnits(onchainPolicy.dailyLimit, 6)
+      : null);
+  const canSaveSwap =
+    Boolean(address) && (Boolean(policy) || Boolean(onchainPolicy?.perTxLimit));
 
   const maskedKey = apiKey
     ? `${apiKey.slice(0, 8)}${"•".repeat(apiKey.length - 12)}${apiKey.slice(-4)}`
@@ -279,10 +313,10 @@ export default function SettingsPage() {
               ) : (
                 <>
                   <span className="text-[10px] font-mono text-muted-foreground">
-                    {policy ? `$${policy.perTxLimit}/tx` : "—/tx"}
+                    {displayPerTx ? `$${displayPerTx}/tx` : "—/tx"}
                   </span>
                   <span className="text-[10px] font-mono text-muted-foreground">
-                    {policy ? `$${policy.dailyBudget}/day` : "—/day"}
+                    {displayDaily ? `$${displayDaily}/day` : "—/day"}
                   </span>
                   <a
                     href={`${XLAYER_EXPLORER}/address/${policy?.policyContract ?? SPEND_POLICY_ADDRESS}`}
@@ -385,7 +419,7 @@ export default function SettingsPage() {
             className="rounded-none text-xs"
             size="sm"
             onClick={handleSaveSwapSettings}
-            disabled={saving || !address || !policy}
+            disabled={saving || !canSaveSwap}
           >
             {saving ? (
               <>

@@ -10,9 +10,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useConnection } from "wagmi";
+import { formatUnits } from "viem";
+import { useConnection, useReadContract } from "wagmi";
 import { useAgent } from "@/components/dashboard/agent-context";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -23,6 +23,7 @@ import {
   getLimitsForOwner,
   type LedgerEntry,
 } from "@/lib/api";
+import { SPEND_POLICY_ABI, SPEND_POLICY_ADDRESS } from "@/lib/contracts";
 
 function statusBadgeClass(status: LedgerEntry["status"]): string {
   switch (status) {
@@ -78,7 +79,21 @@ export default function DashboardPage() {
     setTimeout(() => setCopied(false), 2000);
   }
 
+  // Read policy directly from contract as fallback when DB lookup returns empty
+  const { data: onchainPolicy } = useReadContract({
+    address: SPEND_POLICY_ADDRESS,
+    abi: SPEND_POLICY_ABI,
+    functionName: "getPolicy",
+    args: [AGENT_ADDRESS as `0x${string}`],
+    query: { enabled: Boolean(AGENT_ADDRESS) },
+  });
+
   const policy = policies[0];
+  const dailyBudget =
+    policy?.dailyBudget ??
+    (onchainPolicy?.dailyLimit
+      ? formatUnits(onchainPolicy.dailyLimit, 6)
+      : null);
   const recentTx = transactions.slice(0, 5);
   const pendingCount = transactions.filter(
     (t) => t.status === "pending",
@@ -122,10 +137,8 @@ export default function DashboardPage() {
           <CardContent>
             {initialLoading ? (
               <Skeleton className="h-7 w-24 rounded-none" />
-            ) : policy?.dailyBudget ? (
-              <p className="text-2xl font-bold font-mono">
-                ${policy.dailyBudget}
-              </p>
+            ) : dailyBudget ? (
+              <p className="text-2xl font-bold font-mono">${dailyBudget}</p>
             ) : (
               <div>
                 <p className="text-sm font-medium text-muted-foreground">

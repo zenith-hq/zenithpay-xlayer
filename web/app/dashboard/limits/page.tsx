@@ -2,6 +2,7 @@
 
 import { ExternalLink, Loader2, Shield } from "lucide-react";
 import { useEffect, useState } from "react";
+import { formatUnits } from "viem";
 import {
   useConnection,
   useReadContract,
@@ -52,11 +53,19 @@ export default function LimitsPage() {
   const [allowlistInput, setAllowlistInput] = useState("");
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
 
-  // Read onchain agent status to know whether to call registerAgent or updatePolicy
+  // Read onchain agent status and policy directly from contract
   const { data: onchainStatus } = useReadContract({
     address: SPEND_POLICY_ADDRESS,
     abi: SPEND_POLICY_ABI,
     functionName: "agentStatus",
+    args: [AGENT_ADDRESS as `0x${string}`],
+    query: { enabled: Boolean(AGENT_ADDRESS) },
+  });
+
+  const { data: onchainPolicy } = useReadContract({
+    address: SPEND_POLICY_ADDRESS,
+    abi: SPEND_POLICY_ABI,
+    functionName: "getPolicy",
     args: [AGENT_ADDRESS as `0x${string}`],
     query: { enabled: Boolean(AGENT_ADDRESS) },
   });
@@ -85,6 +94,21 @@ export default function LimitsPage() {
     }
     load();
   }, [address]);
+
+  // Populate form inputs from onchain when DB lookup returned nothing
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only run when onchainPolicy loads
+  useEffect(() => {
+    if (
+      policy ||
+      !onchainPolicy ||
+      onchainPolicy.status === AgentStatus.NotRegistered
+    )
+      return;
+    const perTx = formatUnits(onchainPolicy.perTxLimit, 6);
+    const daily = formatUnits(onchainPolicy.dailyLimit, 6);
+    setPerTxLimit(perTx);
+    setDailyBudget(daily);
+  }, [onchainPolicy]);
 
   function applyPreset(preset: (typeof PRESETS)[number]) {
     setSelectedPreset(preset.label);
@@ -174,6 +198,20 @@ export default function LimitsPage() {
 
   const isRegistered =
     onchainStatus !== undefined && onchainStatus !== AgentStatus.NotRegistered;
+
+  // Prefer DB policy; fall back to onchain data for display
+  const displayPerTx =
+    policy?.perTxLimit ??
+    (onchainPolicy?.perTxLimit
+      ? formatUnits(onchainPolicy.perTxLimit, 6)
+      : null);
+  const displayDaily =
+    policy?.dailyBudget ??
+    (onchainPolicy?.dailyLimit
+      ? formatUnits(onchainPolicy.dailyLimit, 6)
+      : null);
+  const displayApproval = policy?.approvalThreshold ?? null;
+  const displayContract = policy?.policyContract ?? SPEND_POLICY_ADDRESS;
 
   return (
     <div className="space-y-6">
@@ -362,22 +400,14 @@ export default function LimitsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {policy ? (
+                {displayPerTx ? (
                   <div className="space-y-0">
                     {[
-                      {
-                        label: "Per-Tx Limit",
-                        value: `$${policy.perTxLimit}`,
-                      },
-                      {
-                        label: "Daily Budget",
-                        value: `$${policy.dailyBudget}`,
-                      },
+                      { label: "Per-Tx Limit", value: `$${displayPerTx}` },
+                      { label: "Daily Budget", value: `$${displayDaily}` },
                       {
                         label: "Approval Gate",
-                        value: policy.approvalThreshold
-                          ? `$${policy.approvalThreshold}`
-                          : "None",
+                        value: displayApproval ? `$${displayApproval}` : "None",
                       },
                     ].map(({ label, value }) => (
                       <div
@@ -397,12 +427,12 @@ export default function LimitsPage() {
                       <Badge
                         variant="outline"
                         className={`rounded-none text-[10px] font-mono ${
-                          policy.autoSwapEnabled
+                          policy?.autoSwapEnabled
                             ? "border-emerald-600 text-emerald-700 dark:text-emerald-400"
                             : ""
                         }`}
                       >
-                        {policy.autoSwapEnabled ? "Enabled" : "Disabled"}
+                        {policy?.autoSwapEnabled ? "Enabled" : "—"}
                       </Badge>
                     </div>
                     <div className="flex justify-between py-2 text-xs">
@@ -410,12 +440,12 @@ export default function LimitsPage() {
                         Contract
                       </span>
                       <a
-                        href={`${XLAYER_EXPLORER}/address/${policy.policyContract}`}
+                        href={`${XLAYER_EXPLORER}/address/${displayContract}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1 font-mono hover:text-foreground text-muted-foreground underline underline-offset-4"
                       >
-                        {policy.policyContract.slice(0, 8)}...
+                        {displayContract.slice(0, 8)}...
                         <ExternalLink className="size-2.5" />
                       </a>
                     </div>
