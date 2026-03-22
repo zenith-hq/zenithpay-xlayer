@@ -50,7 +50,12 @@ export function UserDropdown() {
           type="button"
           className="w-full px-3 h-9 rounded-none border border-border bg-muted flex items-center gap-2 focus:outline-none hover:bg-muted/80 transition-colors"
         >
-          <div className="flex flex-col items-start min-w-0 flex-1">
+          {/* Collapsed: show only 0x identifier */}
+          <span className="hidden group-data-[collapsible=icon]:block text-[10px] font-mono text-muted-foreground truncate">
+            0x
+          </span>
+          {/* Expanded: full name + address */}
+          <div className="flex flex-col items-start min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
             <span className="text-xs font-medium truncate w-full text-left">
               {agentDisplayName}
             </span>
