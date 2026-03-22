@@ -98,7 +98,7 @@ export function OnboardingFlow() {
 			setStep("signing")
 			// setLimits verifies the signature server-side and auto-links the agent
 			// to the signer's address if not already linked — one atomic operation
-			await setLimits({
+			const result = await setLimits({
 				agentAddress,
 				perTxLimit,
 				dailyBudget,
@@ -108,6 +108,10 @@ export function OnboardingFlow() {
 				humanSignature: signature,
 				timestamp,
 			})
+			// Persist the apiKey in localStorage so the dashboard can show it in Settings
+			if (result.apiKey) {
+				localStorage.setItem(`zpk_${agentAddress}`, result.apiKey)
+			}
 			setStep("fund")
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Failed to set policy")

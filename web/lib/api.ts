@@ -103,6 +103,19 @@ export function getLimitsForOwner(ownerAddress: string) {
   });
 }
 
+export interface SetLimitsResult {
+  status: string;
+  policyContract: string;
+  txHash: string | null;
+  agentAddress: string;
+  apiKey: string | null;
+  perTxLimit: string;
+  dailyBudget: string;
+  allowlist: string[];
+  autoSwapEnabled: boolean;
+  swapSlippageTolerance: string;
+}
+
 export function setLimits(params: {
   agentAddress: string;
   perTxLimit: string;
@@ -114,7 +127,7 @@ export function setLimits(params: {
   humanSignature: string;
   timestamp: number;
 }) {
-  return apiFetch<AgentPolicy>("/limits", {
+  return apiFetch<SetLimitsResult>("/limits", {
     method: "POST",
     body: JSON.stringify(params),
   });

@@ -46,6 +46,14 @@ export default function SettingsPage() {
 
   const [copied, setCopied] = useState<string | null>(null);
   const [showKey, setShowKey] = useState(false);
+  const [apiKey, setApiKey] = useState<string | null>(null);
+
+  // Load the real apiKey from localStorage (stored during onboarding)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: AGENT_ADDRESS is stable
+  useEffect(() => {
+    const stored = localStorage.getItem(`zpk_${AGENT_ADDRESS}`);
+    setApiKey(stored);
+  }, [AGENT_ADDRESS]);
 
   useEffect(() => {
     async function load() {
@@ -98,7 +106,15 @@ export default function SettingsPage() {
         humanSignature: signature,
         timestamp,
       });
-      setPolicy(res);
+      if (res.apiKey) {
+        localStorage.setItem(`zpk_${AGENT_ADDRESS}`, res.apiKey);
+        setApiKey(res.apiKey);
+      }
+      setPolicy((prev) =>
+        prev
+          ? { ...prev, autoSwapEnabled: res.autoSwapEnabled, swapSlippageTolerance: res.swapSlippageTolerance }
+          : prev,
+      );
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
@@ -108,7 +124,9 @@ export default function SettingsPage() {
     }
   }
 
-  const maskedKey = "zpk_••••••••••••••••••••••••••••••••";
+  const maskedKey = apiKey
+    ? `${apiKey.slice(0, 8)}${"•".repeat(apiKey.length - 12)}${apiKey.slice(-4)}`
+    : "zpk_••••••••••••••••••••••••••••••••";
   const curlCommand = `curl https://api.usezenithpay.xyz/skill.md`;
 
   return (
@@ -278,7 +296,7 @@ export default function SettingsPage() {
             <div className="flex items-center gap-2">
               <Input
                 className="rounded-none font-mono text-xs"
-                value={showKey ? "zpk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" : maskedKey}
+                value={showKey ? (apiKey ?? maskedKey) : maskedKey}
                 readOnly
               />
               <Button
@@ -293,7 +311,7 @@ export default function SettingsPage() {
                 variant="ghost"
                 size="icon"
                 className="size-9 rounded-none shrink-0"
-                onClick={() => copyToClipboard(maskedKey, "key")}
+                onClick={() => copyToClipboard(apiKey ?? maskedKey, "key")}
               >
                 <Copy className="size-3" />
               </Button>

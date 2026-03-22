@@ -158,15 +158,20 @@ export async function setLimits(
       },
     });
 
-  // Hard limits (perTxLimit, dailyBudget) are enforced on-chain via SpendPolicy.sol.
-  // The human EOA must call registerAgent/updatePolicy directly from the dashboard
-  // using humanSignature — the API stores off-chain components (approvalThreshold, allowlist)
-  // and returns the contract address for the dashboard to construct the on-chain tx.
+  // Fetch the agent's apiKey to return to the caller. Safe to expose here because
+  // we've already verified the caller is the owner via humanSignature (browser path)
+  // or they're calling via the authenticated MCP path (zpk_ key at HTTP layer).
+  const [agentRow] = await db
+    .select({ apiKey: agents.apiKey })
+    .from(agents)
+    .where(eq(agents.address, request.agentAddress.toLowerCase()));
+
   return {
     status: "deployed",
     policyContract: SPEND_POLICY_ADDRESS,
     txHash: null,
     agentAddress: request.agentAddress,
+    apiKey: agentRow?.apiKey ?? null,
     perTxLimit: request.perTxLimit,
     dailyBudget: request.dailyBudget,
     allowlist: request.allowlist ?? [],

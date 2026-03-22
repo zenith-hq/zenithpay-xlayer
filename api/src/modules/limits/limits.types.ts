@@ -27,6 +27,7 @@ export interface SetLimitsResult {
   policyContract: string;
   txHash: string | null;
   agentAddress: string;
+  apiKey: string | null;
   perTxLimit: string;
   dailyBudget: string;
   allowlist: string[];

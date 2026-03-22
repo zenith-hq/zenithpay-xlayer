@@ -98,7 +98,10 @@ export default function LimitsPage() {
 				humanSignature: signature,
 				timestamp,
 			})
-			setPolicy(res)
+			if (res.apiKey) {
+				localStorage.setItem(`zpk_${AGENT_ADDRESS}`, res.apiKey)
+			}
+			setPolicy(res as unknown as AgentPolicy)
 		} catch (err) {
 			setSaveError(err instanceof Error ? err.message : "Failed to save policy")
 		} finally {
