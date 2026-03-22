@@ -1,8 +1,9 @@
 "use client";
 
-import { ArrowRight, ArrowRightIcon } from "lucide-react";
+import { ArrowRight, ArrowRightIcon, Copy, Check } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
+import { useState } from "react";
 import { useConnection } from "wagmi";
 import { ZenithDither } from "@/components/bg/zenith-dither";
 import { LogoMark } from "@/components/logo-mark";
@@ -11,6 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+const SKILL_INSTALL = "curl -s https://api.usezenithpay.xyz/skill.md";
+
 function HeroBadge() {
   return (
     <Badge
@@ -18,7 +21,7 @@ function HeroBadge() {
       variant="outline"
       asChild
     >
-      <Link href="/overview">
+      <Link href="/dashboard">
         <span className="shine absolute inset-0 bg-linear-to-r from-transparent via-white/60 to-transparent -translate-x-full" />
         <LogoMark className="size-3 animate-[spin_3s_linear_infinite]" />
         <p className="font-light font-pixel-square">Introducing ZenithPay</p>
@@ -37,7 +40,7 @@ function GetStartedButton() {
       style={{ background: "var(--brand-accent)", color: "var(--background)" }}
       className="rounded-none cursor-pointer relative overflow-hidden focus-visible:ring-0 h-9 px-4 hover:opacity-90 transition-opacity group"
     >
-      <Link href={isConnected ? "/overview" : "/signin"}>
+      <Link href={isConnected ? "/dashboard" : "/signin"}>
         <span className="shine absolute -top-1/2 -left-full h-[200%] w-3/4 skew-x-[-20deg] bg-linear-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
         Get started
         <ArrowRightIcon className="size-4 w-0 opacity-0 group-hover:w-4 group-hover:opacity-100 transition-all duration-200" />
@@ -68,33 +71,84 @@ function SeeHowItWorksButton() {
   );
 }
 
-type TerminalLineType = "prompt" | "success" | "info" | "gap" | "cursor";
+function QuickInstall() {
+  const [copied, setCopied] = useState(false);
+
+  function copy() {
+    navigator.clipboard.writeText(SKILL_INSTALL);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  return (
+    <div className="w-full max-w-md border border-border">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-border">
+        <span className="text-[10px] uppercase tracking-[0.18em] font-mono text-muted-foreground/60">
+          Quick Install
+        </span>
+        <button
+          type="button"
+          onClick={copy}
+          className="flex items-center gap-1 text-[10px] font-mono text-muted-foreground hover:text-foreground transition-colors"
+        >
+          {copied ? (
+            <>
+              <Check className="size-3" />
+              Copied
+            </>
+          ) : (
+            <>
+              <Copy className="size-3" />
+              Copy
+            </>
+          )}
+        </button>
+      </div>
+      <div className="px-3 py-2.5 bg-muted/30">
+        <code className="text-[11px] font-mono text-muted-foreground break-all">
+          {SKILL_INSTALL}
+        </code>
+      </div>
+    </div>
+  );
+}
+
+type TerminalLineType =
+  | "comment"
+  | "prompt"
+  | "output"
+  | "success"
+  | "tool"
+  | "gap"
+  | "cursor";
 
 interface TerminalLine {
+  id: string;
   type: TerminalLineType;
   text?: string;
 }
 
 const TERMINAL_LINES: TerminalLine[] = [
-  { type: "prompt", text: "zenithpay agent create --name bot-01" },
-  { type: "success", text: "✓ Wallet ready   0xcadf92…1a9" },
-  { type: "success", text: "✓ Chain: X Layer   Balance: 10.00 USDC" },
-  { type: "gap" },
-  {
-    type: "prompt",
-    text: "zenithpay policy set --per-tx 5 --daily 50",
-  },
-  { type: "success", text: "✓ SpendPolicy.sol   on-chain" },
-  { type: "success", text: "✓ Allowlist   set · OKB auto-swap enabled" },
-  { type: "gap" },
-  { type: "prompt", text: 'zenithpay pay --service exa "DeFi news"' },
-  { type: "info", text: "  checking policy · swapping OKB→USDC..." },
-  { type: "success", text: "✓ x402 payment   $0.007 USDC · 12 results" },
-  { type: "success", text: "✓ Logged on X Layer   block 9841203" },
-  { type: "cursor" },
+  { id: "c1", type: "comment", text: "// Any agent · any runtime — works everywhere" },
+  { id: "p1", type: "prompt", text: "curl -s https://api.usezenithpay.xyz/skill.md" },
+  { id: "o1", type: "output", text: "  → ZenithPay loaded · 6 tools ready" },
+  { id: "g1", type: "gap" },
+  { id: "c2", type: "comment", text: "// Agent task: Research DeFi yields on X Layer" },
+  { id: "g2", type: "gap" },
+  { id: "t1", type: "tool", text: "→ zenithpay_get_limits" },
+  { id: "o2", type: "output", text: "  $0.25/tx · $3.00/day · $2.75 remaining" },
+  { id: "g3", type: "gap" },
+  { id: "t2", type: "tool", text: "→ zenithpay_verify_merchant" },
+  { id: "o3", type: "output", text: "  stableenrich.dev · safe ✓" },
+  { id: "g4", type: "gap" },
+  { id: "t3", type: "tool", text: "→ zenithpay_pay_service" },
+  { id: "o4", type: "output", text: '  $0.05 · "DeFi research on X Layer"' },
+  { id: "s1", type: "success", text: "✓ Approved · txHash 0x3f2a1b8c…" },
+  { id: "s2", type: "success", text: "✓ Logged on X Layer · block 9841207" },
+  { id: "cu", type: "cursor" },
 ];
 
-function HeroTerminal() {
+function AgentDemo() {
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
@@ -102,42 +156,32 @@ function HeroTerminal() {
       transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
       className="w-full overflow-hidden border border-border sm:max-w-[480px]"
     >
-      {/* macOS window chrome — no bg, minimal dots */}
-      <div className="relative flex items-center px-3 h-8 border-b border-border">
+      {/* Window chrome — no title, just dots */}
+      <div className="flex items-center px-3 h-8 border-b border-border">
         <div className="flex items-center gap-1.5">
           <span className="size-2 rounded-full bg-foreground/20" />
           <span className="size-2 rounded-full bg-foreground/20" />
           <span className="size-2 rounded-full bg-foreground/20" />
         </div>
-        <span className="absolute inset-0 flex items-center justify-center text-[10px] font-mono text-muted-foreground/50 pointer-events-none tracking-wide">
-          terminal — zenith
-        </span>
       </div>
 
-      {/* Terminal body */}
+      {/* Body */}
       <div className="bg-[#0d0d0d] px-4 pt-3 pb-5 font-mono min-h-[300px]">
-        <p className="text-[10px] text-white/20 mb-3 tracking-wide">
-          Last login: Mon Mar 16 ·{" "}
-          <span className="text-white/30">zenith@xlayer</span>
-        </p>
-
         {TERMINAL_LINES.map((line, i) => {
           if (line.type === "gap") {
-            return <div key={i} className="h-2" />;
+            return <div key={line.id} className="h-2" />;
           }
 
           if (line.type === "cursor") {
             return (
               <motion.div
-                key={i}
+                key={line.id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.1 + i * 0.09, duration: 0.15 }}
+                transition={{ delay: 0.1 + i * 0.08, duration: 0.15 }}
                 className="flex items-center gap-1 mt-1"
               >
-                <span className="text-white/50 text-[11px]">
-                  zenith@xlayer ~
-                </span>
+                <span className="text-white/50 text-[11px]">agent ~</span>
                 <span className="text-white/30 text-[11px]"> $</span>
                 <span className="inline-block w-[7px] h-[13px] bg-white/50 ml-0.5 animate-pulse" />
               </motion.div>
@@ -146,37 +190,56 @@ function HeroTerminal() {
 
           return (
             <motion.div
-              key={i}
+              key={line.id}
               initial={{ opacity: 0, x: -4 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{
-                delay: 0.1 + i * 0.09,
+                delay: 0.1 + i * 0.08,
                 duration: 0.22,
                 ease: "easeOut",
               }}
               className={cn("leading-[1.7]", {
                 "flex items-start gap-1.5 mt-1": line.type === "prompt",
-                "pl-3": line.type === "success" || line.type === "info",
+                "mt-0.5": line.type !== "prompt",
               })}
             >
+              {line.type === "comment" && (
+                <span className="text-white/20 text-[11px]">{line.text}</span>
+              )}
               {line.type === "prompt" && (
                 <>
-                  <span className="text-white/50 text-[11px] shrink-0 leading-[1.7]">
-                    zenith@xlayer ~ $
+                  <span className="text-white/40 text-[11px] shrink-0 leading-[1.7]">
+                    $
                   </span>
-                  <span className="text-white/90 text-[11px] break-all">
+                  <span className="text-white/80 text-[11px] break-all">
                     {line.text}
                   </span>
                 </>
               )}
-              {line.type === "success" && (
-                <span className="text-[11px]">
-                  <span style={{ color: "var(--brand-accent)" }}>✓</span>
-                  <span className="text-white/50">{line.text?.slice(1)}</span>
+              {line.type === "output" && (
+                <span className="text-white/35 text-[11px] pl-2">
+                  {line.text}
                 </span>
               )}
-              {line.type === "info" && (
-                <span className="text-white/25 text-[11px]">{line.text}</span>
+              {line.type === "tool" && (
+                <span
+                  className="text-[11px] pl-2 font-semibold"
+                  style={{ color: "var(--brand-accent)" }}
+                >
+                  {line.text}
+                </span>
+              )}
+              {line.type === "success" && (
+                <span className="text-[11px] pl-2">
+                  <span style={{ color: "var(--brand-accent)" }}>
+                    {line.text?.startsWith("✓") ? "✓" : ""}
+                  </span>
+                  <span className="text-white/50">
+                    {line.text?.startsWith("✓")
+                      ? line.text.slice(1)
+                      : line.text}
+                  </span>
+                </span>
               )}
             </motion.div>
           );
@@ -190,7 +253,7 @@ export function HeroSection() {
   return (
     <section className="relative overflow-hidden mx-auto flex w-full lg:h-(--hero-height) max-w-7xl min-w-0 flex-col border-x md:min-h-0 lg:flex-row">
       <ZenithDither opacity={0.26} />
-      {/* Left: headline + CTAs + TechGrid */}
+      {/* Left: headline + CTAs + quick install + TechGrid */}
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex flex-1 flex-col items-start justify-center px-5 pt-16 pb-8 sm:px-8 sm:pt-20 sm:pb-10 lg:px-10 xl:px-12">
           <div className="flex items-center gap-2 mb-5">
@@ -230,14 +293,23 @@ export function HeroSection() {
             <SeeHowItWorksButton />
           </motion.div>
 
-          {/* Mobile terminal — below CTAs, hidden on desktop */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: "easeOut", delay: 0.5 }}
+            className="mt-6"
+          >
+            <QuickInstall />
+          </motion.div>
+
+          {/* Mobile demo — below quick install, hidden on desktop */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.5 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.6 }}
             className="lg:hidden w-full mt-10"
           >
-            <HeroTerminal />
+            <AgentDemo />
           </motion.div>
         </div>
 
@@ -246,9 +318,9 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* Right: terminal widget — desktop only */}
+      {/* Right: agent demo — desktop only */}
       <div className="hidden border-border lg:flex lg:w-[440px] lg:flex-none lg:flex-col lg:items-center lg:justify-center lg:border-l lg:px-6 lg:py-8 xl:w-auto xl:flex-1 xl:px-8">
-        <HeroTerminal />
+        <AgentDemo />
       </div>
     </section>
   );

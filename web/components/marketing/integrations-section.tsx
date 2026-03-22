@@ -22,6 +22,13 @@ function Val({ children }: { children: React.ReactNode }) {
 function Dim({ children }: { children: React.ReactNode }) {
   return <span className="text-white/40">{children}</span>;
 }
+function Acc({ children }: { children: React.ReactNode }) {
+  return (
+    <span style={{ color: "var(--brand-accent)", opacity: 0.85 }}>
+      {children}
+    </span>
+  );
+}
 
 const CODE: Record<Tab, React.ReactNode> = {
   MCP: (
@@ -47,13 +54,13 @@ const CODE: Record<Tab, React.ReactNode> = {
         <Dim>,</Dim>
       </div>
       <div className="pl-12">
-        <Str>"env"</Str>
+        <Str>"headers"</Str>
         <Dim>: {"{"}</Dim>
       </div>
       <div className="pl-16">
-        <Str>"AGENT_ADDRESS"</Str>
+        <Str>"Authorization"</Str>
         <Dim>: </Dim>
-        <Str>"0xcadf92...1a9"</Str>
+        <Str>"Bearer zpk_..."</Str>
       </div>
       <div className="pl-12">
         <Dim>{"}"}</Dim>
@@ -68,18 +75,30 @@ const CODE: Record<Tab, React.ReactNode> = {
         <Val>{"}"}</Val>
       </div>
       <div className="mt-4 border-t border-white/8 pt-3">
-        <Cm>{"// 3 tools exposed to your agent:"}</Cm>
+        <Cm>{"// 6 tools exposed to your agent:"}</Cm>
         <div className="mt-1">
-          <Dim>zenithpay_balance</Dim>
-          <Cm>{"  · wallet + remaining budget"}</Cm>
+          <Acc>zenithpay_balance</Acc>
+          <Cm>{"        · USDC + OKB + remaining budget"}</Cm>
         </div>
         <div>
-          <Dim>zenithpay_pay_service</Dim>
-          <Cm>{"  · policy-gated payment"}</Cm>
+          <Acc>zenithpay_pay_service</Acc>
+          <Cm>{"    · policy-gated x402 payment"}</Cm>
         </div>
         <div>
-          <Dim>zenithpay_set_limits</Dim>
-          <Cm>{"  · set per-tx cap + daily budget"}</Cm>
+          <Acc>zenithpay_get_limits</Acc>
+          <Cm>{"    · read onchain spend policy"}</Cm>
+        </div>
+        <div>
+          <Acc>zenithpay_set_limits</Acc>
+          <Cm>{"    · set per-tx cap + daily budget"}</Cm>
+        </div>
+        <div>
+          <Acc>zenithpay_verify_merchant</Acc>
+          <Cm>{"· OKX security scan + allowlist"}</Cm>
+        </div>
+        <div>
+          <Acc>zenithpay_ledger</Acc>
+          <Cm>{"         · full audit trail"}</Cm>
         </div>
       </div>
     </div>
@@ -112,15 +131,20 @@ const CODE: Record<Tab, React.ReactNode> = {
       </div>
       <div className="pl-8">
         <Dim>{"headers: { "}</Dim>
-        <Str>"Content-Type"</Str>
+        <Str>"Authorization"</Str>
         <Dim>{": "}</Dim>
-        <Str>"application/json"</Str>
+        <Str>"Bearer zpk_..."</Str>
         <Dim>{" },"}</Dim>
       </div>
       <div className="pl-8">
         <Dim>body: </Dim>
         <Val>JSON.stringify</Val>
         <Dim>{"({"}</Dim>
+      </div>
+      <div className="pl-12">
+        <Dim>agentAddress: </Dim>
+        <Str>"0x726Cf0C4...C947"</Str>
+        <Dim>,</Dim>
       </div>
       <div className="pl-12">
         <Dim>serviceUrl: </Dim>
@@ -134,12 +158,7 @@ const CODE: Record<Tab, React.ReactNode> = {
       </div>
       <div className="pl-12">
         <Dim>intent: </Dim>
-        <Str>"Fetch DeFi market data"</Str>
-        <Dim>,</Dim>
-      </div>
-      <div className="pl-12">
-        <Dim>agentAddress: </Dim>
-        <Str>"0xcadf92...1a9"</Str>
+        <Str>"Research DeFi trends on X Layer"</Str>
         <Dim>,</Dim>
       </div>
       <div className="pl-8">
@@ -154,19 +173,23 @@ const CODE: Record<Tab, React.ReactNode> = {
       </div>
       <div className="mt-4 border-t border-white/8 pt-3">
         <div>
-          <Cm>{"// 200"}</Cm>
-          <Dim>{"  · "}</Dim>
-          <Val>approved — policy check passed</Val>
+          <Cm>{"// 200 "}</Cm>
+          <Acc>approved</Acc>
+          <Dim>{"  · txHash on X Layer"}</Dim>
         </div>
         <div>
-          <Cm>{"// 403"}</Cm>
-          <Dim>{"  · "}</Dim>
-          <Val>blocked — daily budget exceeded</Val>
+          <Cm>{"// 202 "}</Cm>
+          <Acc>pending</Acc>
+          <Dim>{"   · queued for human approval"}</Dim>
         </div>
         <div>
-          <Cm>{"// 402"}</Cm>
-          <Dim>{"  · "}</Dim>
-          <Val>payment required upstream</Val>
+          <Cm>{"// 403 "}</Cm>
+          <Acc>blocked</Acc>
+          <Dim>{"   · daily budget exceeded"}</Dim>
+        </div>
+        <div>
+          <Cm>{"// 402 "}</Cm>
+          <Dim>{"            · x402 payment upstream"}</Dim>
         </div>
       </div>
     </div>
@@ -175,41 +198,52 @@ const CODE: Record<Tab, React.ReactNode> = {
   Skill: (
     <div className="font-mono text-[11px] leading-[1.85]">
       <div>
-        <Cm>{"// Paste into your agent to install ZenithPay"}</Cm>
+        <Cm>{"// Paste into any agent to install ZenithPay"}</Cm>
       </div>
-      <div className="mt-1">
-        <Val>Set up </Val>
-        <Str>curl -s https://api.usezenithpay.xyz/skill.md</Str>
+      <div className="mt-1 flex items-start gap-1.5">
+        <Dim>$</Dim>
+        <Val>curl -s https://api.usezenithpay.xyz/skill.md</Val>
       </div>
-      <div className="mt-4 border-t border-white/8 pt-3">
-        <Cm>{"// Your agent reads the skill file and gets 3 tools:"}</Cm>
-        <div className="mt-1">
-          <Dim>zenithpay_balance</Dim>
-          <Cm>{"  · wallet + remaining budget"}</Cm>
-        </div>
-        <div>
-          <Dim>zenithpay_pay_service</Dim>
-          <Cm>{"  · policy-gated payment"}</Cm>
-        </div>
-        <div>
-          <Dim>zenithpay_set_limits</Dim>
-          <Cm>{"  · set per-tx cap + daily budget"}</Cm>
-        </div>
+      <div className="mt-2">
+        <Acc>  → ZenithPay skill loaded · 6 tools ready</Acc>
       </div>
       <div className="mt-4 border-t border-white/8 pt-3">
-        <Cm>{"// Works with any agent that supports skills:"}</Cm>
+        <Cm>{"// Agent runs onboarding automatically:"}</Cm>
         <div className="mt-1">
+          <Dim>1.</Dim>
+          <Cm>{" POST /wallet/genesis  "}</Cm>
+          <Dim>→ TEE wallet + API key</Dim>
+        </div>
+        <div>
+          <Dim>2.</Dim>
+          <Cm>{" Open onboarding link  "}</Cm>
+          <Dim>→ set spend policy onchain</Dim>
+        </div>
+        <div>
+          <Dim>3.</Dim>
+          <Cm>{" GET /limits           "}</Cm>
+          <Dim>→ verify policy is active</Dim>
+        </div>
+        <div>
+          <Dim>4.</Dim>
+          <Cm>{" POST /pay             "}</Cm>
+          <Dim>→ policy-gated x402 payment</Dim>
+        </div>
+      </div>
+      <div className="mt-4 border-t border-white/8 pt-3">
+        <Cm>{"// Works with any agent — not just terminals:"}</Cm>
+        <div className="mt-1 flex flex-wrap gap-x-3">
           <Val>Claude Code</Val>
-          <Dim> · </Dim>
-          <Val>OpenClaw</Val>
-          <Dim> · </Dim>
-          <Val>Codex</Val>
-          <Dim> · </Dim>
-          <Val>Gemini CLI</Val>
-          <Dim> · </Dim>
-          <Val>Claude Desktop</Val>
-          <Dim> · </Dim>
+          <Dim>·</Dim>
           <Val>Cursor</Val>
+          <Dim>·</Dim>
+          <Val>Gemini CLI</Val>
+          <Dim>·</Dim>
+          <Val>Codex</Val>
+          <Dim>·</Dim>
+          <Val>Telegram bots</Val>
+          <Dim>·</Dim>
+          <Val>n8n</Val>
         </div>
       </div>
     </div>
@@ -217,10 +251,10 @@ const CODE: Record<Tab, React.ReactNode> = {
 };
 
 const TAB_DESCRIPTIONS: Record<Tab, string> = {
-  MCP: "Register ZenithPay as an MCP server. Your agent gets three tools — balance check, policy-gated payment, and spend limit control.",
-  API: "Call ZenithPay directly over HTTP. Every payment request is policy-checked and logged on X Layer before funds move.",
+  MCP: "Register ZenithPay as an MCP server. Your agent gets 6 tools — balance check, policy-gated x402 payment, spend limit read/write, merchant verification, and full audit trail.",
+  API: "Call ZenithPay directly over HTTP. Every payment request hits the onchain SpendPolicy contract before any funds move. Responses include txHash on X Layer.",
   Skill:
-    "One line to install. Your agent reads the skill file and gets all three ZenithPay tools instantly — balance, payments, and spend limits.",
+    "One curl command to install. The agent reads the skill, creates a TEE wallet, guides the human through policy activation onchain, then pays with full policy enforcement.",
 };
 
 export function IntegrationsSection() {
@@ -326,7 +360,6 @@ export function IntegrationsSection() {
 
           {/* Right: code panel */}
           <div className="relative flex-1 min-w-0 overflow-hidden">
-            {/* Code window chrome */}
             <div className="border border-border overflow-hidden">
               <div className="relative flex items-center px-3 h-8 border-b border-border bg-background">
                 <div className="flex items-center gap-1.5">
@@ -336,8 +369,10 @@ export function IntegrationsSection() {
                 </div>
                 <span className="absolute inset-0 flex items-center justify-center text-[10px] font-mono text-muted-foreground/40 pointer-events-none tracking-wide">
                   {activeTab === "Skill"
-                    ? "skill.md"
-                    : `${activeTab.toLowerCase().replace(" ", "-")}.ts`}
+                    ? "api.usezenithpay.xyz/skill.md"
+                    : activeTab === "MCP"
+                      ? ".claude/settings.json"
+                      : "zenithpay-pay.ts"}
                 </span>
               </div>
 
