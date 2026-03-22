@@ -5,11 +5,8 @@ export interface GenesisWalletRequest {
 
 export interface GenesisWalletResult {
   agentAddress: string;
+  apiKey: string;
   label: string | null;
-  balances: {
-    USDC: string;
-    OKB: string;
-  };
   createdAt: string;
   message: string;
 }
