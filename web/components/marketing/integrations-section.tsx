@@ -8,19 +8,19 @@ const TABS = ["MCP", "Skill", "API"] as const;
 type Tab = (typeof TABS)[number];
 
 function Cm({ children }: { children: React.ReactNode }) {
-  return <span className="text-white/25">{children}</span>;
+  return <span className="text-black/25 dark:text-white/25">{children}</span>;
 }
 function Kw({ children }: { children: React.ReactNode }) {
-  return <span className="text-white/50">{children}</span>;
+  return <span className="text-black/50 dark:text-white/50">{children}</span>;
 }
 function Str({ children }: { children: React.ReactNode }) {
-  return <span className="text-white/65">{children}</span>;
+  return <span className="text-black/65 dark:text-white/65">{children}</span>;
 }
 function Val({ children }: { children: React.ReactNode }) {
-  return <span className="text-white/85">{children}</span>;
+  return <span className="text-black/85 dark:text-white/85">{children}</span>;
 }
 function Dim({ children }: { children: React.ReactNode }) {
-  return <span className="text-white/40">{children}</span>;
+  return <span className="text-black/40 dark:text-white/40">{children}</span>;
 }
 function Acc({ children }: { children: React.ReactNode }) {
   return (
@@ -361,7 +361,7 @@ export function IntegrationsSection() {
           {/* Right: code panel */}
           <div className="relative flex-1 min-w-0 overflow-hidden">
             <div className="border border-border overflow-hidden">
-              <div className="relative flex items-center px-3 h-8 border-b border-border bg-background">
+              <div className="relative flex items-center px-3 h-8 border-b border-border bg-zinc-100 dark:bg-zinc-900">
                 <div className="flex items-center gap-1.5">
                   <span className="size-2 rounded-full bg-foreground/15" />
                   <span className="size-2 rounded-full bg-foreground/15" />
@@ -376,7 +376,7 @@ export function IntegrationsSection() {
                 </span>
               </div>
 
-              <div className="bg-[#0d0d0d] px-5 py-5 min-h-[320px]">
+              <div className="bg-zinc-50 dark:bg-[#0d0d0d] px-5 py-5 min-h-[320px]">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={activeTab}

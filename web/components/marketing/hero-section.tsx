@@ -4,6 +4,7 @@ import { ArrowRight, ArrowRightIcon, Copy, Check } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useState } from "react";
+import { toast } from "sonner";
 import { useConnection } from "wagmi";
 import { ZenithDither } from "@/components/bg/zenith-dither";
 import { LogoMark } from "@/components/logo-mark";
@@ -75,26 +76,31 @@ function QuickInstall() {
   const [copied, setCopied] = useState(false);
 
   function copy() {
-    navigator.clipboard.writeText(SKILL_INSTALL);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    navigator.clipboard.writeText(SKILL_INSTALL).then(() => {
+      setCopied(true);
+      toast.success("Copied to clipboard", {
+        description: "Paste into your agent to install ZenithPay",
+        duration: 2500,
+      });
+      setTimeout(() => setCopied(false), 2500);
+    });
   }
 
   return (
-    <div className="w-full max-w-md border border-border">
-      <div className="flex items-center justify-between px-3 py-2 border-b border-border">
+    <div className="w-full max-w-lg border border-border">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-border bg-muted/20">
         <span className="text-[10px] uppercase tracking-[0.18em] font-mono text-muted-foreground/60">
           Quick Install
         </span>
         <button
           type="button"
           onClick={copy}
-          className="flex items-center gap-1 text-[10px] font-mono text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-1.5 text-[10px] font-mono px-2 py-1 border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
         >
           {copied ? (
             <>
-              <Check className="size-3" />
-              Copied
+              <Check className="size-3" style={{ color: "var(--brand-accent)" }} />
+              <span style={{ color: "var(--brand-accent)" }}>Copied!</span>
             </>
           ) : (
             <>
@@ -104,8 +110,8 @@ function QuickInstall() {
           )}
         </button>
       </div>
-      <div className="px-3 py-2.5 bg-muted/30">
-        <code className="text-[11px] font-mono text-muted-foreground break-all">
+      <div className="px-4 py-3 bg-muted/10">
+        <code className="text-[12px] font-mono text-foreground/70 break-all select-all">
           {SKILL_INSTALL}
         </code>
       </div>
@@ -165,8 +171,8 @@ function AgentDemo() {
         </div>
       </div>
 
-      {/* Body */}
-      <div className="bg-[#0d0d0d] px-4 pt-3 pb-5 font-mono min-h-[300px]">
+      {/* Body — light bg by default, dark in dark mode */}
+      <div className="bg-zinc-50 dark:bg-[#0d0d0d] px-4 pt-3 pb-5 font-mono min-h-[300px]">
         {TERMINAL_LINES.map((line, i) => {
           if (line.type === "gap") {
             return <div key={line.id} className="h-2" />;
@@ -181,9 +187,9 @@ function AgentDemo() {
                 transition={{ delay: 0.1 + i * 0.08, duration: 0.15 }}
                 className="flex items-center gap-1 mt-1"
               >
-                <span className="text-white/50 text-[11px]">agent ~</span>
-                <span className="text-white/30 text-[11px]"> $</span>
-                <span className="inline-block w-[7px] h-[13px] bg-white/50 ml-0.5 animate-pulse" />
+                <span className="text-black/40 dark:text-white/50 text-[11px]">agent ~</span>
+                <span className="text-black/30 dark:text-white/30 text-[11px]"> $</span>
+                <span className="inline-block w-[7px] h-[13px] bg-black/40 dark:bg-white/50 ml-0.5 animate-pulse" />
               </motion.div>
             );
           }
@@ -204,20 +210,20 @@ function AgentDemo() {
               })}
             >
               {line.type === "comment" && (
-                <span className="text-white/20 text-[11px]">{line.text}</span>
+                <span className="text-black/25 dark:text-white/20 text-[11px]">{line.text}</span>
               )}
               {line.type === "prompt" && (
                 <>
-                  <span className="text-white/40 text-[11px] shrink-0 leading-[1.7]">
+                  <span className="text-black/35 dark:text-white/40 text-[11px] shrink-0 leading-[1.7]">
                     $
                   </span>
-                  <span className="text-white/80 text-[11px] break-all">
+                  <span className="text-black/75 dark:text-white/80 text-[11px] break-all">
                     {line.text}
                   </span>
                 </>
               )}
               {line.type === "output" && (
-                <span className="text-white/35 text-[11px] pl-2">
+                <span className="text-black/45 dark:text-white/35 text-[11px] pl-2">
                   {line.text}
                 </span>
               )}
@@ -234,7 +240,7 @@ function AgentDemo() {
                   <span style={{ color: "var(--brand-accent)" }}>
                     {line.text?.startsWith("✓") ? "✓" : ""}
                   </span>
-                  <span className="text-white/50">
+                  <span className="text-black/50 dark:text-white/50">
                     {line.text?.startsWith("✓")
                       ? line.text.slice(1)
                       : line.text}
@@ -297,7 +303,7 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: "easeOut", delay: 0.5 }}
-            className="mt-6"
+            className="mt-10"
           >
             <QuickInstall />
           </motion.div>
