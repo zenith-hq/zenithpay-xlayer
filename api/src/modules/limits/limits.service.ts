@@ -8,6 +8,7 @@ import { policies } from "../../db/schema/policies";
 import { unitsToUsdc } from "../../utils";
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+
 import type {
   AgentPolicy,
   SetLimitsRequest,
@@ -121,7 +122,10 @@ export async function setLimits(
       // Auto-link: first human to activate becomes the owner — atomic with policy set
       await db
         .update(agents)
-        .set({ ownerEoa: signer })
+        .set({
+          ownerEoa: signer,
+          ...(request.label !== undefined ? { label: request.label } : {}),
+        })
         .where(
           and(
             eq(agents.address, request.agentAddress.toLowerCase()),
@@ -130,6 +134,11 @@ export async function setLimits(
         );
     } else if (ownerLower !== signerLower) {
       throw new Error("Unauthorized: signer is not the agent owner");
+    } else if (request.label !== undefined) {
+      await db
+        .update(agents)
+        .set({ label: request.label })
+        .where(eq(agents.address, request.agentAddress.toLowerCase()));
     }
   }
 

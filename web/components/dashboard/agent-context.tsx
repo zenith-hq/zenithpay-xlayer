@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 import { useConnection } from "wagmi";
-import { getAgentsByOwner } from "@/lib/api";
+import { getAgentByAddress, getAgentsByOwner } from "@/lib/api";
 
 const FALLBACK_AGENT =
   process.env.NEXT_PUBLIC_AGENT_ADDRESS ??
@@ -50,15 +50,22 @@ export function AgentProvider({ children }: { children: ReactNode }) {
     setLoading(true);
 
     getAgentsByOwner(address)
-      .then((res) => {
+      .then(async (res) => {
         if (cancelled) return;
         const first = res.agents[0];
         if (first) {
           setAgentAddress(first.address);
           setAgentLabel(first.label);
-        } else {
-          setAgentAddress(FALLBACK_AGENT);
-          setAgentLabel(null);
+          return;
+        }
+        // owner_eoa mismatch — look up by known agent address directly
+        try {
+          const byAddr = await getAgentByAddress(FALLBACK_AGENT);
+          if (!cancelled && byAddr.agents[0]) {
+            setAgentLabel(byAddr.agents[0].label);
+          }
+        } catch {
+          // no-op — label stays null, address stays FALLBACK_AGENT
         }
       })
       .catch(() => {

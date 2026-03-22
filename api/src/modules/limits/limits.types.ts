@@ -17,6 +17,7 @@ export interface SetLimitsRequest {
   approvalThreshold?: string;
   autoSwapEnabled?: boolean;
   swapSlippageTolerance?: string;
+  label?: string;
   humanSignature: string;
   /** Required for browser onboarding path (POST /limits). Omit for direct MCP tool calls. */
   timestamp?: number;

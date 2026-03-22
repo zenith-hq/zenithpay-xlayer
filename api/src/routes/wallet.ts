@@ -40,7 +40,9 @@ wallet.post(
   },
 );
 
-function toBalanceResponse(b: Awaited<ReturnType<typeof balanceService.getBalance>>) {
+function toBalanceResponse(
+  b: Awaited<ReturnType<typeof balanceService.getBalance>>,
+) {
   return {
     agentAddress: b.address,
     usdcBalance: b.balances.USDC,
@@ -70,8 +72,16 @@ wallet.get("/balance", async (c) => {
 
 wallet.get("/agents", async (c) => {
   const ownerEoa = c.req.header("X-Owner-Address") ?? "";
+  const agentAddress = c.req.query("address");
 
   try {
+    if (agentAddress) {
+      const agent = await walletService.getAgentByAddress(agentAddress);
+      return c.json({
+        agents: agent ? [{ address: agent.address, label: agent.label }] : [],
+      });
+    }
+
     const agents = await walletService.getAgentsByOwner(ownerEoa);
     return c.json({
       agents: agents.map((a) => ({ address: a.address, label: a.label })),

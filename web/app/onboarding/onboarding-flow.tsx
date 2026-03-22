@@ -101,6 +101,7 @@ export function OnboardingFlow() {
   const [approvalThreshold, setApprovalThreshold] = useState<string>(
     PRESETS.balanced.approvalThreshold,
   );
+  const [agentName, setAgentName] = useState<string>("");
   const [signing, setSigning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -154,6 +155,7 @@ export function OnboardingFlow() {
         approvalThreshold,
         autoSwapEnabled: true,
         swapSlippageTolerance: "0.01",
+        label: agentName.trim() || undefined,
         humanSignature: signature,
         timestamp,
       });
@@ -348,6 +350,23 @@ export function OnboardingFlow() {
             <h2 className="text-sm font-medium uppercase tracking-wider">
               Set Spend Policy
             </h2>
+          </div>
+
+          {/* Agent name */}
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="agentName"
+              className="text-xs uppercase tracking-wider"
+            >
+              Agent Name
+            </Label>
+            <Input
+              id="agentName"
+              className="rounded-none font-mono text-xs"
+              placeholder="e.g. Shopping Agent, Research Bot"
+              value={agentName}
+              onChange={(e) => setAgentName(e.target.value)}
+            />
           </div>
 
           {/* Presets */}

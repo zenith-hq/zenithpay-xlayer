@@ -79,6 +79,15 @@ export async function getAgentsByOwner(ownerEoa: string) {
   return db.select().from(agents).where(eq(agents.ownerEoa, ownerEoa));
 }
 
+export async function getAgentByAddress(agentAddress: string) {
+  const db = getDb();
+  const [row] = await db
+    .select()
+    .from(agents)
+    .where(eq(agents.address, agentAddress.toLowerCase()));
+  return row ?? null;
+}
+
 export async function linkAgent(
   agentAddress: string,
   ownerAddress: string,

@@ -85,7 +85,9 @@ export interface GenesisResult {
   message: string;
 }
 
-export async function getBalance(agentAddress: string): Promise<BalanceResult | null> {
+export async function getBalance(
+  agentAddress: string,
+): Promise<BalanceResult | null> {
   const res = await apiFetch<{ agents: BalanceResult[] }>(
     `/wallet/balance?address=${agentAddress}`,
   );
@@ -123,6 +125,7 @@ export function setLimits(params: {
   approvalThreshold?: string;
   autoSwapEnabled?: boolean;
   swapSlippageTolerance?: string;
+  label?: string;
   humanSignature: string;
   timestamp: number;
 }) {
@@ -208,4 +211,10 @@ export function getAgentsByOwner(ownerAddress: string) {
   return apiFetch<{ agents: AgentInfo[] }>("/wallet/agents", {
     headers: { "X-Owner-Address": ownerAddress },
   });
+}
+
+export function getAgentByAddress(agentAddress: string) {
+  return apiFetch<{ agents: AgentInfo[] }>(
+    `/wallet/agents?address=${agentAddress}`,
+  );
 }
