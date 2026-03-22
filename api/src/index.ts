@@ -1,12 +1,25 @@
+import { existsSync } from "node:fs";
 import { $ } from "bun";
 import { app } from "./app";
 import { env } from "./env";
 
-// onchainos installs to /root/.local/bin which is not in PATH in Railway's
-// non-login shell. Prepend it so Bun.spawn and Bun.$ both resolve the binary.
-process.env.PATH = `/root/.local/bin:${process.env.PATH}`;
-
 async function authenticateCLI() {
+  const bin = Bun.which("onchainos");
+  if (!bin) {
+    const locations = [
+      "/root/.local/bin/onchainos",
+      "/usr/local/bin/onchainos",
+    ];
+    console.error("onchainos binary not found in PATH");
+    for (const loc of locations) {
+      console.error(`  ${loc}: ${existsSync(loc) ? "EXISTS but not in PATH" : "NOT FOUND"}`);
+    }
+    console.error("  PATH:", process.env.PATH);
+    return;
+  }
+
+  console.log(`onchainos found at ${bin}`);
+
   try {
     const status = await $`onchainos wallet status`.json();
     if (status.ok && status.data?.loggedIn) {
