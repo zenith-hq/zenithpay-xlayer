@@ -5,8 +5,8 @@ nixPkgs = ["bun", "curl", "bash"]
 cmds = [
   "bun install --frozen-lockfile",
   "curl -sSL https://raw.githubusercontent.com/okx/onchainos-skills/main/install.sh | sh",
-  "cp /root/.local/bin/onchainos /usr/local/bin/onchainos || true"
+  "cp /root/.local/bin/onchainos /usr/bin/onchainos"
 ]
 
 [start]
-cmd = "PATH=/root/.local/bin:/usr/local/bin:$PATH bun run src/index.ts"
+cmd = "bun run src/index.ts"

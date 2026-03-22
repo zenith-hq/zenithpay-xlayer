@@ -1,4 +1,3 @@
-import { existsSync } from "node:fs";
 import { $ } from "bun";
 import { app } from "./app";
 import { env } from "./env";
@@ -6,15 +5,7 @@ import { env } from "./env";
 async function authenticateCLI() {
   const bin = Bun.which("onchainos");
   if (!bin) {
-    const locations = [
-      "/root/.local/bin/onchainos",
-      "/usr/local/bin/onchainos",
-    ];
-    console.error("onchainos binary not found in PATH");
-    for (const loc of locations) {
-      console.error(`  ${loc}: ${existsSync(loc) ? "EXISTS but not in PATH" : "NOT FOUND"}`);
-    }
-    console.error("  PATH:", process.env.PATH);
+    console.error("onchainos binary not found in PATH:", process.env.PATH);
     return;
   }
 
