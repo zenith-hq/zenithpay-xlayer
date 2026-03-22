@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { CreditCard, ExternalLink, Loader2 } from "lucide-react";
+import { ExternalLink, Loader2 } from "lucide-react";
+import { FlaskConical } from "lucide-react";
 import { type PaymentResult, executePayment } from "@/lib/api";
 import { useAgent } from "@/components/dashboard/agent-context";
 
@@ -142,9 +143,10 @@ export default function PayPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Pay</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Demo</h1>
         <p className="text-sm text-muted-foreground">
-          Execute policy-gated x402 payments through the agent
+          Trigger a test payment to see the full policy enforcement flow live.
+          In production, your agent executes this automatically via the skill.
         </p>
       </div>
 
@@ -152,8 +154,8 @@ export default function PayPage() {
         <Card className="rounded-none border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm font-medium uppercase tracking-wider">
-              <CreditCard className="size-4" />
-              New Payment
+              <FlaskConical className="size-4" />
+              Test Payment
             </CardTitle>
           </CardHeader>
           <CardContent>

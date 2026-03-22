@@ -2,7 +2,6 @@
 
 import {
   BookOpen,
-  CreditCard,
   LayoutDashboard,
   ScrollText,
   Settings,
@@ -30,7 +29,6 @@ import { UserDropdown } from "@/components/user-dropdown";
 
 const mainNav = [
   { title: "Overview", href: "/dashboard", icon: LayoutDashboard, exact: true },
-  { title: "Pay", href: "/dashboard/pay", icon: CreditCard, exact: false },
   { title: "Limits", href: "/dashboard/limits", icon: Shield, exact: false },
   { title: "Ledger", href: "/dashboard/ledger", icon: ScrollText, exact: false },
   { title: "Approvals", href: "/dashboard/approvals", icon: ShieldCheck, exact: false },
