@@ -40,18 +40,27 @@ wallet.post(
   },
 );
 
+function toBalanceResponse(b: Awaited<ReturnType<typeof balanceService.getBalance>>) {
+  return {
+    agentAddress: b.address,
+    usdcBalance: b.balances.USDC,
+    okbBalance: b.balances.OKB,
+    remainingDailyBudget: b.remainingDailyBudget ?? null,
+  };
+}
+
 wallet.get("/balance", async (c) => {
   const address = c.req.query("address");
 
   try {
     if (address) {
       const result = await balanceService.getBalance(address);
-      return c.json({ agents: [result] });
+      return c.json({ agents: [toBalanceResponse(result)] });
     }
 
     const ownerEoa = c.req.header("X-Owner-Address") ?? "";
     const results = await balanceService.getAllAgentBalances(ownerEoa);
-    return c.json({ agents: results });
+    return c.json({ agents: results.map(toBalanceResponse) });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Balance query failed";

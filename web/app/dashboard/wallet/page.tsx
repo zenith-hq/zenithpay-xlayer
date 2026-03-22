@@ -1,14 +1,14 @@
 "use client";
 
+import { Copy, ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useConnection } from "wagmi";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
-import { Copy, ExternalLink } from "lucide-react";
-import { type BalanceResult, getBalance } from "@/lib/api";
 import { useAgent } from "@/components/dashboard/agent-context";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { type BalanceResult, getBalance } from "@/lib/api";
 
 const EXPLORER_URL = "https://www.oklink.com/xlayer";
 
@@ -75,7 +75,9 @@ export default function WalletPage() {
                   <Copy className="size-3" />
                 </Button>
                 {copied === "agent" && (
-                  <span className="text-[10px] text-muted-foreground">Copied</span>
+                  <span className="text-[10px] text-muted-foreground">
+                    Copied
+                  </span>
                 )}
               </div>
             </div>
@@ -91,7 +93,10 @@ export default function WalletPage() {
               <span className="text-xs text-muted-foreground uppercase tracking-wider">
                 Type
               </span>
-              <Badge variant="outline" className="rounded-none text-xs font-mono">
+              <Badge
+                variant="outline"
+                className="rounded-none text-xs font-mono"
+              >
                 OKX TEE Wallet
               </Badge>
             </div>
@@ -198,7 +203,9 @@ export default function WalletPage() {
           <CardContent>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <code className="text-xs font-mono">{shortenAddress(address)}</code>
+                <code className="text-xs font-mono">
+                  {shortenAddress(address)}
+                </code>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -208,10 +215,15 @@ export default function WalletPage() {
                   <Copy className="size-3" />
                 </Button>
                 {copied === "owner" && (
-                  <span className="text-[10px] text-muted-foreground">Copied</span>
+                  <span className="text-[10px] text-muted-foreground">
+                    Copied
+                  </span>
                 )}
               </div>
-              <Badge variant="outline" className="rounded-none text-xs font-mono">
+              <Badge
+                variant="outline"
+                className="rounded-none text-xs font-mono"
+              >
                 Owner / Policy Signer
               </Badge>
             </div>

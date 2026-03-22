@@ -85,16 +85,15 @@ export interface GenesisResult {
   message: string;
 }
 
-export function getBalance(agentAddress: string) {
-  return apiFetch<BalanceResult>(
+export async function getBalance(agentAddress: string): Promise<BalanceResult | null> {
+  const res = await apiFetch<{ agents: BalanceResult[] }>(
     `/wallet/balance?address=${agentAddress}`,
   );
+  return res.agents[0] ?? null;
 }
 
 export function getLimits(agentAddress: string) {
-  return apiFetch<{ agents: AgentPolicy[] }>(
-    `/limits?address=${agentAddress}`,
-  );
+  return apiFetch<{ agents: AgentPolicy[] }>(`/limits?address=${agentAddress}`);
 }
 
 export function getLimitsForOwner(ownerAddress: string) {
@@ -144,15 +143,23 @@ export function getApprovals(agentAddress?: string) {
   return apiFetch<{ approvals: PendingApproval[] }>(`/approvals${query}`);
 }
 
-export function approvePayment(approvalId: string) {
+export function approvePayment(
+  approvalId: string,
+  body: { humanSignature: string; timestamp: number },
+) {
   return apiFetch<PaymentResult>(`/approvals/${approvalId}/approve`, {
     method: "POST",
+    body: JSON.stringify(body),
   });
 }
 
-export function denyPayment(approvalId: string) {
+export function denyPayment(
+  approvalId: string,
+  body: { humanSignature: string; timestamp: number },
+) {
   return apiFetch<{ status: string }>(`/approvals/${approvalId}/deny`, {
     method: "POST",
+    body: JSON.stringify(body),
   });
 }
 

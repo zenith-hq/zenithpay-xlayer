@@ -68,7 +68,9 @@ export default function OnboardingPage() {
           <ModeToggle className="absolute top-2 right-2 dark:hover:bg-transparent w-auto h-auto" />
           <div className="flex min-h-full items-center justify-center p-8">
             <div className="w-full max-w-lg">
-              <Suspense fallback={<div className="size-8 animate-pulse bg-muted" />}>
+              <Suspense
+                fallback={<div className="size-8 animate-pulse bg-muted" />}
+              >
                 <OnboardingFlow />
               </Suspense>
             </div>

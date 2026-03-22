@@ -40,7 +40,10 @@ function LandingNavActions() {
     <div className="flex items-center gap-2">
       <Button
         asChild
-        style={{ background: "var(--brand-accent)", color: "var(--background)" }}
+        style={{
+          background: "var(--brand-accent)",
+          color: "var(--background)",
+        }}
         className="rounded-none cursor-pointer relative overflow-hidden focus-visible:ring-0 h-9 px-4 hover:opacity-90 transition-opacity"
       >
         <Link href="/overview">

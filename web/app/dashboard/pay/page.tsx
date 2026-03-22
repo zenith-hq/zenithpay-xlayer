@@ -1,15 +1,14 @@
 "use client";
 
+import { ExternalLink, FlaskConical, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAgent } from "@/components/dashboard/agent-context";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ExternalLink, Loader2 } from "lucide-react";
-import { FlaskConical } from "lucide-react";
-import { type PaymentResult, executePayment } from "@/lib/api";
-import { useAgent } from "@/components/dashboard/agent-context";
+import { executePayment, type PaymentResult } from "@/lib/api";
 
 const EXPLORER_URL = "https://www.oklink.com/xlayer";
 
@@ -103,7 +102,9 @@ function StatusDisplay({ result }: { result: PaymentResult }) {
           <span className="text-xs text-muted-foreground uppercase tracking-wider">
             Budget remaining
           </span>
-          <span className="text-sm font-mono">${result.remainingDailyBudget}</span>
+          <span className="text-sm font-mono">
+            ${result.remainingDailyBudget}
+          </span>
         </div>
       )}
     </div>
@@ -161,7 +162,10 @@ export default function PayPage() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <Label htmlFor="serviceUrl" className="text-xs uppercase tracking-wider">
+                <Label
+                  htmlFor="serviceUrl"
+                  className="text-xs uppercase tracking-wider"
+                >
                   Service URL
                 </Label>
                 <Input
@@ -178,7 +182,10 @@ export default function PayPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="maxAmount" className="text-xs uppercase tracking-wider">
+                <Label
+                  htmlFor="maxAmount"
+                  className="text-xs uppercase tracking-wider"
+                >
                   Max Amount (USDC)
                 </Label>
                 <Input
@@ -192,7 +199,10 @@ export default function PayPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="intent" className="text-xs uppercase tracking-wider">
+                <Label
+                  htmlFor="intent"
+                  className="text-xs uppercase tracking-wider"
+                >
                   Intent
                 </Label>
                 <Textarea

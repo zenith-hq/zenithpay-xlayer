@@ -25,6 +25,14 @@ export async function authMiddleware(c: Context, next: Next) {
     return next();
   }
 
+  // Dynamic approval routes — signature verification happens inside the route
+  if (
+    c.req.method === "POST" &&
+    /^\/approvals\/[^/]+\/(approve|deny)$/.test(c.req.path)
+  ) {
+    return next();
+  }
+
   const authHeader = c.req.header("Authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return c.json(

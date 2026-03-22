@@ -1,14 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useConnection, useSignMessage } from "wagmi";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   AlertTriangle,
   Copy,
@@ -18,12 +9,17 @@ import {
   Loader2,
   Settings,
 } from "lucide-react";
-import {
-  type AgentPolicy,
-  getLimitsForOwner,
-  setLimits,
-} from "@/lib/api";
+import { useEffect, useState } from "react";
+import { useConnection, useSignMessage } from "wagmi";
 import { useAgent } from "@/components/dashboard/agent-context";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
+import { type AgentPolicy, getLimitsForOwner, setLimits } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 const EXPLORER_URL = "https://www.oklink.com/xlayer";
@@ -112,7 +108,11 @@ export default function SettingsPage() {
       }
       setPolicy((prev) =>
         prev
-          ? { ...prev, autoSwapEnabled: res.autoSwapEnabled, swapSlippageTolerance: res.swapSlippageTolerance }
+          ? {
+              ...prev,
+              autoSwapEnabled: res.autoSwapEnabled,
+              swapSlippageTolerance: res.swapSlippageTolerance,
+            }
           : prev,
       );
       setSaved(true);
@@ -145,9 +145,14 @@ export default function SettingsPage() {
             <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
               Active Agent
             </p>
-            <p className="text-xs text-muted-foreground mt-0.5">1 active agent</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              1 active agent
+            </p>
           </div>
-          <Badge variant="outline" className="rounded-none text-[10px] font-mono">
+          <Badge
+            variant="outline"
+            className="rounded-none text-[10px] font-mono"
+          >
             OKX TEE · X Layer 196
           </Badge>
         </div>
@@ -167,7 +172,9 @@ export default function SettingsPage() {
                 <Copy className="size-3" />
               </button>
               {copied === "agent" && (
-                <span className="text-[10px] text-muted-foreground">Copied</span>
+                <span className="text-[10px] text-muted-foreground">
+                  Copied
+                </span>
               )}
             </div>
 
@@ -232,7 +239,10 @@ export default function SettingsPage() {
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="slippage" className="text-xs uppercase tracking-wider">
+            <Label
+              htmlFor="slippage"
+              className="text-xs uppercase tracking-wider"
+            >
               Slippage Tolerance
             </Label>
             <Input
@@ -305,7 +315,11 @@ export default function SettingsPage() {
                 className="size-9 rounded-none shrink-0"
                 onClick={() => setShowKey((v) => !v)}
               >
-                {showKey ? <EyeOff className="size-3" /> : <Eye className="size-3" />}
+                {showKey ? (
+                  <EyeOff className="size-3" />
+                ) : (
+                  <Eye className="size-3" />
+                )}
               </Button>
               <Button
                 variant="ghost"
@@ -322,7 +336,9 @@ export default function SettingsPage() {
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs uppercase tracking-wider">Agent Skill</Label>
+            <Label className="text-xs uppercase tracking-wider">
+              Agent Skill
+            </Label>
             <div className="flex items-center gap-2">
               <Input
                 className="rounded-none font-mono text-xs"

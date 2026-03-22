@@ -3,6 +3,7 @@
 import { LayoutDashboard, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useConnect, useConnection, useConnectors, useDisconnect } from "wagmi";
+import { useAgent } from "@/components/dashboard/agent-context";
 import ModeToggle from "@/components/theme-toggle/mode-toggle";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +14,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAgent } from "@/components/dashboard/agent-context";
 
 function truncateAddress(address: string) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -62,7 +62,10 @@ export function UserDropdown() {
           </div>
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="rounded-none border-border w-48">
+      <DropdownMenuContent
+        align="end"
+        className="rounded-none border-border w-48"
+      >
         <DropdownMenuLabel className="font-normal">
           <div className="space-y-0.5">
             <p className="text-xs font-medium">{agentDisplayName}</p>

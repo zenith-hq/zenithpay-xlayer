@@ -12,7 +12,7 @@ export interface LedgerEntry {
   txHash?: string | null;
   swapUsed: boolean;
   okbSpent?: string | null;
-  timestamp: string;
+  createdAt: string;
 }
 
 export interface LedgerQuery {

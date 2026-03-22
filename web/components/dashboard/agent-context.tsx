@@ -2,10 +2,10 @@
 
 import {
   createContext,
+  type ReactNode,
   useContext,
   useEffect,
   useState,
-  type ReactNode,
 } from "react";
 import { useConnection } from "wagmi";
 import { getAgentsByOwner } from "@/lib/api";
@@ -79,7 +79,9 @@ export function AgentProvider({ children }: { children: ReactNode }) {
   const agentDisplayName = deriveDisplayName(agentLabel, agentAddress);
 
   return (
-    <AgentContext.Provider value={{ agentAddress, agentLabel, agentDisplayName, loading }}>
+    <AgentContext.Provider
+      value={{ agentAddress, agentLabel, agentDisplayName, loading }}
+    >
       {children}
     </AgentContext.Provider>
   );

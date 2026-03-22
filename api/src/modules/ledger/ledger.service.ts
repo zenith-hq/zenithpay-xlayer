@@ -44,7 +44,7 @@ export async function getTransactions(
     txHash: r.txHash,
     swapUsed: r.swapUsed,
     okbSpent: r.okbSpent,
-    timestamp: r.timestamp.toISOString(),
+    createdAt: r.timestamp.toISOString(),
   }));
 
   return {
@@ -56,7 +56,7 @@ export async function getTransactions(
 }
 
 export async function writeTransaction(
-  entry: Omit<LedgerEntry, "id" | "timestamp">,
+  entry: Omit<LedgerEntry, "id" | "createdAt">,
 ): Promise<LedgerEntry> {
   const db = getDb();
   const id = generateId("txn");
@@ -80,6 +80,6 @@ export async function writeTransaction(
   return {
     ...entry,
     id,
-    timestamp: now.toISOString(),
+    createdAt: now.toISOString(),
   };
 }

@@ -137,7 +137,7 @@ export async function setLimits(
   await db
     .insert(policies)
     .values({
-      agentAddress: request.agentAddress,
+      agentAddress: request.agentAddress.toLowerCase(),
       perTxLimit: request.perTxLimit,
       dailyBudget: request.dailyBudget,
       allowlist: request.allowlist ?? [],

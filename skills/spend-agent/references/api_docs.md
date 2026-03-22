@@ -15,8 +15,8 @@
 | `GET /ledger` | None — public read |
 | `GET /approvals` | None — public read |
 | `POST /pay` | Bearer `zpk_...` required |
-| `POST /approvals/:id/approve` | Bearer `zpk_...` required |
-| `POST /approvals/:id/deny` | Bearer `zpk_...` required |
+| `POST /approvals/:id/approve` | None — authorized via `humanSignature` in body |
+| `POST /approvals/:id/deny` | None — authorized via `humanSignature` in body |
 
 ---
 
@@ -334,7 +334,20 @@ List pending payments awaiting human review. Public read — no auth required.
 ### POST /approvals/:id/approve
 Approve a pending payment. Executes immediately — runs full pay flow (balance check → swap if needed → x402 settle → ledger).
 
-**Auth:** `Authorization: Bearer zpk_...`
+Authorized via `humanSignature` — same EIP-191 pattern as `POST /limits`. No Bearer token needed.
+
+**Request**
+```json
+{
+  "humanSignature": "0x...",
+  "timestamp": 1711234567890
+}
+```
+
+The `humanSignature` must be an EIP-191 personal_sign of:
+```json
+{"action":"approve","approvalId":"apr_01abc","timestamp":1711234567890}
+```
 
 **Response**
 ```json
@@ -346,17 +359,42 @@ Approve a pending payment. Executes immediately — runs full pay flow (balance 
 }
 ```
 
+**Errors**
+- `400` — missing humanSignature or timestamp
+- `403` — signer is not the agent's owner
+- `404` — approval not found
+- `409` — approval already resolved
+
 ---
 
 ### POST /approvals/:id/deny
 Deny a pending payment. Cancels and logs to ledger as `denied`.
 
-**Auth:** `Authorization: Bearer zpk_...`
+Authorized via `humanSignature` — same EIP-191 pattern as `POST /limits`. No Bearer token needed.
+
+**Request**
+```json
+{
+  "humanSignature": "0x...",
+  "timestamp": 1711234567890
+}
+```
+
+The `humanSignature` must be an EIP-191 personal_sign of:
+```json
+{"action":"deny","approvalId":"apr_01abc","timestamp":1711234567890}
+```
 
 **Response**
 ```json
 { "status": "denied" }
 ```
+
+**Errors**
+- `400` — missing humanSignature or timestamp
+- `403` — signer is not the agent's owner
+- `404` — approval not found
+- `409` — approval already resolved
 
 ---
 

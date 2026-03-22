@@ -33,12 +33,27 @@ import { UserDropdown } from "@/components/user-dropdown";
 const mainNav = [
   { title: "Overview", href: "/dashboard", icon: LayoutDashboard, exact: true },
   { title: "Limits", href: "/dashboard/limits", icon: Shield, exact: false },
-  { title: "Ledger", href: "/dashboard/ledger", icon: ScrollText, exact: false },
-  { title: "Approvals", href: "/dashboard/approvals", icon: ShieldCheck, exact: false },
+  {
+    title: "Ledger",
+    href: "/dashboard/ledger",
+    icon: ScrollText,
+    exact: false,
+  },
+  {
+    title: "Approvals",
+    href: "/dashboard/approvals",
+    icon: ShieldCheck,
+    exact: false,
+  },
 ];
 
 const accountNav = [
-  { title: "Settings", href: "/dashboard/settings", icon: Settings, exact: false },
+  {
+    title: "Settings",
+    href: "/dashboard/settings",
+    icon: Settings,
+    exact: false,
+  },
 ];
 
 export function AppSidebar() {
@@ -97,7 +112,9 @@ export function AppSidebar() {
                 >
                   <CreditCard className="size-4" />
                   <span>Agent Card</span>
-                  <span className="ml-auto text-[9px] font-mono uppercase tracking-wider opacity-70">soon</span>
+                  <span className="ml-auto text-[9px] font-mono uppercase tracking-wider opacity-70">
+                    soon
+                  </span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
@@ -108,7 +125,9 @@ export function AppSidebar() {
                 >
                   <Zap className="size-4" />
                   <span>Agent Credit</span>
-                  <span className="ml-auto text-[9px] font-mono uppercase tracking-wider opacity-70">soon</span>
+                  <span className="ml-auto text-[9px] font-mono uppercase tracking-wider opacity-70">
+                    soon
+                  </span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -143,7 +162,11 @@ export function AppSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Documentation">
-                  <Link href="https://docs.usezenithpay.xyz" target="_blank" rel="noopener noreferrer">
+                  <Link
+                    href="https://docs.usezenithpay.xyz"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <BookOpen className="size-4" />
                     <span>Documentation</span>
                     <ExternalLink className="size-3 ml-auto opacity-50" />
