@@ -304,8 +304,12 @@ export function IntegrationsSection() {
                       : "text-muted-foreground hover:text-foreground",
                   )}
                 >
-                  <span className="font-mono text-xs uppercase tracking-[0.15em]">
-                    {tab}
+                  <span className="font-mono text-xs tracking-[0.15em]">
+                    {tab === "SKILL.md" ? (
+                      <><span className="uppercase">SKILL</span>.md</>
+                    ) : (
+                      <span className="uppercase">{tab}</span>
+                    )}
                   </span>
                   <span
                     className={cn(
