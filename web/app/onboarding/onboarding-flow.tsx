@@ -3,15 +3,12 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useConnect, useConnection, useConnectors, useSignMessage } from "wagmi";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LogoMark } from "@/components/logo-mark";
 import {
   Check,
-  ChevronRight,
   Copy,
   Loader2,
   Shield,
@@ -24,21 +21,21 @@ type Step = "connect" | "policy" | "signing" | "fund" | "done";
 const PRESETS = {
   conservative: {
     label: "Conservative",
-    description: "$0.10 per tx, $1 daily",
+    description: "$0.10 / tx · $1 daily",
     perTxLimit: "0.10",
     dailyBudget: "1.00",
     approvalThreshold: "0.05",
   },
   balanced: {
     label: "Balanced",
-    description: "$0.25 per tx, $3 daily",
+    description: "$0.25 / tx · $3 daily",
     perTxLimit: "0.25",
     dailyBudget: "3.00",
     approvalThreshold: "0.10",
   },
   open: {
     label: "Open",
-    description: "$1 per tx, $10 daily",
+    description: "$1 / tx · $10 daily",
     perTxLimit: "1.00",
     dailyBudget: "10.00",
     approvalThreshold: "0.50",
@@ -46,6 +43,18 @@ const PRESETS = {
 } as const;
 
 const XLAYER_USDC = "0x74b7f16337b8972027f6196a17a631ac6de26d22";
+
+const STEPS: { key: Step; label: string }[] = [
+  { key: "connect", label: "Connect" },
+  { key: "policy", label: "Policy" },
+  { key: "fund", label: "Fund" },
+  { key: "done", label: "Done" },
+];
+
+function stepIndex(step: Step): number {
+  if (step === "signing") return 1;
+  return STEPS.findIndex((s) => s.key === step);
+}
 
 export function OnboardingFlow() {
   const searchParams = useSearchParams();
@@ -59,25 +68,20 @@ export function OnboardingFlow() {
   const [step, setStep] = useState<Step>(isConnected ? "policy" : "connect");
 
   useEffect(() => {
-    if (isConnected && step === "connect") {
-      setStep("policy");
-    }
+    if (isConnected && step === "connect") setStep("policy");
   }, [isConnected, step]);
+
   const [selectedPreset, setSelectedPreset] =
     useState<keyof typeof PRESETS>("balanced");
+  const [agentLabel, setAgentLabel] = useState("");
   const [perTxLimit, setPerTxLimit] = useState<string>(PRESETS.balanced.perTxLimit);
   const [dailyBudget, setDailyBudget] = useState<string>(PRESETS.balanced.dailyBudget);
   const [approvalThreshold, setApprovalThreshold] = useState<string>(
     PRESETS.balanced.approvalThreshold,
   );
-  const [agentLabel, setAgentLabel] = useState("");
   const [signing, setSigning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-
-  function handleConnect() {
-    connect({ connector: connectors[0] });
-  }
 
   function applyPreset(key: keyof typeof PRESETS) {
     setSelectedPreset(key);
@@ -90,7 +94,6 @@ export function OnboardingFlow() {
     if (!agentAddress || !address) return;
     setSigning(true);
     setError(null);
-
     try {
       const message = JSON.stringify({
         agentAddress,
@@ -99,14 +102,11 @@ export function OnboardingFlow() {
         timestamp: Date.now(),
       });
       const signature = await signMessageAsync({ message });
-
       setStep("signing");
-
       await createGenesisWallet(
         { label: agentLabel.trim() || undefined },
         address,
       );
-
       await setLimits({
         agentAddress,
         perTxLimit,
@@ -116,7 +116,6 @@ export function OnboardingFlow() {
         swapSlippageTolerance: "0.01",
         humanSignature: signature,
       });
-
       setStep("fund");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to set policy");
@@ -135,23 +134,29 @@ export function OnboardingFlow() {
 
   if (!agentAddress) {
     return (
-      <Card className="w-full max-w-md">
-        <CardContent className="pt-6 text-center">
-          <p className="text-sm text-muted-foreground">
-            Missing agent address. Use the deep link from your agent terminal:
-          </p>
-          <code className="mt-2 block text-xs">
-            usezenithpay.xyz/onboarding?agent=0x...
-          </code>
-        </CardContent>
-      </Card>
+      <div className="border border-dashed p-8 text-center space-y-2">
+        <p className="text-sm text-muted-foreground">
+          Missing agent address. Use the deep link from your agent terminal:
+        </p>
+        <code className="text-xs font-mono">
+          usezenithpay.xyz/onboarding?agent=0x...
+        </code>
+      </div>
     );
   }
 
+  const currentIdx = stepIndex(step);
+
   return (
-    <div className="w-full max-w-lg space-y-6">
-      <div className="text-center space-y-2">
-        <LogoMark className="mx-auto size-8" />
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="space-y-1">
+        <div className="flex items-center gap-2">
+          <LogoMark className="size-5" />
+          <span className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
+            ZenithPay
+          </span>
+        </div>
         <h1 className="text-2xl font-semibold tracking-tight">
           Activate Your Agent
         </h1>
@@ -160,292 +165,331 @@ export function OnboardingFlow() {
         </p>
       </div>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-medium">Agent Detected</CardTitle>
-            <Badge variant="outline">X Layer (196)</Badge>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <code className="text-xs break-all">{agentAddress}</code>
-        </CardContent>
-      </Card>
+      {/* Agent detected */}
+      <div className="border border-dashed p-3 flex items-center justify-between">
+        <div>
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">
+            Agent detected
+          </p>
+          <code className="text-xs font-mono text-foreground break-all">
+            {agentAddress}
+          </code>
+        </div>
+        <span className="text-[10px] border px-1.5 py-0.5 font-mono text-muted-foreground shrink-0 ml-4">
+          X Layer · 196
+        </span>
+      </div>
 
       {/* Progress */}
-      {(() => {
-        const steps: { key: Step; label: string }[] = [
-          { key: "connect", label: "Connect" },
-          { key: "policy", label: "Policy" },
-          { key: "fund", label: "Fund" },
-          { key: "done", label: "Done" },
-        ];
-        const currentIdx = steps.findIndex((s) => s.key === step || (step === "signing" && s.key === "policy"));
-        return (
-          <div className="flex items-center gap-0">
-            {steps.map((s, idx) => {
-              const isDone = idx < currentIdx;
-              const isActive = idx === currentIdx;
-              return (
-                <div key={s.key} className="flex items-center">
-                  <div
-                    className={`flex size-6 items-center justify-center border text-[10px] font-mono ${
-                      isDone
-                        ? "border-foreground bg-foreground text-background"
-                        : isActive
-                          ? "border-foreground text-foreground"
-                          : "border-border text-muted-foreground"
-                    }`}
-                  >
-                    {isDone ? <Check className="size-3" /> : idx + 1}
-                  </div>
-                  <span
-                    className={`ml-1.5 text-[10px] uppercase tracking-wider ${
-                      isActive ? "text-foreground font-medium" : "text-muted-foreground"
-                    }`}
-                  >
-                    {s.label}
-                  </span>
-                  {idx < steps.length - 1 && (
-                    <div className="mx-3 h-px w-6 bg-border" />
-                  )}
+      <div className="flex items-center">
+        {STEPS.map((s, idx) => {
+          const isDone = idx < currentIdx;
+          const isActive = idx === currentIdx;
+          const isLast = idx === STEPS.length - 1;
+
+          return (
+            <div key={s.key} className="flex items-center flex-1 last:flex-none">
+              <div className="flex items-center gap-1.5 shrink-0">
+                <div
+                  className="flex size-6 items-center justify-center border text-[10px] font-mono transition-colors"
+                  style={
+                    isDone
+                      ? {
+                          borderColor: "var(--brand-accent)",
+                          backgroundColor: "var(--brand-accent)",
+                          color: "var(--background)",
+                        }
+                      : isActive
+                        ? {
+                            borderColor: "var(--brand-accent)",
+                            color: "var(--brand-accent)",
+                          }
+                        : {}
+                  }
+                >
+                  {isDone ? <Check className="size-3" /> : idx + 1}
                 </div>
-              );
-            })}
-          </div>
-        );
-      })()}
+                <span
+                  className="text-[10px] uppercase tracking-wider transition-colors"
+                  style={
+                    isActive
+                      ? { color: "var(--brand-accent)", fontWeight: 500 }
+                      : isDone
+                        ? { color: "var(--brand-accent)" }
+                        : {}
+                  }
+                >
+                  {s.label}
+                </span>
+              </div>
+              {!isLast && (
+                <div
+                  className="mx-3 h-px flex-1 transition-colors"
+                  style={{
+                    backgroundColor:
+                      idx < currentIdx
+                        ? "var(--brand-accent)"
+                        : "var(--border)",
+                  }}
+                />
+              )}
+            </div>
+          );
+        })}
+      </div>
 
       {/* Step 1: Connect */}
       {step === "connect" && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Wallet className="size-4" />
+        <div className="border p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <Wallet className="size-4 text-muted-foreground" />
+            <h2 className="text-sm font-medium uppercase tracking-wider">
               Connect Wallet
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Connect your EOA wallet to sign the spend policy. This wallet
-              becomes the policy owner — only you can modify the agent&apos;s
-              limits.
-            </p>
-            <Button
-              className="w-full"
-              onClick={handleConnect}
-              disabled={connectPending}
-            >
-              {connectPending ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" />
-                  Connecting...
-                </>
-              ) : (
-                "Connect Wallet"
-              )}
-            </Button>
-            <p className="text-xs text-muted-foreground text-center">
-              Supports OKX Wallet or any EIP-6963 compatible wallet
-            </p>
-          </CardContent>
-        </Card>
+            </h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Connect your EOA wallet to sign the spend policy. This wallet
+            becomes the policy owner — only you can modify the agent&apos;s
+            limits.
+          </p>
+          <Button
+            className="w-full rounded-none"
+            onClick={() => connect({ connector: connectors[0] })}
+            disabled={connectPending}
+          >
+            {connectPending ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                Connecting...
+              </>
+            ) : (
+              "Connect Wallet"
+            )}
+          </Button>
+          <p className="text-xs text-muted-foreground text-center">
+            Supports OKX Wallet or any EIP-6963 compatible wallet
+          </p>
+        </div>
       )}
 
       {/* Step 2: Policy */}
       {step === "policy" && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Shield className="size-4" />
+        <div className="border p-6 space-y-5">
+          <div className="flex items-center gap-2">
+            <Shield className="size-4 text-muted-foreground" />
+            <h2 className="text-sm font-medium uppercase tracking-wider">
               Set Spend Policy
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-1">
-              <Label htmlFor="agentLabel" className="text-xs">
-                Agent Name
+            </h2>
+          </div>
+
+          {/* Agent name */}
+          <div className="space-y-1.5">
+            <Label htmlFor="agentLabel" className="text-xs uppercase tracking-wider">
+              Agent Name
+            </Label>
+            <Input
+              id="agentLabel"
+              className="rounded-none font-mono text-xs"
+              placeholder="e.g. Research Agent"
+              value={agentLabel}
+              onChange={(e) => setAgentLabel(e.target.value)}
+              maxLength={64}
+            />
+          </div>
+
+          {/* Presets */}
+          <div className="grid grid-cols-3 gap-2">
+            {(Object.keys(PRESETS) as (keyof typeof PRESETS)[]).map((key) => (
+              <button
+                key={key}
+                type="button"
+                className="border p-3 text-left transition-colors"
+                style={
+                  selectedPreset === key
+                    ? {
+                        borderColor: "var(--brand-accent)",
+                        backgroundColor: "oklch(from var(--brand-accent) l c h / 0.06)",
+                      }
+                    : {}
+                }
+                onClick={() => applyPreset(key)}
+              >
+                <p className="text-xs font-medium">{PRESETS[key].label}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5 font-mono">
+                  {PRESETS[key].description}
+                </p>
+              </button>
+            ))}
+          </div>
+
+          {/* Inputs */}
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="perTx" className="text-xs uppercase tracking-wider">
+                Per-Transaction Limit (USDC)
               </Label>
               <Input
-                id="agentLabel"
-                placeholder="e.g. Research Agent"
-                value={agentLabel}
-                onChange={(e) => setAgentLabel(e.target.value)}
-                maxLength={64}
+                id="perTx"
+                className="rounded-none font-mono text-xs"
+                value={perTxLimit}
+                onChange={(e) => setPerTxLimit(e.target.value)}
               />
             </div>
-
-            <div className="grid grid-cols-3 gap-2">
-              {(Object.keys(PRESETS) as (keyof typeof PRESETS)[]).map((key) => (
-                <button
-                  key={key}
-                  type="button"
-                  className={`border p-3 text-left transition-colors ${
-                    selectedPreset === key
-                      ? "border-foreground bg-foreground/5"
-                      : "border-border hover:border-foreground/50"
-                  }`}
-                  onClick={() => applyPreset(key)}
-                >
-                  <p className="text-sm font-medium">{PRESETS[key].label}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {PRESETS[key].description}
-                  </p>
-                </button>
-              ))}
+            <div className="space-y-1.5">
+              <Label htmlFor="daily" className="text-xs uppercase tracking-wider">
+                Daily Budget (USDC)
+              </Label>
+              <Input
+                id="daily"
+                className="rounded-none font-mono text-xs"
+                value={dailyBudget}
+                onChange={(e) => setDailyBudget(e.target.value)}
+              />
             </div>
-
-            <div className="space-y-3 pt-2">
-              <div className="space-y-1">
-                <Label htmlFor="perTx" className="text-xs">
-                  Per-Transaction Limit (USDC)
-                </Label>
-                <Input
-                  id="perTx"
-                  value={perTxLimit}
-                  onChange={(e) => setPerTxLimit(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-1">
-                <Label htmlFor="daily" className="text-xs">
-                  Daily Budget (USDC)
-                </Label>
-                <Input
-                  id="daily"
-                  value={dailyBudget}
-                  onChange={(e) => setDailyBudget(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-1">
-                <Label htmlFor="threshold" className="text-xs">
-                  Approval Threshold (USDC)
-                </Label>
-                <Input
-                  id="threshold"
-                  value={approvalThreshold}
-                  onChange={(e) => setApprovalThreshold(e.target.value)}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Payments above this amount require your manual approval
-                </p>
-              </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="threshold" className="text-xs uppercase tracking-wider">
+                Approval Threshold (USDC)
+              </Label>
+              <Input
+                id="threshold"
+                className="rounded-none font-mono text-xs"
+                value={approvalThreshold}
+                onChange={(e) => setApprovalThreshold(e.target.value)}
+              />
+              <p className="text-[10px] text-muted-foreground">
+                Payments above this require your manual approval
+              </p>
             </div>
+          </div>
 
-            {error && (
-              <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3">
-                <p className="text-sm text-destructive">{error}</p>
-              </div>
+          {error && (
+            <div className="border border-destructive/50 bg-destructive/10 p-3">
+              <p className="text-xs font-mono text-destructive">{error}</p>
+            </div>
+          )}
+
+          <Button
+            className="w-full rounded-none"
+            onClick={handleSign}
+            disabled={signing || !perTxLimit || !dailyBudget}
+          >
+            {signing ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                Signing...
+              </>
+            ) : (
+              "Sign & Activate Policy"
             )}
-
-            <Button
-              className="w-full"
-              onClick={handleSign}
-              disabled={signing || !perTxLimit || !dailyBudget}
-            >
-              {signing ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" />
-                  Signing...
-                </>
-              ) : (
-                "Sign & Activate Policy"
-              )}
-            </Button>
-
-            <p className="text-xs text-muted-foreground text-center">
-              This deploys the policy onchain — ZenithPay cannot override it
-            </p>
-          </CardContent>
-        </Card>
+          </Button>
+          <p className="text-xs text-muted-foreground text-center">
+            This deploys the policy onchain — ZenithPay cannot override it
+          </p>
+        </div>
       )}
 
       {/* Step 2.5: Signing in progress */}
       {step === "signing" && (
-        <Card>
-          <CardContent className="py-8 text-center space-y-3">
-            <Loader2 className="mx-auto size-6 animate-spin" />
-            <p className="text-sm">Deploying spend policy to X Layer...</p>
-          </CardContent>
-        </Card>
+        <div className="border p-10 flex flex-col items-center gap-3">
+          <Loader2 className="size-5 animate-spin text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">
+            Deploying spend policy to X Layer...
+          </p>
+        </div>
       )}
 
       {/* Step 3: Fund */}
       {step === "fund" && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Check className="size-4 text-green-500" />
+        <div className="border p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <div
+              className="flex size-5 items-center justify-center"
+              style={{ color: "var(--brand-accent)" }}
+            >
+              <Check className="size-4" />
+            </div>
+            <h2 className="text-sm font-medium uppercase tracking-wider">
               Policy Activated
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Your agent can now transact within the limits you set. Fund the
-              agent wallet to start:
-            </p>
+            </h2>
+          </div>
 
-            <div className="rounded-md border p-3 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">
-                  Agent address
+          <p className="text-sm text-muted-foreground">
+            Fund the agent wallet to start transacting:
+          </p>
+
+          <div className="border border-dashed p-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Agent address
+              </span>
+              <button
+                type="button"
+                className="flex items-center gap-1 text-[10px] font-mono text-muted-foreground hover:text-foreground transition-colors"
+                onClick={copyAddress}
+              >
+                {copied ? "Copied" : "Copy"}
+                <Copy className="size-3" />
+              </button>
+            </div>
+            <code className="text-xs font-mono break-all block">{agentAddress}</code>
+          </div>
+
+          <div className="space-y-0 border border-dashed">
+            {[
+              { label: "Network", value: "X Layer mainnet (196)" },
+              {
+                label: "USDC",
+                value: `${XLAYER_USDC.slice(0, 10)}...${XLAYER_USDC.slice(-8)}`,
+              },
+              { label: "Gas token", value: "OKB (send small amount for fees)" },
+            ].map(({ label, value }) => (
+              <div
+                key={label}
+                className="flex justify-between border-b border-dashed last:border-0 px-3 py-2 text-xs"
+              >
+                <span className="text-muted-foreground uppercase tracking-wider text-[10px]">
+                  {label}
                 </span>
-                <button
-                  type="button"
-                  className="flex items-center gap-1 text-xs text-primary hover:underline"
-                  onClick={copyAddress}
-                >
-                  {copied ? "Copied" : "Copy"}
-                  <Copy className="size-3" />
-                </button>
+                <span className="font-mono text-[10px]">{value}</span>
               </div>
-              <code className="text-xs break-all block">{agentAddress}</code>
-            </div>
+            ))}
+          </div>
 
-            <div className="text-sm space-y-1">
-              <p>
-                <span className="text-muted-foreground">Network:</span> X Layer
-                mainnet (chain ID 196)
-              </p>
-              <p>
-                <span className="text-muted-foreground">USDC:</span>{" "}
-                <code className="text-xs">{XLAYER_USDC}</code>
-              </p>
-              <p>
-                <span className="text-muted-foreground">Gas:</span> Send a small
-                amount of OKB for transaction fees
-              </p>
-            </div>
-
-            <Button className="w-full" onClick={() => setStep("done")}>
-              I&apos;ve funded the wallet
-            </Button>
-          </CardContent>
-        </Card>
+          <Button
+            className="w-full rounded-none"
+            onClick={() => setStep("done")}
+          >
+            I&apos;ve funded the wallet
+          </Button>
+        </div>
       )}
 
       {/* Step 4: Done */}
       {step === "done" && (
-        <Card>
-          <CardContent className="py-8 text-center space-y-4">
-            <div className="mx-auto flex size-12 items-center justify-center border border-emerald-600 bg-emerald-500/10">
-              <Check className="size-6 text-emerald-600" />
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold">Agent Activated</h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                Return to your agent terminal and continue. The agent will
-                verify the policy is active.
-              </p>
-            </div>
-            <div className="flex gap-2 justify-center">
-              <Button variant="outline" className="rounded-none" asChild>
-                <a href="/dashboard">Open Dashboard</a>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="border p-10 flex flex-col items-center gap-4 text-center">
+          <div
+            className="flex size-12 items-center justify-center border"
+            style={{
+              borderColor: "var(--brand-accent)",
+              backgroundColor: "oklch(from var(--brand-accent) l c h / 0.1)",
+            }}
+          >
+            <Check
+              className="size-6"
+              style={{ color: "var(--brand-accent)" }}
+            />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold">Agent Activated</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Return to your agent terminal and continue. The agent will verify
+              the policy is active.
+            </p>
+          </div>
+          <Button variant="outline" className="rounded-none" asChild>
+            <a href="/dashboard">Open Dashboard</a>
+          </Button>
+        </div>
       )}
     </div>
   );
