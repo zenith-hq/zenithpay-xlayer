@@ -24,6 +24,7 @@ import {
   setLimits,
 } from "@/lib/api";
 import { useAgent } from "@/components/dashboard/agent-context";
+import { cn } from "@/lib/utils";
 
 const EXPLORER_URL = "https://www.oklink.com/xlayer";
 const SPEND_POLICY_ADDRESS =
@@ -32,7 +33,7 @@ const SPEND_POLICY_ADDRESS =
 
 export default function SettingsPage() {
   const { address } = useConnection();
-  const { agentAddress: AGENT_ADDRESS } = useAgent();
+  const { agentAddress: AGENT_ADDRESS, agentDisplayName } = useAgent();
   const { signMessageAsync } = useSignMessage();
   const [policy, setPolicy] = useState<AgentPolicy | null>(null);
   const [loading, setLoading] = useState(true);
@@ -117,78 +118,73 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      <Card className="rounded-none border">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-sm font-medium uppercase tracking-wider">
-            <Settings className="size-4" />
-            Agent Configuration
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-0">
-          <div className="flex items-center justify-between border-b border-dashed py-3">
-            <span className="text-xs text-muted-foreground uppercase tracking-wider">
-              Agent Address
-            </span>
-            <div className="flex items-center gap-2">
-              <code className="text-xs font-mono">
+      {/* Active Agent card */}
+      <div className="border">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-dashed">
+          <div>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              Active Agent
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">1 active agent</p>
+          </div>
+          <Badge variant="outline" className="rounded-none text-[10px] font-mono">
+            OKX TEE · X Layer 196
+          </Badge>
+        </div>
+
+        <div className="px-4 py-4 flex items-start justify-between gap-4">
+          <div className="space-y-1.5 min-w-0">
+            <p className="text-sm font-semibold truncate">{agentDisplayName}</p>
+            <div className="flex items-center gap-1.5">
+              <code className="text-[10px] font-mono text-muted-foreground">
                 {AGENT_ADDRESS.slice(0, 10)}...{AGENT_ADDRESS.slice(-8)}
               </code>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-5 rounded-none"
+              <button
+                type="button"
+                className="text-muted-foreground hover:text-foreground transition-colors"
                 onClick={() => copyToClipboard(AGENT_ADDRESS, "agent")}
               >
                 <Copy className="size-3" />
-              </Button>
+              </button>
               {copied === "agent" && (
                 <span className="text-[10px] text-muted-foreground">Copied</span>
               )}
             </div>
-          </div>
 
-          <div className="flex items-center justify-between border-b border-dashed py-3">
-            <span className="text-xs text-muted-foreground uppercase tracking-wider">
-              Network
-            </span>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono">X Layer mainnet</span>
-              <Badge variant="outline" className="rounded-none text-[10px] font-mono">
-                chain 196
-              </Badge>
+            <div className="flex items-center gap-4 pt-1">
+              {loading ? (
+                <Skeleton className="h-3 w-32 rounded-none" />
+              ) : (
+                <>
+                  <span className="text-[10px] font-mono text-muted-foreground">
+                    {policy ? `$${policy.perTxLimit}/tx` : "—/tx"}
+                  </span>
+                  <span className="text-[10px] font-mono text-muted-foreground">
+                    {policy ? `$${policy.dailyBudget}/day` : "—/day"}
+                  </span>
+                  <a
+                    href={`${EXPLORER_URL}/address/${policy?.policyContract ?? SPEND_POLICY_ADDRESS}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-[10px] font-mono text-muted-foreground hover:text-foreground"
+                  >
+                    SpendPolicy
+                    <ExternalLink className="size-2.5" />
+                  </a>
+                </>
+              )}
             </div>
           </div>
 
-          <div className="flex items-center justify-between border-b border-dashed py-3">
-            <span className="text-xs text-muted-foreground uppercase tracking-wider">
-              Wallet Type
-            </span>
-            <Badge variant="outline" className="rounded-none text-xs font-mono">
-              OKX TEE Wallet
-            </Badge>
-          </div>
-
-          <div className="flex items-center justify-between py-3">
-            <span className="text-xs text-muted-foreground uppercase tracking-wider">
-              SpendPolicy Contract
-            </span>
-            {loading ? (
-              <Skeleton className="h-4 w-32 rounded-none" />
-            ) : (
-              <a
-                href={`${EXPLORER_URL}/address/${policy?.policyContract ?? SPEND_POLICY_ADDRESS}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-foreground underline underline-offset-4"
-              >
-                {(policy?.policyContract ?? SPEND_POLICY_ADDRESS).slice(0, 10)}...
-                {(policy?.policyContract ?? SPEND_POLICY_ADDRESS).slice(-8)}
-                <ExternalLink className="size-2.5" />
-              </a>
+          <div
+            className={cn(
+              "shrink-0 size-2 rounded-full mt-1.5",
+              policy ? "bg-emerald-500" : "bg-muted-foreground/30",
             )}
-          </div>
-        </CardContent>
-      </Card>
+            title={policy ? "Policy active" : "No policy set"}
+          />
+        </div>
+      </div>
 
       <Card className="rounded-none border">
         <CardHeader>
