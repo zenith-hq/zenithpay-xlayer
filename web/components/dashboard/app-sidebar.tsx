@@ -2,12 +2,14 @@
 
 import {
   BookOpen,
+  CreditCard,
   ExternalLink,
   LayoutDashboard,
   ScrollText,
   Settings,
   Shield,
   ShieldCheck,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -67,7 +69,7 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-2">
+      <SidebarContent className="md:px-2">
         <SidebarGroup>
           <SidebarGroupLabel>Agent</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -86,6 +88,29 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              {/* Coming soon items */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  disabled
+                  tooltip="Agent Card — coming soon"
+                  className="opacity-40 cursor-not-allowed"
+                >
+                  <CreditCard className="size-4" />
+                  <span>Agent Card</span>
+                  <span className="ml-auto text-[9px] font-mono uppercase tracking-wider opacity-70">soon</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  disabled
+                  tooltip="Agent Credit — coming soon"
+                  className="opacity-40 cursor-not-allowed"
+                >
+                  <Zap className="size-4" />
+                  <span>Agent Credit</span>
+                  <span className="ml-auto text-[9px] font-mono uppercase tracking-wider opacity-70">soon</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
