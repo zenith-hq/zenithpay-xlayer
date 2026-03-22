@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut } from "lucide-react";
+import { LayoutDashboard, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useConnect, useConnection, useConnectors, useDisconnect } from "wagmi";
 import ModeToggle from "@/components/theme-toggle/mode-toggle";
@@ -75,7 +75,10 @@ export function UserDropdown() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild className="rounded-none">
-          <Link href="/dashboard">Dashboard</Link>
+          <Link href="/dashboard">
+            <LayoutDashboard className="mr-2 size-4" />
+            Dashboard
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild className="rounded-none p-0">
           <ModeToggle
