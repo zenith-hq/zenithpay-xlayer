@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="web/public/banner.png" alt="ZenithPay"/>
+<img src="/zenithpay-banner.png" alt="ZenithPay"/>
 
 # ZenithPay
 
