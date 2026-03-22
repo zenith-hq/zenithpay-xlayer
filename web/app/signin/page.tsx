@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import SignIn from "@/components/signin";
-import { SignInVisual } from "@/components/signin-visual";
 
 const TARGET_COLS = 8;
 const TARGET_ROWS = 8;
@@ -62,10 +61,9 @@ export default function SignInPage() {
             />
           );
         })}
-        {/* Card spanning inner area */}
-        <div className="col-[1/9] row-[1/9] bg-background grid grid-cols-1 divide-y divide-dashed divide-border border-0 md:col-[2/8] md:row-[2/8] md:border md:border-border lg:grid-cols-2 lg:divide-y-0 lg:divide-x">
+        {/* Inner panel — full inner grid, single column, centered */}
+        <div className="col-[1/9] row-[1/9] bg-background border-0 md:col-[2/8] md:row-[2/8] md:border md:border-border overflow-y-auto">
           <SignIn />
-          <SignInVisual />
         </div>
       </div>
     </div>

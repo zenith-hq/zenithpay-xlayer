@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
+import ModeToggle from "@/components/theme-toggle/mode-toggle";
 import { OnboardingFlow } from "./onboarding-flow";
 
 const TARGET_COLS = 8;
@@ -63,7 +64,8 @@ export default function OnboardingPage() {
         })}
 
         {/* Inner panel — full inner grid, single column, scrollable */}
-        <div className="col-[1/9] row-[1/9] bg-background border-0 md:col-[2/8] md:row-[2/8] md:border md:border-border overflow-y-auto">
+        <div className="relative col-[1/9] row-[1/9] bg-background border-0 md:col-[2/8] md:row-[2/8] md:border md:border-border overflow-y-auto">
+          <ModeToggle className="absolute top-2 right-2 dark:hover:bg-transparent w-auto h-auto" />
           <div className="flex min-h-full items-center justify-center p-8">
             <div className="w-full max-w-lg">
               <Suspense fallback={<div className="size-8 animate-pulse bg-muted" />}>
