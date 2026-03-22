@@ -1,7 +1,22 @@
 # ZenithPay API Reference
 
 **Base URL:** `https://api.usezenithpay.xyz`
-**Auth:** `Authorization: Bearer $ZENITHPAY_API_KEY` on all endpoints except `/health` and `/skill.md`
+
+**Auth:** `Authorization: Bearer $ZENITHPAY_API_KEY` (your `zpk_...` key from `~/.zenithpay/config.json`)
+
+| Endpoint | Auth required |
+|----------|--------------|
+| `POST /wallet/genesis` | None — public (no key exists yet) |
+| `POST /agents/link` | None — public |
+| `POST /limits` | None — authorized via `humanSignature` in body |
+| `GET /limits` | None — public read |
+| `GET /wallet/balance` | None — public read |
+| `GET /wallet/agents` | None — public read (pass `X-Owner-Address` header) |
+| `GET /ledger` | None — public read |
+| `GET /approvals` | None — public read |
+| `POST /pay` | Bearer `zpk_...` required |
+| `POST /approvals/:id/approve` | Bearer `zpk_...` required |
+| `POST /approvals/:id/deny` | Bearer `zpk_...` required |
 
 ---
 
@@ -34,7 +49,7 @@ MCP config:
       "url": "https://api.usezenithpay.xyz/mcp",
       "env": {
         "AGENT_ADDRESS": "0x...",
-        "ZENITHPAY_API_KEY": "your_key"
+        "ZENITHPAY_API_KEY": "zpk_..."
       }
     }
   }
@@ -44,7 +59,7 @@ MCP config:
 ---
 
 ### POST /wallet/genesis
-Create a TEE-secured agent wallet via OKX Agentic Wallet. Private key never leaves the TEE.
+Create a TEE-secured agent wallet via OKX Agentic Wallet. Private key never leaves the TEE. Public — no auth required.
 
 **Request**
 ```json
@@ -55,26 +70,50 @@ Create a TEE-secured agent wallet via OKX Agentic Wallet. Private key never leav
 ```json
 {
   "agentAddress": "0x...",
+  "apiKey": "zpk_...",
   "label": "research-agent-01",
-  "balances": { "USDC": "0.00", "OKB": "0.00" },
-  "createdAt": "2026-01-01T00:00:00Z"
+  "createdAt": "2026-01-01T00:00:00Z",
+  "message": "Wallet created. Activate at https://usezenithpay.xyz/onboarding?agent=0x..."
 }
 ```
+
+Idempotent — calling again with the same OKX account returns the existing agent and API key.
+
+---
+
+### POST /agents/link
+Link an unlinked agent to a human EOA. Public — no auth required.
+
+Can only succeed when `owner_eoa` is the zero address (prevents hijacking). Once linked, the owner is immutable — only revocable via SpendPolicy.sol.
+
+**Request**
+```json
+{ "agentAddress": "0x...", "ownerAddress": "0x..." }
+```
+
+**Response**
+```json
+{ "agentAddress": "0x...", "ownerAddress": "0x..." }
+```
+
+**Errors**
+- `409` — agent already linked to an owner
+- `404` — agent not found
 
 ---
 
 ### GET /wallet/balance
-Get USDC + OKB balance and remaining daily budget for agent(s).
+Get USDC + OKB balance and remaining daily budget. Public read — no auth required.
 
-**Query params:** `address` (optional — filters to specific agent, returns all if omitted)
+**Query params:** `address` (optional — filters to specific agent)
 
 **Response**
 ```json
 {
   "agents": [{
-    "address": "0x...",
-    "label": "research-agent-01",
-    "balances": { "USDC": "12.50", "OKB": "0.80" },
+    "agentAddress": "0x...",
+    "usdcBalance": "12.50",
+    "okbBalance": "0.80",
     "remainingDailyBudget": "1.75"
   }]
 }
@@ -83,7 +122,9 @@ Get USDC + OKB balance and remaining daily budget for agent(s).
 ---
 
 ### GET /wallet/agents
-List all agent addresses registered under the authenticated account.
+List all agents owned by an EOA. Public read — pass `X-Owner-Address` header.
+
+**Headers:** `X-Owner-Address: 0x...` (the owner's EOA)
 
 **Response**
 ```json
@@ -99,6 +140,8 @@ List all agent addresses registered under the authenticated account.
 
 ### POST /pay
 Execute a policy-gated x402 payment. SpendPolicy.sol is checked onchain before any money moves. Auto-swaps OKB → USDC internally if needed.
+
+**Auth:** `Authorization: Bearer zpk_...`
 
 **Request**
 ```json
@@ -162,7 +205,7 @@ Execute a policy-gated x402 payment. SpendPolicy.sol is checked onchain before a
 ---
 
 ### GET /limits
-Get current onchain spend policy for agent(s).
+Get current onchain spend policy. Public read — no auth required.
 
 **Query params:** `address` (optional)
 
@@ -173,9 +216,10 @@ Get current onchain spend policy for agent(s).
     "address": "0x...",
     "perTxLimit": "0.25",
     "dailyBudget": "3.00",
-    "remainingDailyBudget": "1.75",
     "allowlist": ["exa.ai", "firecrawl.dev"],
     "approvalThreshold": "0.10",
+    "autoSwapEnabled": true,
+    "swapSlippageTolerance": "0.01",
     "policyContract": "0xF5875F25ccEB2edDc57F218eaF1F71c5CF161f21"
   }]
 }
@@ -184,7 +228,9 @@ Get current onchain spend policy for agent(s).
 ---
 
 ### POST /limits
-Deploy or update the agent's SpendPolicy contract onchain. Requires human EOA signature.
+Deploy or update the agent's spend policy. Public — authorized via `humanSignature` (no Bearer token needed from browser). Also handles ownership linking atomically if the agent is not yet linked.
+
+**How authorization works:** The server reconstructs the signed message from `agentAddress + perTxLimit + dailyBudget + timestamp`, recovers the signer via ECDSA, and verifies it matches the agent's `owner_eoa`. If `owner_eoa` is the zero address (unlinked), the signer is auto-linked as owner.
 
 **Request**
 ```json
@@ -194,8 +240,18 @@ Deploy or update the agent's SpendPolicy contract onchain. Requires human EOA si
   "dailyBudget": "3.00",
   "allowlist": ["exa.ai", "firecrawl.dev"],
   "approvalThreshold": "0.10",
-  "humanSignature": "0x..."
+  "autoSwapEnabled": true,
+  "swapSlippageTolerance": "0.01",
+  "humanSignature": "0x...",
+  "timestamp": 1711234567890
 }
+```
+
+`timestamp` is required when calling from a browser (used to verify the signature). Omit when calling via MCP tool directly.
+
+The `humanSignature` must be an EIP-191 personal_sign of:
+```json
+{"agentAddress":"0x...","perTxLimit":"0.25","dailyBudget":"3.00","timestamp":1711234567890}
 ```
 
 **Response**
@@ -203,21 +259,29 @@ Deploy or update the agent's SpendPolicy contract onchain. Requires human EOA si
 {
   "status": "deployed",
   "policyContract": "0xF5875F25ccEB2edDc57F218eaF1F71c5CF161f21",
-  "txHash": "0x...",
+  "txHash": null,
   "agentAddress": "0x...",
+  "apiKey": "zpk_...",
   "perTxLimit": "0.25",
   "dailyBudget": "3.00",
   "allowlist": ["exa.ai", "firecrawl.dev"],
-  "approvalThreshold": "0.10"
+  "autoSwapEnabled": true,
+  "swapSlippageTolerance": "0.01"
 }
 ```
+
+`apiKey` is returned so the browser can store it in localStorage after onboarding.
+
+**Errors**
+- `403` — signer is not the agent's owner
+- `404` — agent not found
 
 ---
 
 ### GET /ledger
-Full transaction audit trail for agent(s).
+Full transaction audit trail. Public read — no auth required.
 
-**Query params:** `address` (optional), `limit` (default 50, max 200), `offset`, `status` (`approved`, `blocked`, `pending`, `denied`)
+**Query params:** `agent` (optional), `limit` (default 50, max 200), `offset`, `status` (`approved`, `blocked`, `pending`, `denied`)
 
 **Response**
 ```json
@@ -233,7 +297,7 @@ Full transaction audit trail for agent(s).
     "txHash": "0x...",
     "swapUsed": false,
     "okbSpent": null,
-    "timestamp": "2026-01-01T00:00:00Z"
+    "createdAt": "2026-01-01T00:00:00Z"
   }],
   "total": 1,
   "limit": 50,
@@ -244,9 +308,9 @@ Full transaction audit trail for agent(s).
 ---
 
 ### GET /approvals
-List pending payments awaiting human review. Only payments that exceeded `approvalThreshold` appear here. Hard-blocked payments go directly to ledger.
+List pending payments awaiting human review. Public read — no auth required.
 
-**Query params:** `address` (optional)
+**Query params:** `agent` (optional)
 
 **Response**
 ```json
@@ -254,15 +318,14 @@ List pending payments awaiting human review. Only payments that exceeded `approv
   "approvals": [{
     "id": "apr_01abc",
     "agentAddress": "0x...",
-    "agentLabel": "research-agent-01",
     "merchant": "service.xyz",
+    "serviceUrl": "https://service.xyz/api",
     "amount": "0.50",
-    "currency": "USDC",
     "intent": "Research DeFi trends",
+    "status": "pending",
     "requestedAt": "2026-01-01T00:01:00Z",
-    "status": "pending"
-  }],
-  "total": 1
+    "resolvedAt": null
+  }]
 }
 ```
 
@@ -271,15 +334,15 @@ List pending payments awaiting human review. Only payments that exceeded `approv
 ### POST /approvals/:id/approve
 Approve a pending payment. Executes immediately — runs full pay flow (balance check → swap if needed → x402 settle → ledger).
 
+**Auth:** `Authorization: Bearer zpk_...`
+
 **Response**
 ```json
 {
-  "id": "apr_01abc",
   "status": "approved",
   "txHash": "0x...",
   "amount": "0.50",
-  "merchant": "service.xyz",
-  "settledAt": "2026-01-01T00:05:00Z"
+  "merchant": "service.xyz"
 }
 ```
 
@@ -288,15 +351,11 @@ Approve a pending payment. Executes immediately — runs full pay flow (balance 
 ### POST /approvals/:id/deny
 Deny a pending payment. Cancels and logs to ledger as `denied`.
 
+**Auth:** `Authorization: Bearer zpk_...`
+
 **Response**
 ```json
-{
-  "id": "apr_01abc",
-  "status": "denied",
-  "merchant": "service.xyz",
-  "amount": "0.50",
-  "deniedAt": "2026-01-01T00:05:00Z"
-}
+{ "status": "denied" }
 ```
 
 ---
@@ -312,9 +371,9 @@ All errors follow this shape:
 |--------|-------|---------|
 | 400 | `bad_request` | Missing or invalid request fields |
 | 401 | `unauthorized` | Missing or invalid API key |
-| 403 | `forbidden` | API key does not have permission for this agent |
+| 403 | `forbidden` | Signer is not the agent's owner (POST /limits) |
 | 404 | `not_found` | Agent or resource not found |
-| 422 | `policy_violation` | Payment blocked by onchain policy |
+| 409 | `conflict` | Agent already linked to an owner |
 | 429 | `rate_limited` | Too many requests — back off and retry |
 | 500 | `internal_error` | Server error |
 
