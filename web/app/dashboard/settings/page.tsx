@@ -26,6 +26,9 @@ import {
 import { useAgent } from "@/components/dashboard/agent-context";
 
 const EXPLORER_URL = "https://www.oklink.com/xlayer";
+const SPEND_POLICY_ADDRESS =
+  process.env.NEXT_PUBLIC_SPEND_POLICY_ADDRESS ??
+  "0xF5875F25ccEB2edDc57F218eaF1F71c5CF161f21";
 
 export default function SettingsPage() {
   const { address } = useConnection();
@@ -171,18 +174,17 @@ export default function SettingsPage() {
             </span>
             {loading ? (
               <Skeleton className="h-4 w-32 rounded-none" />
-            ) : policy ? (
+            ) : (
               <a
-                href={`${EXPLORER_URL}/address/${policy.policyContract}`}
+                href={`${EXPLORER_URL}/address/${policy?.policyContract ?? SPEND_POLICY_ADDRESS}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-foreground underline underline-offset-4"
               >
-                {policy.policyContract.slice(0, 10)}...{policy.policyContract.slice(-8)}
+                {(policy?.policyContract ?? SPEND_POLICY_ADDRESS).slice(0, 10)}...
+                {(policy?.policyContract ?? SPEND_POLICY_ADDRESS).slice(-8)}
                 <ExternalLink className="size-2.5" />
               </a>
-            ) : (
-              <span className="text-xs text-muted-foreground">Not deployed</span>
             )}
           </div>
         </CardContent>

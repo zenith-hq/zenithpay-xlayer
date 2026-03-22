@@ -106,10 +106,20 @@ export default function DashboardPage() {
           <CardContent>
             {loading ? (
               <Skeleton className="h-7 w-24 rounded-none" />
-            ) : (
+            ) : policy?.dailyBudget ? (
               <p className="text-2xl font-bold font-mono">
-                ${policy?.dailyBudget ?? "—"}
+                ${policy.dailyBudget}
               </p>
+            ) : (
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Policy not set</p>
+                <Link
+                  href="/dashboard/limits"
+                  className="text-xs underline underline-offset-4 text-muted-foreground hover:text-foreground"
+                >
+                  Configure limits →
+                </Link>
+              </div>
             )}
           </CardContent>
         </Card>
