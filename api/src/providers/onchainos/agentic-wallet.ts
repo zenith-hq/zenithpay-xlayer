@@ -126,8 +126,7 @@ async function walletPost<T>(
     data: T[];
   };
 
-  const codeOk =
-    json.code === "0" || json.code === 0;
+  const codeOk = json.code === "0" || json.code === 0;
   if (!codeOk) {
     throw new Error(`Wallet API error [${json.code}]: ${json.msg}`);
   }
@@ -262,9 +261,9 @@ export async function listAccounts(): Promise<AccountListItem[]> {
   return Array.isArray(resp) ? resp : [resp as unknown as AccountListItem];
 }
 
-export async function getAddresses(
-  accountIds: string[],
-): Promise<{ accounts: Array<{ accountId: string; addresses: AddressInfo[] }> }> {
+export async function getAddresses(accountIds: string[]): Promise<{
+  accounts: Array<{ accountId: string; addresses: AddressInfo[] }>;
+}> {
   const session = await getAuthedSession();
   return walletPost(
     `${WALLET_PREFIX}/account/address/list`,

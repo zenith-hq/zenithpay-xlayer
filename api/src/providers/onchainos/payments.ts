@@ -1,3 +1,8 @@
+import crypto from "node:crypto";
+import { Aead, CipherSuite, Kdf, Kem } from "hpke-js";
+import { XLAYER_CHAIN_ID } from "../../config/chains";
+import { akLogin } from "./agentic-wallet";
+
 interface X402VerifyResult {
   valid: boolean;
   paymentRequired: boolean;
@@ -52,12 +57,70 @@ interface X402PaymentResponse {
   transaction: string;
 }
 
+const OKX_BASE = "https://web3.okx.com";
+const WALLET_PREFIX = "/priapi/v5/wallet/agentic";
+const HPKE_INFO = new TextEncoder().encode("okx-tee-sign");
+const ED25519_PKCS8_PREFIX = Buffer.from(
+  "302e020100300506032b657004220420",
+  "hex",
+);
+
 function decodeBase64(encoded: string): string {
   return Buffer.from(encoded, "base64").toString("utf-8");
 }
 
 function encodeBase64(data: string): string {
   return Buffer.from(data, "utf-8").toString("base64");
+}
+
+async function hpkeDecryptSessionSk(
+  encryptedB64: string,
+  sessionKeyB64: string,
+): Promise<Uint8Array> {
+  const encrypted = Buffer.from(encryptedB64, "base64");
+  const skBytes = Buffer.from(sessionKeyB64, "base64");
+
+  if (skBytes.length !== 32) {
+    throw new Error(`session key must be 32 bytes, got ${skBytes.length}`);
+  }
+  if (encrypted.length <= 32) {
+    throw new Error(`encrypted blob too short: ${encrypted.length} bytes`);
+  }
+
+  const enc = encrypted.subarray(0, 32);
+  const ciphertext = encrypted.subarray(32);
+
+  const suite = new CipherSuite({
+    kem: Kem.DhkemX25519HkdfSha256,
+    kdf: Kdf.HkdfSha256,
+    aead: Aead.Aes256Gcm,
+  });
+
+  const recipientKey = await suite.importKey("raw", skBytes, false);
+  const ctx = await suite.createRecipientContext({
+    recipientKey,
+    enc,
+    info: HPKE_INFO,
+  });
+
+  const plaintext = await ctx.open(ciphertext, new Uint8Array(0));
+  const seed = new Uint8Array(plaintext);
+
+  if (seed.length !== 32) {
+    throw new Error(`decrypted seed must be 32 bytes, got ${seed.length}`);
+  }
+
+  return seed;
+}
+
+function ed25519Sign(seed: Uint8Array, message: Uint8Array): Uint8Array {
+  const der = Buffer.concat([ED25519_PKCS8_PREFIX, seed]);
+  const privateKey = crypto.createPrivateKey({
+    key: der,
+    format: "der",
+    type: "pkcs8",
+  });
+  return new Uint8Array(crypto.sign(null, message, privateKey));
 }
 
 /**
@@ -121,47 +184,107 @@ export async function verifyX402(
 /**
  * Sign an x402 payment via OKX Agentic Wallet TEE.
  *
- * Uses `onchainos payment x402-pay` which calls:
- * - /priapi/v5/wallet/agentic/pre-transaction/gen-msg-hash (EIP-3009 hash)
- * - /priapi/v5/wallet/agentic/pre-transaction/sign-msg (TEE signature)
+ * Calls the OKX REST API directly (no CLI dependency):
+ * 1. gen-msg-hash — get EIP-3009 unsigned hash from TEE
+ * 2. HPKE decrypt encryptedSessionSk → Ed25519 signing seed
+ * 3. Ed25519 sign the msgHash locally (proves session validity)
+ * 4. sign-msg — TEE produces the final EIP-3009 signature
  */
 async function signX402(
   payerAddress: string,
   requirement: X402PaymentRequirement,
 ): Promise<X402PaymentProof> {
-  const proc = Bun.spawn(
-    [
-      "onchainos",
-      "payment",
-      "x402-pay",
-      "--network",
-      requirement.network,
-      "--amount",
-      requirement.amount,
-      "--pay-to",
-      requirement.payTo,
-      "--asset",
-      requirement.asset,
-      "--from",
-      payerAddress,
-    ],
-    { stdout: "pipe", stderr: "pipe" },
+  const session = await akLogin();
+
+  const now = Math.floor(Date.now() / 1000);
+  const validBefore = (now + (requirement.maxTimeoutSeconds || 300)).toString();
+  const nonce = `0x${Buffer.from(crypto.randomBytes(32)).toString("hex")}`;
+
+  const baseFields = {
+    chainIndex: XLAYER_CHAIN_ID,
+    from: payerAddress,
+    to: requirement.payTo,
+    value: requirement.amount,
+    validAfter: "0",
+    validBefore,
+    nonce,
+    verifyingContract: requirement.asset,
+  };
+
+  const headers = {
+    "Content-Type": "application/json",
+    "ok-client-version": "2.1.0",
+    "Ok-Access-Client-type": "agent-cli",
+    Authorization: `Bearer ${session.accessToken}`,
+  };
+
+  const genHashResp = await fetch(
+    `${OKX_BASE}${WALLET_PREFIX}/pre-transaction/gen-msg-hash`,
+    {
+      method: "POST",
+      headers,
+      body: JSON.stringify(baseFields),
+    },
+  );
+  const genHashJson = (await genHashResp.json()) as {
+    code: string | number;
+    msg: string;
+    data: Array<{ msgHash: string; domainHash: string }>;
+  };
+
+  if (genHashJson.code !== "0" && genHashJson.code !== 0) {
+    throw new Error(
+      `gen-msg-hash failed [${genHashJson.code}]: ${genHashJson.msg}`,
+    );
+  }
+
+  const { msgHash, domainHash } = genHashJson.data[0];
+
+  const seed = await hpkeDecryptSessionSk(
+    session.encryptedSessionSk,
+    session.sessionPrivateKey,
   );
 
-  const stdout = await new Response(proc.stdout).text();
-  const stderr = await new Response(proc.stderr).text();
-  const exitCode = await proc.exited;
+  const msgHashBytes = Buffer.from(msgHash.replace(/^0x/, ""), "hex");
+  const sessionSignature = ed25519Sign(seed, msgHashBytes);
+  const sessionSignatureB64 = Buffer.from(sessionSignature).toString("base64");
 
-  if (exitCode !== 0) {
-    throw new Error(`x402 signing failed: ${stderr || stdout}`);
+  const signMsgBody = {
+    ...baseFields,
+    domainHash,
+    sessionCert: session.sessionCert,
+    sessionSignature: sessionSignatureB64,
+  };
+
+  const signResp = await fetch(
+    `${OKX_BASE}${WALLET_PREFIX}/pre-transaction/sign-msg`,
+    {
+      method: "POST",
+      headers,
+      body: JSON.stringify(signMsgBody),
+    },
+  );
+  const signJson = (await signResp.json()) as {
+    code: string | number;
+    msg: string;
+    data: Array<{ signature: string }>;
+  };
+
+  if (signJson.code !== "0" && signJson.code !== 0) {
+    throw new Error(`sign-msg failed [${signJson.code}]: ${signJson.msg}`);
   }
 
-  const result = JSON.parse(stdout);
-  if (!result.ok || !result.data?.signature) {
-    throw new Error(`x402 signing failed: ${stdout}`);
-  }
-
-  return result.data as X402PaymentProof;
+  return {
+    signature: signJson.data[0].signature,
+    authorization: {
+      from: payerAddress,
+      to: requirement.payTo,
+      value: requirement.amount,
+      validAfter: "0",
+      validBefore,
+      nonce,
+    },
+  };
 }
 
 /**
@@ -195,9 +318,7 @@ export async function settleX402(
     throw new Error("No payment-required header in 402 response");
   }
 
-  const decoded: X402PaymentRequired = JSON.parse(
-    decodeBase64(paymentHeader),
-  );
+  const decoded: X402PaymentRequired = JSON.parse(decodeBase64(paymentHeader));
 
   if (!decoded.accepts?.length) {
     throw new Error("No payment options in 402 response");
@@ -225,8 +346,7 @@ export async function settleX402(
   const headerValue = encodeBase64(JSON.stringify(paymentPayload));
 
   // Step 4: Replay original request with payment header
-  const headerName =
-    decoded.x402Version >= 2 ? "X-Payment" : "X-Payment";
+  const headerName = decoded.x402Version >= 2 ? "X-Payment" : "X-Payment";
 
   const replayResp = await fetch(serviceUrl, {
     method: "POST",

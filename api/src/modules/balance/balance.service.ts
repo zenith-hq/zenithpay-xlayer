@@ -32,7 +32,11 @@ export async function getBalance(agentAddress: string): Promise<AgentBalance> {
     if (addr === XLAYER_USDC.toLowerCase()) {
       usdcBalance = tb.balance;
     }
-    if (addr === "" || addr === OKB_NATIVE.toLowerCase() || tb.symbol === "OKB") {
+    if (
+      addr === "" ||
+      addr === OKB_NATIVE.toLowerCase() ||
+      tb.symbol === "OKB"
+    ) {
       okbBalance = tb.balance;
     }
   }

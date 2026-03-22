@@ -6,13 +6,13 @@
 
 > Your Agent spends. You Own the Rules.
 
-**Security middleware for AI agents that spend money — hard limits enforced at the smart contract level, x402-native payment routing, auto-swap, and a human approval queue. Built on X Layer and OKX OnchainOS.**
+**Security middleware for AI agents — onchain spend enforcement, human-in-the-loop policies, and gasless x402 payments. Built on X Layer, powered by OKX OnchainOS.**
 
 <a href="https://docs.usezenithpay.xyz">Docs</a> &nbsp;·&nbsp;
 <a href="https://api.usezenithpay.xyz/skill.md">Skill.md</a> &nbsp;·&nbsp;
 <a href="https://usezenithpay.xyz">Live Demo</a> &nbsp;·&nbsp;
 <a href="">Video Demo</a> &nbsp;·&nbsp;
-<a href="https://www.oklink.com/xlayer/tx/0xf0be30b27021c475fcdfcb8657f8d392617ebc25454a329af9240df3ded22ae9">TX Proof</a>
+<a href="https://www.oklink.com/xlayer/tx/0x6cecdfbd813da3c9792f78ff4bc49e60af976a424b53da7b2f1c78e6192389eb">TX Proof</a>
 
 ![Network](https://img.shields.io/badge/Network-X%20Layer-19191A?style=flat-square&logoColor=white)
 ![Payments](https://img.shields.io/badge/Payments-x402-FF69B4?style=flat-square&logoColor=white)
@@ -25,29 +25,122 @@
 
 ## The Problem
 
-X Layer is unlocking an agent economy, but agents that spend money are a new kind of risk. Give them unlimited access and you lose control. Rely on off-chain guardrails and you're trusting a database — one that can be changed, bypassed, or go down entirely.
+X Layer is unlocking a massive agent economy, but agents that spend money introduce a new, high-stakes risk. Give them unrestricted access to funds and you lose control. Rely on off-chain guardrails and you're trusting a centralized database — one that can be bypassed, manipulated, or go down entirely.
 
-ZenithPay is security middleware for AI agents that spend money. It sits between your agent and every service it pays, enforcing hard limits at the smart contract level — limits that no API call can override and no server outage can remove.
-
-Think of it as a corporate card spend policy system, but for AI agents instead of employees: per-transaction limits, daily budgets, merchant allowlists, and a human approval queue for anything above your threshold. Built directly on X Layer and powered by OKX OnchainOS.
-
----
+This creates a fundamental gap: agents can transact, but there is **no reliable way to govern how they spend.**
 
 ## The Solution
 
-Five products. Three live. Two in roadmap. Built on OKX OnchainOS.
+**ZenithPay is the financial infrastructure layer for AI agents that spend money.**
+It sits between your agent and the services it pays, enforcing hard limits at the smart contract level — constraints no API can override and no server outage can remove.
 
-**Agent Wallet** — Every agent gets a real TEE-secured wallet on X Layer. Email login, zero gas, private keys protected by OKX Agentic Wallet infrastructure. Agents hold actual USDC balances — not simulated floats.
+Think of it as a **corporate spend policy engine for AI agents:** per-transaction limits, daily budgets, merchant allowlists, and human-in-the-loop approvals — all secured by X Layer and powered by OKX OnchainOS.
 
-**Agent Pay** — Agents pay any x402-compatible HTTP service directly in USDC. Zero gas on X Layer via the OKX Payments API. If the agent holds OKB, ZenithPay auto-swaps to USDC before payment — no manual intervention, no failed transactions.
+---
 
-**Spend Policy** — Hard limits deployed onchain via smart contract. No API can override them — even if ZenithPay goes down, the rules hold. Per-transaction cap, daily budget, merchant allowlist. Plus an approval threshold: payments above it are paused for human review, giving builders a human-in-the-loop control without blocking routine spending. Every approved, blocked, and pending payment is logged with agent intent.
+## Core capabilities (live + upcoming)
 
-**Agent Card** _(Coming Soon)_ — Virtual cards for AI agents. Same policy engine, working anywhere cards are accepted.
+**Agent Wallet** — Every agent gets a real TEE-secured wallet on X Layer. Email login, zero gas, with private keys protected by OKX’s Agentic Wallet infrastructure. Agents hold real USDC balances — not simulated floats.
+
+**Agent Pay** — Agents pay any x402-compatible HTTP service directly in USDC. Gasless x402 payments via OKX Payments API. If the agent holds OKB, ZenithPay automatically swaps to USDC before payment — no manual intervention, no failed transactions.
+
+**Spend Policy** — Onchain smart contracts enforce hard limits that no API can override, holding even if ZenithPay goes down. Supports per-transaction caps, daily budgets, merchant allowlists, and human-in-the-loop approval thresholds.
+
+**Agent Card** _(Coming Soon)_ — Virtual cards for AI agents, powered by the same policy engine and usable anywhere cards are accepted.
 
 **Agent Credit** _(Coming Soon)_ — Credit lines for AI agents backed by onchain spend history.
 
 ---
+
+## Getting Started
+
+Two entry points — through your agent or through the dashboard. Both lead to the same place.
+
+### Path 1 — Connect through your agent (recommended)
+
+> 🔐 **Security advantage**
+> ZenithPay never stores private keys locally.
+> Keys are held inside OKX TEE — agents only store an address.
+
+Read the skill into any agent and follow the onboarding steps:
+
+```bash
+# Claude Code, Cursor, Codex, OpenClaw, Gemini CLI
+Read https://api.usezenithpay.xyz/skill.md and follow the onboarding instructions
+```
+
+The skill walks the agent through:
+
+```
+1. Check ~/.zenithpay/config.json for existing wallet
+   → Found: load agentAddress, skip to step 4
+   → Not found: continue
+
+2. Prompt for email → POST /wallet/genesis
+   → OKX Agentic Wallet creates TEE-secured wallet
+   → agentAddress returned, stored in ~/.zenithpay/config.json
+   → No private key stored — key lives in OKX TEE, never exposed
+
+3. Set spend policy
+   → Prompted to connect human EOA wallet for signature
+   → Policy deployed onchain via SpendPolicy.sol
+
+4. Fund agent wallet
+   → Send USDC or OKB to agentAddress on X Layer (chain ID 196)
+
+5. Agent is ready — zenithpay_pay_service() available
+```
+
+Local config created at `~/.zenithpay/config.json`:
+
+```json
+{
+	"agentAddress": "0x...",
+	"createdAt": "2026-01-01T00:00:00Z"
+}
+```
+
+No private key. No seed phrase. Compare this to wallets that store raw private keys locally — ZenithPay agents hold only an address. The key never leaves OKX's secure enclave.
+
+---
+
+### Path 2 — Through the dashboard
+
+Go to [usezenithpay.xyz](https://usezenithpay.xyz):
+
+```
+1. Connect your EOA wallet (OKX Web Wallet or MetaMask)
+2. Create agent wallet → enter email → OTP → wallet created
+3. Set spend policy → presets or custom limits
+4. Fund agent wallet → address + QR code shown
+5. Copy agent address → paste into your agent config
+```
+
+---
+
+### Two surfaces, one system
+
+## Two surfaces, one system
+
+ZenithPay separates control and execution:
+
+- The **agent** executes payments
+- The **human** defines the rules
+
+Both connect through the same wallet, API, and contract.
+
+|                     | Agent (terminal)                       | Dashboard (browser)                        |
+| ------------------- | -------------------------------------- | ------------------------------------------ |
+| **Entry**           | `curl skill.md` → agent reads and acts | `usezenithpay.xyz` → human connects wallet |
+| **Wallet creation** | Email prompt → POST /wallet/genesis    | Email form → POST /wallet/genesis          |
+| **Policy setup**    | Guided by skill instructions           | Visual sliders + presets                   |
+| **Funding**         | Agent shows address to fund            | QR code + address shown                    |
+| **Payments**        | `zenithpay_pay_service()`              | Monitor on Payments page                   |
+| **Approvals**       | Agent pauses, awaits human             | Approve/deny on dashboard                  |
+| **Ledger**          | `zenithpay_ledger()`                   | Full history on Ledger page                |
+| **Under the hood**  | Same API, same contract                | Same API, same contract                    |
+
+The agent and the dashboard are two views of the same system. The human sets the rules. The agent operates within them. SpendPolicy.sol enforces everything onchain — neither surface can override it.
 
 ## How It Works
 
@@ -67,14 +160,14 @@ Five products. Three live. Two in roadmap. Built on OKX OnchainOS.
    → APPROVED: x402 payment settles zero gas — PaymentExecuted event onchain
    → PENDING:  Above approval threshold — queued for human review
    → BLOCKED:  PaymentBlocked event onchain, reason returned to agent
-   Every outcome is permanent onchain proof — verifiable on OKLink
+   Every outcome is recorded onchain as verifiable proof — verifiable on OKLink
 
-5. Human reviews (optional)
+4. Human reviews (optional)
    Dashboard shows pending payments → approve or deny
    → Approved: executes immediately
    → Denied: cancelled and logged
 
-6. Full audit trail
+5. Full audit trail
    Every payment logged: time · merchant · amount · intent · status · tx hash
    Visible in dashboard and queryable via API
 ```
@@ -378,9 +471,8 @@ XLAYER_RPC_URL=https://rpc.xlayer.tech
 OKX_API_KEY=...                   # get at web3.okx.com/onchain-os/dev-portal
 OKX_SECRET_KEY=...
 OKX_PASSPHRASE=...
-DATABASE_URL=postgresql://...
 SUPABASE_URL=...
-SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_KEY=...
 SPEND_POLICY_ADDRESS=0x...        # fill after step 4
 ZENITHPAY_API_KEY_SECRET=...
 ```
@@ -467,20 +559,20 @@ cd api && bun dev   # :3001
 
 ## Deployed Contracts
 
-| Contract     | Source                                                           | Network                        | Address                                                                                                                                          | TX                                                                                                                                                                               |
-| ------------ | ---------------------------------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Contract     | Source                                                           | Network                        | Address                                                                                                                          | TX                                                                                                                         |
+| ------------ | ---------------------------------------------------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | Spend Policy | [`contracts/src/SpendPolicy.sol`](contracts/src/SpendPolicy.sol) | X Layer mainnet (chain ID 196) | [`0xF5875F25ccEB2edDc57F218eaF1F71c5CF161f21`](https://www.oklink.com/xlayer/address/0xF5875F25ccEB2edDc57F218eaF1F71c5CF161f21) | [`0xf0be30b...22ae9`](https://www.oklink.com/xlayer/tx/0xf0be30b27021c475fcdfcb8657f8d392617ebc25454a329af9240df3ded22ae9) |
 
 ## Live Transaction Proof
 
-| Description | Chain | TX Hash |
-| --- | --- | --- |
+| Description                                   | Chain   | TX Hash                                                                                                                |
+| --------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------- |
 | x402 payment to stableenrich.dev (Exa search) | X Layer | [`0x6cecdfbd...`](https://www.oklink.com/xlayer/tx/0x6cecdfbd813da3c9792f78ff4bc49e60af976a424b53da7b2f1c78e6192389eb) |
-| x402 payment to stableenrich.dev | X Layer | [`0x141eab48...`](https://www.oklink.com/xlayer/tx/0x141eab489df25fe3b37c9f2cb851417fcbc6f665fdba52e5827b6a6f4c6e0b15) |
-| Real x402 service payment (Exa neural search) | Base | [`0xa8b200a1...`](https://basescan.org/tx/0xa8b200a12812a847d8d3affa1f992ab77ba304e4d5d0f9bbe6031d41f603527f) |
-| SpendPolicy agent registration | X Layer | [`0xf04cc8c1...`](https://www.oklink.com/xlayer/tx/0xf04cc8c1d7d1facf257170a98ad6935b7d0fe825d5bdfbfad443223c5dc99920) |
+| x402 payment to stableenrich.dev              | X Layer | [`0x141eab48...`](https://www.oklink.com/xlayer/tx/0x141eab489df25fe3b37c9f2cb851417fcbc6f665fdba52e5827b6a6f4c6e0b15) |
+| Real x402 service payment (Exa neural search) | Base    | [`0xa8b200a1...`](https://basescan.org/tx/0xa8b200a12812a847d8d3affa1f992ab77ba304e4d5d0f9bbe6031d41f603527f)          |
+| SpendPolicy agent registration                | X Layer | [`0xf04cc8c1...`](https://www.oklink.com/xlayer/tx/0xf04cc8c1d7d1facf257170a98ad6935b7d0fe825d5bdfbfad443223c5dc99920) |
 
-**Agent Wallet:** [`0x726Cf0C4Fe559DB9A32396161694C7b88C60C947`](https://www.oklink.com/xlayer/address/0x726Cf0C4Fe559DB9A32396161694C7b88C60C947) (OKX Agentic Wallet, TEE-signed)
+**Demo Agent Wallet:** [`0x726Cf0C4Fe559DB9A32396161694C7b88C60C947`](https://www.oklink.com/xlayer/address/0x726Cf0C4Fe559DB9A32396161694C7b88C60C947) (OKX Agentic Wallet, TEE-signed)
 
 ---
 
@@ -535,6 +627,7 @@ zenithpay-xlayer/
 ## Roadmap
 
 - [ ] Smart accounts + session keys (ERC-4337) — scoped, expiring agent permissions
+- [ ] ERC-8004 Agent trust identity
 - [ ] skills.sh — `npx skills add zenithpay/spend-agent`
 - [ ] Agent Card — virtual cards backed by SpendPolicy engine
 - [ ] Agent Credit — credit lines backed by onchain spend history

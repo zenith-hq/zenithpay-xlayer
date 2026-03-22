@@ -12,9 +12,7 @@ export async function createGenesisWallet(
 
   const session = await agenticWallet.akLogin();
 
-  const xlayerAddr = session.addressList.find(
-    (a) => a.chainIndex === "196",
-  );
+  const xlayerAddr = session.addressList.find((a) => a.chainIndex === "196");
   const agentAddress = xlayerAddr?.address ?? session.addressList[0]?.address;
 
   if (!agentAddress) {
@@ -38,7 +36,8 @@ export async function createGenesisWallet(
       agentAddress,
       label,
       balances: { USDC: "0.00", OKB: "0.00" },
-      createdAt: existing[0].createdAt?.toISOString() ?? new Date().toISOString(),
+      createdAt:
+        existing[0].createdAt?.toISOString() ?? new Date().toISOString(),
       message: `Wallet created. Activate at https://usezenithpay.xyz/onboarding?agent=${agentAddress}`,
     };
   }

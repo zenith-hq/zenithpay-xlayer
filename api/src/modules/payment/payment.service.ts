@@ -131,7 +131,11 @@ export async function executePayment(
     if (addr === XLAYER_USDC.toLowerCase()) {
       usdcBalance = Number.parseFloat(tb.balance);
     }
-    if (addr === "" || addr === OKB_NATIVE.toLowerCase() || tb.symbol === "OKB") {
+    if (
+      addr === "" ||
+      addr === OKB_NATIVE.toLowerCase() ||
+      tb.symbol === "OKB"
+    ) {
       okbBalance = Number.parseFloat(tb.balance);
     }
   }
@@ -194,12 +198,12 @@ export async function executePayment(
 
       // Check slippage tolerance before executing swap
       // fromTokenAmount is in wei (18 decimals), okbBalance is in UI units
-      const slippageTolerance = Number.parseFloat(
-        policy.swapSlippageTolerance,
-      );
+      const slippageTolerance = Number.parseFloat(policy.swapSlippageTolerance);
       const estimatedOkbWei = BigInt(quote.routerResult.fromTokenAmount);
       const maxOkbWei =
-        estimatedOkbWei + (estimatedOkbWei * BigInt(Math.floor(slippageTolerance * 10000))) / 10000n;
+        estimatedOkbWei +
+        (estimatedOkbWei * BigInt(Math.floor(slippageTolerance * 10000))) /
+          10000n;
       const maxOkbUi = Number(maxOkbWei) / 1e18;
 
       if (maxOkbUi > okbBalance) {
