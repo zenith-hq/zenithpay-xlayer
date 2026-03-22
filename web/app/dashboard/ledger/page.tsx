@@ -86,22 +86,23 @@ function StatCell({
 export default function LedgerPage() {
   const { agentAddress } = useAgent();
   const [transactions, setTransactions] = useState<LedgerEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  async function load() {
+  async function load(isInitial = false) {
     try {
       const res = await getLedger(agentAddress);
       setTransactions(res.transactions);
       setLastUpdated(new Date());
     } finally {
-      setLoading(false);
+      if (isInitial) setInitialLoading(false);
     }
   }
 
   useEffect(() => {
-    load();
-    const interval = setInterval(load, REFRESH_INTERVAL);
+    setInitialLoading(true);
+    load(true);
+    const interval = setInterval(() => load(false), REFRESH_INTERVAL);
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agentAddress]);
@@ -137,29 +138,29 @@ export default function LedgerPage() {
         <StatCell
           label="Total Transactions"
           value={String(transactions.length)}
-          loading={loading}
+          loading={initialLoading}
         />
         <StatCell
           label="Executed"
           value={String(executed.length)}
           valueClass={executed.length > 0 ? "text-emerald-500" : undefined}
-          loading={loading}
+          loading={initialLoading}
         />
         <StatCell
           label="Blocked"
           value={String(blocked.length)}
           valueClass={blocked.length > 0 ? "text-red-500" : undefined}
-          loading={loading}
+          loading={initialLoading}
         />
         <StatCell
           label="Total Spent"
           value={`$${totalSpent.toFixed(2)}`}
-          loading={loading}
+          loading={initialLoading}
         />
       </div>
 
       {/* Table */}
-      {loading ? (
+      {initialLoading ? (
         <div className="space-y-px">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={`skel-${i}`} className="h-12 w-full rounded-none" />

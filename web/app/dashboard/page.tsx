@@ -35,9 +35,10 @@ export default function DashboardPage() {
   const [balance, setBalance] = useState<BalanceResult | null>(null);
   const [policies, setPolicies] = useState<AgentPolicy[]>([]);
   const [transactions, setTransactions] = useState<LedgerEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
     async function load() {
       try {
         const [balRes, limRes, ledRes] = await Promise.allSettled([
@@ -45,16 +46,18 @@ export default function DashboardPage() {
           address ? getLimitsForOwner(address) : Promise.resolve({ agents: [] }),
           getLedger(AGENT_ADDRESS),
         ]);
+        if (cancelled) return;
         if (balRes.status === "fulfilled") setBalance(balRes.value);
         if (limRes.status === "fulfilled") setPolicies(limRes.value.agents);
         if (ledRes.status === "fulfilled")
           setTransactions(ledRes.value.transactions);
       } finally {
-        setLoading(false);
+        if (!cancelled) setInitialLoading(false);
       }
     }
     load();
-  }, [address]);
+    return () => { cancelled = true; };
+  }, [address, AGENT_ADDRESS]);
 
   const [copied, setCopied] = useState(false);
 
@@ -86,7 +89,7 @@ export default function DashboardPage() {
             <CreditCard className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {loading ? (
+            {initialLoading ? (
               <Skeleton className="h-7 w-24 rounded-none" />
             ) : (
               <p className="text-2xl font-bold font-mono">
@@ -104,7 +107,7 @@ export default function DashboardPage() {
             <Shield className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {loading ? (
+            {initialLoading ? (
               <Skeleton className="h-7 w-24 rounded-none" />
             ) : policy?.dailyBudget ? (
               <p className="text-2xl font-bold font-mono">
@@ -132,7 +135,7 @@ export default function DashboardPage() {
             <CreditCard className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {loading ? (
+            {initialLoading ? (
               <Skeleton className="h-7 w-16 rounded-none" />
             ) : (
               <div className="flex items-center gap-2">
@@ -158,7 +161,7 @@ export default function DashboardPage() {
             <ScrollText className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {loading ? (
+            {initialLoading ? (
               <Skeleton className="h-7 w-16 rounded-none" />
             ) : (
               <p className="text-2xl font-bold font-mono">{transactions.length}</p>
@@ -182,7 +185,7 @@ export default function DashboardPage() {
                 <span className="text-xs text-muted-foreground uppercase tracking-wider">
                   USDC
                 </span>
-                {loading ? (
+                {initialLoading ? (
                   <Skeleton className="h-4 w-20 rounded-none" />
                 ) : (
                   <span className="text-sm font-bold font-mono">
@@ -194,7 +197,7 @@ export default function DashboardPage() {
                 <span className="text-xs text-muted-foreground uppercase tracking-wider">
                   OKB
                 </span>
-                {loading ? (
+                {initialLoading ? (
                   <Skeleton className="h-4 w-16 rounded-none" />
                 ) : (
                   <span className="text-sm font-mono">
@@ -265,7 +268,7 @@ export default function DashboardPage() {
             </Link>
           </CardHeader>
           <CardContent>
-            {loading ? (
+            {initialLoading ? (
               <div className="space-y-2">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <Skeleton key={`skel-${i}`} className="h-8 w-full rounded-none" />
