@@ -33,7 +33,7 @@ export function CTASection() {
             }}
             className="rounded-none cursor-pointer relative overflow-hidden focus-visible:ring-0 h-9 px-4 group hover:opacity-90 transition-opacity"
           >
-            <Link href={authenticated ? "/overview" : "/signin"}>
+            <Link href={authenticated ? "/dashboard" : "/signin"}>
               <span className="shine absolute -top-1/2 -left-full h-[200%] w-3/4 skew-x-[-20deg] bg-linear-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
               {authenticated ? "Go to Dashboard" : "Get started"}
               <ArrowRightIcon className="size-4 w-0 opacity-0 group-hover:w-4 group-hover:opacity-100 transition-all duration-200" />

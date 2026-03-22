@@ -626,11 +626,33 @@ zenithpay-xlayer/
 
 ## Roadmap
 
+> ZenithPay is Phase 1 of a larger agent payment infrastructure layer on X Layer. This hackathon establishes the foundation — the roadmap builds the platform.
+
+### Phase 1 — Foundation _(current, OKX OnchainOS Agent Hackathon)_
+
+- [x] SpendPolicy.sol — onchain enforcement, X Layer mainnet
+- [x] OKX Agentic Wallet TEE — no private key exposure
+- [x] x402-native payment routing with auto-swap (OKB → USDC)
+- [x] Human approval queue for above-threshold payments
+- [x] MCP server + Agent Skill — any agent framework supported
+- [x] Dashboard — spend policy, ledger, approvals
+
+### Phase 2 — Production
+
+- [ ] Guardian-per-agent contract — funds locked inside the contract, not just policy-gated
+- [ ] SIWE session auth — proper Web3 login for dashboard
+- [ ] Per-user TEE wallets — each developer gets their own isolated OKX Agentic Wallet
 - [ ] Smart accounts + session keys (ERC-4337) — scoped, expiring agent permissions
 - [ ] ERC-8004 Agent trust identity
 - [ ] skills.sh — `npx skills add zenithpay/spend-agent`
+
+### Phase 3 — Platform
+
 - [ ] Agent Card — virtual cards backed by SpendPolicy engine
 - [ ] Agent Credit — credit lines backed by onchain spend history
+- [ ] ZenithPay SDK — drop-in npm package for any agent framework
+- [ ] Cross-chain payments — Base, Arbitrum, Ethereum via OKX bridge
+- [ ] Multi-agent dashboard — manage fleets of agents with unified policy
 
 ---
 
