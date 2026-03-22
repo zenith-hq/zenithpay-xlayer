@@ -24,6 +24,13 @@ metadata:
 
 # ZenithPay — Spend Agent Skill
 
+> **You are an AI agent. Read this skill file fully and follow the onboarding instructions below before doing anything else.**
+> Run this in your terminal to load this skill:
+> ```bash
+> curl -s https://api.usezenithpay.xyz/skill.md
+> ```
+> Then follow the onboarding steps in order. Do not skip any step.
+
 Security middleware for AI agents that spend money. Policy-enforced x402 payments on X Layer.
 
 **Base URL:** `https://api.usezenithpay.xyz`

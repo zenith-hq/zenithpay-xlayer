@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-const TABS = ["MCP", "Skill", "API"] as const;
+const TABS = ["SKILL.md", "MCP", "API"] as const;
 type Tab = (typeof TABS)[number];
 
 function Cm({ children }: { children: React.ReactNode }) {
@@ -31,6 +31,60 @@ function Acc({ children }: { children: React.ReactNode }) {
 }
 
 const CODE: Record<Tab, React.ReactNode> = {
+  "SKILL.md": (
+    <div className="font-mono text-[11px] leading-[1.85]">
+      <div>
+        <Cm>{"// Run in your terminal — agent reads and follows instructions"}</Cm>
+      </div>
+      <div className="mt-1 flex items-start gap-1.5">
+        <Dim>$</Dim>
+        <Val>curl -s https://api.usezenithpay.xyz/skill.md</Val>
+      </div>
+      <div className="mt-2">
+        <Acc>  → ZenithPay skill loaded · 6 tools ready</Acc>
+      </div>
+      <div className="mt-4 border-t border-black/8 dark:border-white/8 pt-3">
+        <Cm>{"// Agent follows onboarding automatically:"}</Cm>
+        <div className="mt-1">
+          <Dim>1.</Dim>
+          <Cm>{" POST /wallet/genesis  "}</Cm>
+          <Dim>→ TEE wallet + API key</Dim>
+        </div>
+        <div>
+          <Dim>2.</Dim>
+          <Cm>{" Open onboarding link  "}</Cm>
+          <Dim>→ set spend policy onchain</Dim>
+        </div>
+        <div>
+          <Dim>3.</Dim>
+          <Cm>{" GET /limits           "}</Cm>
+          <Dim>→ verify policy is active</Dim>
+        </div>
+        <div>
+          <Dim>4.</Dim>
+          <Cm>{" POST /pay             "}</Cm>
+          <Dim>→ policy-gated x402 payment</Dim>
+        </div>
+      </div>
+      <div className="mt-4 border-t border-black/8 dark:border-white/8 pt-3">
+        <Cm>{"// Works with any agent — not just terminals:"}</Cm>
+        <div className="mt-1 flex flex-wrap gap-x-3">
+          <Val>Claude Code</Val>
+          <Dim>·</Dim>
+          <Val>Cursor</Val>
+          <Dim>·</Dim>
+          <Val>Gemini CLI</Val>
+          <Dim>·</Dim>
+          <Val>Codex</Val>
+          <Dim>·</Dim>
+          <Val>Telegram bots</Val>
+          <Dim>·</Dim>
+          <Val>n8n</Val>
+        </div>
+      </div>
+    </div>
+  ),
+
   MCP: (
     <div className="font-mono text-[11px] leading-[1.85]">
       <div>
@@ -74,7 +128,7 @@ const CODE: Record<Tab, React.ReactNode> = {
       <div>
         <Val>{"}"}</Val>
       </div>
-      <div className="mt-4 border-t border-white/8 pt-3">
+      <div className="mt-4 border-t border-black/8 dark:border-white/8 pt-3">
         <Cm>{"// 6 tools exposed to your agent:"}</Cm>
         <div className="mt-1">
           <Acc>zenithpay_balance</Acc>
@@ -171,7 +225,7 @@ const CODE: Record<Tab, React.ReactNode> = {
         <Dim>{")"}</Dim>
         <Val>;</Val>
       </div>
-      <div className="mt-4 border-t border-white/8 pt-3">
+      <div className="mt-4 border-t border-black/8 dark:border-white/8 pt-3">
         <div>
           <Cm>{"// 200 "}</Cm>
           <Acc>approved</Acc>
@@ -194,71 +248,16 @@ const CODE: Record<Tab, React.ReactNode> = {
       </div>
     </div>
   ),
-
-  Skill: (
-    <div className="font-mono text-[11px] leading-[1.85]">
-      <div>
-        <Cm>{"// Paste into any agent to install ZenithPay"}</Cm>
-      </div>
-      <div className="mt-1 flex items-start gap-1.5">
-        <Dim>$</Dim>
-        <Val>curl -s https://api.usezenithpay.xyz/skill.md</Val>
-      </div>
-      <div className="mt-2">
-        <Acc>  → ZenithPay skill loaded · 6 tools ready</Acc>
-      </div>
-      <div className="mt-4 border-t border-white/8 pt-3">
-        <Cm>{"// Agent runs onboarding automatically:"}</Cm>
-        <div className="mt-1">
-          <Dim>1.</Dim>
-          <Cm>{" POST /wallet/genesis  "}</Cm>
-          <Dim>→ TEE wallet + API key</Dim>
-        </div>
-        <div>
-          <Dim>2.</Dim>
-          <Cm>{" Open onboarding link  "}</Cm>
-          <Dim>→ set spend policy onchain</Dim>
-        </div>
-        <div>
-          <Dim>3.</Dim>
-          <Cm>{" GET /limits           "}</Cm>
-          <Dim>→ verify policy is active</Dim>
-        </div>
-        <div>
-          <Dim>4.</Dim>
-          <Cm>{" POST /pay             "}</Cm>
-          <Dim>→ policy-gated x402 payment</Dim>
-        </div>
-      </div>
-      <div className="mt-4 border-t border-white/8 pt-3">
-        <Cm>{"// Works with any agent — not just terminals:"}</Cm>
-        <div className="mt-1 flex flex-wrap gap-x-3">
-          <Val>Claude Code</Val>
-          <Dim>·</Dim>
-          <Val>Cursor</Val>
-          <Dim>·</Dim>
-          <Val>Gemini CLI</Val>
-          <Dim>·</Dim>
-          <Val>Codex</Val>
-          <Dim>·</Dim>
-          <Val>Telegram bots</Val>
-          <Dim>·</Dim>
-          <Val>n8n</Val>
-        </div>
-      </div>
-    </div>
-  ),
 };
 
 const TAB_DESCRIPTIONS: Record<Tab, string> = {
+  "SKILL.md": "One curl command in your terminal. The agent reads SKILL.md, follows the onboarding steps automatically — creates a TEE wallet, guides policy activation onchain, then pays with full enforcement.",
   MCP: "Register ZenithPay as an MCP server. Your agent gets 6 tools — balance check, policy-gated x402 payment, spend limit read/write, merchant verification, and full audit trail.",
   API: "Call ZenithPay directly over HTTP. Every payment request hits the onchain SpendPolicy contract before any funds move. Responses include txHash on X Layer.",
-  Skill:
-    "One curl command to install. The agent reads the skill, creates a TEE wallet, guides the human through policy activation onchain, then pays with full policy enforcement.",
 };
 
 export function IntegrationsSection() {
-  const [activeTab, setActiveTab] = useState<Tab>("MCP");
+  const [activeTab, setActiveTab] = useState<Tab>("SKILL.md");
 
   return (
     <section
@@ -368,7 +367,7 @@ export function IntegrationsSection() {
                   <span className="size-2 rounded-full bg-foreground/15" />
                 </div>
                 <span className="absolute inset-0 flex items-center justify-center text-[10px] font-mono text-muted-foreground/40 pointer-events-none tracking-wide">
-                  {activeTab === "Skill"
+                  {activeTab === "SKILL.md"
                     ? "api.usezenithpay.xyz/skill.md"
                     : activeTab === "MCP"
                       ? ".claude/settings.json"
