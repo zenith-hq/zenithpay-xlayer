@@ -8,10 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Copy, ExternalLink } from "lucide-react";
 import { type BalanceResult, getBalance } from "@/lib/api";
-
-const AGENT_ADDRESS =
-  process.env.NEXT_PUBLIC_AGENT_ADDRESS ??
-  "0x726Cf0C4Fe559DB9A32396161694C7b88C60C947";
+import { useAgent } from "@/components/dashboard/agent-context";
 
 const EXPLORER_URL = "https://www.oklink.com/xlayer";
 
@@ -21,6 +18,7 @@ function shortenAddress(addr: string): string {
 
 export default function WalletPage() {
   const { address } = useConnection();
+  const { agentAddress: AGENT_ADDRESS } = useAgent();
   const [balance, setBalance] = useState<BalanceResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState<string | null>(null);
@@ -35,7 +33,7 @@ export default function WalletPage() {
       }
     }
     load();
-  }, []);
+  }, [AGENT_ADDRESS]);
 
   function copyToClipboard(text: string, label: string) {
     navigator.clipboard.writeText(text);

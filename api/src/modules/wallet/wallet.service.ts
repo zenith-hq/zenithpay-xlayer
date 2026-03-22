@@ -27,9 +27,16 @@ export async function createGenesisWallet(
     .where(eq(agents.address, agentAddress));
 
   if (existing.length > 0) {
+    const label = request.label ?? existing[0].label;
+    if (request.label && request.label !== existing[0].label) {
+      await db
+        .update(agents)
+        .set({ label: request.label })
+        .where(eq(agents.address, agentAddress));
+    }
     return {
       agentAddress,
-      label: existing[0].label,
+      label,
       balances: { USDC: "0.00", OKB: "0.00" },
       createdAt: existing[0].createdAt?.toISOString() ?? new Date().toISOString(),
       message: `Wallet created. Activate at https://usezenithpay.xyz/onboarding?agent=${agentAddress}`,

@@ -15,10 +15,7 @@ import {
   getLimitsForOwner,
   setLimits,
 } from "@/lib/api";
-
-const AGENT_ADDRESS =
-  process.env.NEXT_PUBLIC_AGENT_ADDRESS ??
-  "0x726Cf0C4Fe559DB9A32396161694C7b88C60C947";
+import { useAgent } from "@/components/dashboard/agent-context";
 
 const EXPLORER_URL = "https://www.oklink.com/xlayer";
 
@@ -30,6 +27,7 @@ const PRESETS = [
 
 export default function LimitsPage() {
   const { address } = useConnection();
+  const { agentAddress: AGENT_ADDRESS } = useAgent();
   const { signMessageAsync } = useSignMessage();
   const [policy, setPolicy] = useState<AgentPolicy | null>(null);
   const [loading, setLoading] = useState(true);

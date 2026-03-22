@@ -8,10 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { CreditCard, ExternalLink, Loader2 } from "lucide-react";
 import { type PaymentResult, executePayment } from "@/lib/api";
-
-const AGENT_ADDRESS =
-  process.env.NEXT_PUBLIC_AGENT_ADDRESS ??
-  "0x726Cf0C4Fe559DB9A32396161694C7b88C60C947";
+import { useAgent } from "@/components/dashboard/agent-context";
 
 const EXPLORER_URL = "https://www.oklink.com/xlayer";
 
@@ -113,6 +110,7 @@ function StatusDisplay({ result }: { result: PaymentResult }) {
 }
 
 export default function PayPage() {
+  const { agentAddress: AGENT_ADDRESS } = useAgent();
   const [serviceUrl, setServiceUrl] = useState("");
   const [maxAmount, setMaxAmount] = useState("");
   const [intent, setIntent] = useState("");

@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAgent } from "@/components/dashboard/agent-context";
 
 function truncateAddress(address: string) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -22,6 +23,7 @@ export function UserDropdown() {
   const { mutate: connect } = useConnect();
   const connectors = useConnectors();
   const { mutate: disconnect } = useDisconnect();
+  const { agentDisplayName } = useAgent();
   const isReady = status !== "connecting" && status !== "reconnecting";
 
   if (!isReady) {
@@ -40,31 +42,39 @@ export function UserDropdown() {
     );
   }
 
-  const triggerLabel = address ? truncateAddress(address) : "0x...";
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="h-8 w-[110px] px-3 rounded-none border border-border bg-muted flex items-center justify-center gap-1.5 focus:outline-none hover:bg-muted/80 transition-colors"
+          className="w-full px-3 h-9 rounded-none border border-border bg-muted flex items-center gap-2 focus:outline-none hover:bg-muted/80 transition-colors"
         >
-          <span className="text-xs font-mono text-foreground/70">
-            {triggerLabel}
-          </span>
+          <div className="flex flex-col items-start min-w-0 flex-1">
+            <span className="text-xs font-medium truncate w-full text-left">
+              {agentDisplayName}
+            </span>
+            {address && (
+              <span className="text-[10px] font-mono text-muted-foreground">
+                {truncateAddress(address)}
+              </span>
+            )}
+          </div>
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="rounded-none border-border">
+      <DropdownMenuContent align="end" className="rounded-none border-border w-48">
         <DropdownMenuLabel className="font-normal">
-          {address && (
-            <div className="text-xs text-muted-foreground font-mono">
-              {truncateAddress(address)}
-            </div>
-          )}
+          <div className="space-y-0.5">
+            <p className="text-xs font-medium">{agentDisplayName}</p>
+            {address && (
+              <p className="text-[10px] text-muted-foreground font-mono">
+                {truncateAddress(address)}
+              </p>
+            )}
+          </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild className="rounded-none">
-          <Link href="/overview">Dashboard</Link>
+          <Link href="/dashboard">Dashboard</Link>
         </DropdownMenuItem>
         <DropdownMenuItem className="rounded-none" onClick={() => disconnect()}>
           <LogOut className="mr-2 size-4" />

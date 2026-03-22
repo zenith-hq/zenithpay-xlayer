@@ -13,10 +13,7 @@ import {
 } from "@/components/ui/table";
 import { ExternalLink, ScrollText } from "lucide-react";
 import { type LedgerEntry, getLedger } from "@/lib/api";
-
-const AGENT_ADDRESS =
-  process.env.NEXT_PUBLIC_AGENT_ADDRESS ??
-  "0x726Cf0C4Fe559DB9A32396161694C7b88C60C947";
+import { useAgent } from "@/components/dashboard/agent-context";
 
 const EXPLORER_URL = "https://www.oklink.com/xlayer";
 
@@ -45,20 +42,21 @@ function formatDate(iso: string): string {
 }
 
 export default function LedgerPage() {
+  const { agentAddress } = useAgent();
   const [transactions, setTransactions] = useState<LedgerEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       try {
-        const res = await getLedger(AGENT_ADDRESS);
+        const res = await getLedger(agentAddress);
         setTransactions(res.transactions);
       } finally {
         setLoading(false);
       }
     }
     load();
-  }, []);
+  }, [agentAddress]);
 
   return (
     <div className="space-y-6">

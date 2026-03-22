@@ -15,10 +15,7 @@ import {
   getLedger,
   getLimitsForOwner,
 } from "@/lib/api";
-
-const AGENT_ADDRESS =
-  process.env.NEXT_PUBLIC_AGENT_ADDRESS ??
-  "0x726Cf0C4Fe559DB9A32396161694C7b88C60C947";
+import { useAgent } from "@/components/dashboard/agent-context";
 
 function statusBadgeClass(status: LedgerEntry["status"]): string {
   switch (status) {
@@ -34,6 +31,7 @@ function statusBadgeClass(status: LedgerEntry["status"]): string {
 
 export default function DashboardPage() {
   const { address } = useConnection();
+  const { agentAddress: AGENT_ADDRESS } = useAgent();
   const [balance, setBalance] = useState<BalanceResult | null>(null);
   const [policies, setPolicies] = useState<AgentPolicy[]>([]);
   const [transactions, setTransactions] = useState<LedgerEntry[]>([]);

@@ -11,10 +11,7 @@ import {
   denyPayment,
   getApprovals,
 } from "@/lib/api";
-
-const AGENT_ADDRESS =
-  process.env.NEXT_PUBLIC_AGENT_ADDRESS ??
-  "0x726Cf0C4Fe559DB9A32396161694C7b88C60C947";
+import { useAgent } from "@/components/dashboard/agent-context";
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", {
@@ -26,23 +23,25 @@ function formatDate(iso: string): string {
 }
 
 export default function ApprovalsPage() {
+  const { agentAddress } = useAgent();
   const [approvals, setApprovals] = useState<PendingApproval[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadApprovals();
-  }, []);
-
   async function loadApprovals() {
     setLoading(true);
     try {
-      const res = await getApprovals(AGENT_ADDRESS);
+      const res = await getApprovals(agentAddress);
       setApprovals(res.approvals);
     } finally {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    loadApprovals();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [agentAddress]);
 
   async function handleApprove(id: string) {
     setProcessingId(id);

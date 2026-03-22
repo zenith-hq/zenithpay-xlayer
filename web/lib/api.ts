@@ -154,12 +154,24 @@ export function executePayment(params: {
   });
 }
 
-export function createGenesisWallet(params: {
-  email: string;
-  label?: string;
-}) {
+export function createGenesisWallet(
+  params: { email?: string; label?: string },
+  ownerAddress?: string,
+) {
   return apiFetch<GenesisResult>("/wallet/genesis", {
     method: "POST",
     body: JSON.stringify(params),
+    headers: ownerAddress ? { "X-Owner-Address": ownerAddress } : undefined,
+  });
+}
+
+export interface AgentInfo {
+  address: string;
+  label: string | null;
+}
+
+export function getAgentsByOwner(ownerAddress: string) {
+  return apiFetch<{ agents: AgentInfo[] }>("/wallet/agents", {
+    headers: { "X-Owner-Address": ownerAddress },
   });
 }

@@ -17,7 +17,7 @@ import {
   Shield,
   Wallet,
 } from "lucide-react";
-import { setLimits } from "@/lib/api";
+import { createGenesisWallet, setLimits } from "@/lib/api";
 
 type Step = "connect" | "policy" | "signing" | "fund" | "done";
 
@@ -70,6 +70,7 @@ export function OnboardingFlow() {
   const [approvalThreshold, setApprovalThreshold] = useState<string>(
     PRESETS.balanced.approvalThreshold,
   );
+  const [agentLabel, setAgentLabel] = useState("");
   const [signing, setSigning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -100,6 +101,11 @@ export function OnboardingFlow() {
       const signature = await signMessageAsync({ message });
 
       setStep("signing");
+
+      await createGenesisWallet(
+        { label: agentLabel.trim() || undefined },
+        address,
+      );
 
       await setLimits({
         agentAddress,
@@ -256,6 +262,19 @@ export function OnboardingFlow() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="space-y-1">
+              <Label htmlFor="agentLabel" className="text-xs">
+                Agent Name
+              </Label>
+              <Input
+                id="agentLabel"
+                placeholder="e.g. Research Agent"
+                value={agentLabel}
+                onChange={(e) => setAgentLabel(e.target.value)}
+                maxLength={64}
+              />
+            </div>
+
             <div className="grid grid-cols-3 gap-2">
               {(Object.keys(PRESETS) as (keyof typeof PRESETS)[]).map((key) => (
                 <button
