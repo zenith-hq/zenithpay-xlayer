@@ -79,8 +79,8 @@ export interface PaymentResult {
 
 export interface GenesisResult {
   agentAddress: string;
-  label: string;
-  balances: { USDC: string; OKB: string };
+  apiKey: string;
+  label: string | null;
   createdAt: string;
   message: string;
 }
@@ -112,6 +112,7 @@ export function setLimits(params: {
   autoSwapEnabled?: boolean;
   swapSlippageTolerance?: string;
   humanSignature: string;
+  timestamp: number;
 }) {
   return apiFetch<AgentPolicy>("/limits", {
     method: "POST",

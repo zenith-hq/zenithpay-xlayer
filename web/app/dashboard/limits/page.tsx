@@ -73,11 +73,12 @@ export default function LimitsPage() {
 		setSaveError(null)
 
 		try {
+			const timestamp = Date.now()
 			const message = JSON.stringify({
 				agentAddress: AGENT_ADDRESS,
 				perTxLimit,
 				dailyBudget,
-				timestamp: Date.now(),
+				timestamp,
 			})
 			const signature = await signMessageAsync({ message })
 
@@ -95,6 +96,7 @@ export default function LimitsPage() {
 				autoSwapEnabled,
 				swapSlippageTolerance,
 				humanSignature: signature,
+				timestamp,
 			})
 			setPolicy(res)
 		} catch (err) {

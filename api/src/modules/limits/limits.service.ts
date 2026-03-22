@@ -1,11 +1,13 @@
-import { eq } from "drizzle-orm";
-import { createPublicClient, http } from "viem";
+import { and, eq } from "drizzle-orm";
+import { createPublicClient, http, recoverMessageAddress } from "viem";
 import { xlayer } from "../../config/chains";
 import { SPEND_POLICY_ABI, SPEND_POLICY_ADDRESS } from "../../config/contracts";
 import { getDb } from "../../db/client";
 import { agents } from "../../db/schema/agents";
 import { policies } from "../../db/schema/policies";
 import { unitsToUsdc } from "../../utils";
+
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 import type {
   AgentPolicy,
   SetLimitsRequest,
@@ -86,6 +88,50 @@ export async function setLimits(
   request: SetLimitsRequest,
 ): Promise<SetLimitsResult> {
   const db = getDb();
+
+  // Browser onboarding path: verify humanSignature and auto-link if needed.
+  // MCP direct call path: timestamp is absent — skip verification (zpk_ auth
+  // is enforced at the HTTP layer before reaching this function).
+  if (request.timestamp !== undefined) {
+    const message = JSON.stringify({
+      agentAddress: request.agentAddress,
+      perTxLimit: request.perTxLimit,
+      dailyBudget: request.dailyBudget,
+      timestamp: request.timestamp,
+    });
+
+    const signer = await recoverMessageAddress({
+      message,
+      signature: request.humanSignature as `0x${string}`,
+    });
+
+    const [agentRecord] = await db
+      .select({ ownerEoa: agents.ownerEoa })
+      .from(agents)
+      .where(eq(agents.address, request.agentAddress.toLowerCase()));
+
+    if (!agentRecord) {
+      throw new Error("Agent not found");
+    }
+
+    const ownerLower = agentRecord.ownerEoa.toLowerCase();
+    const signerLower = signer.toLowerCase();
+
+    if (ownerLower === ZERO_ADDRESS) {
+      // Auto-link: first human to activate becomes the owner — atomic with policy set
+      await db
+        .update(agents)
+        .set({ ownerEoa: signer })
+        .where(
+          and(
+            eq(agents.address, request.agentAddress.toLowerCase()),
+            eq(agents.ownerEoa, ZERO_ADDRESS),
+          ),
+        );
+    } else if (ownerLower !== signerLower) {
+      throw new Error("Unauthorized: signer is not the agent owner");
+    }
+  }
 
   // Store policy locally (off-chain components like approvalThreshold)
   await db

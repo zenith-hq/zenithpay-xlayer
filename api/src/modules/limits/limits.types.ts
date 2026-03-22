@@ -18,6 +18,8 @@ export interface SetLimitsRequest {
   autoSwapEnabled?: boolean;
   swapSlippageTolerance?: string;
   humanSignature: string;
+  /** Required for browser onboarding path (POST /limits). Omit for direct MCP tool calls. */
+  timestamp?: number;
 }
 
 export interface SetLimitsResult {

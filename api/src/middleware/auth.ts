@@ -6,9 +6,17 @@ import { env } from "../env";
 
 // Public paths that never require auth
 const PUBLIC_PATHS = new Set([
+  // Agent onboarding — no key exists yet
   "POST /wallet/genesis",
   "POST /agents/link",
+  // Human browser — uses humanSignature for authorization instead of Bearer
   "POST /limits",
+  // Read endpoints — informational, secured by knowing the agent address
+  "GET /limits",
+  "GET /wallet/balance",
+  "GET /wallet/agents",
+  "GET /ledger",
+  "GET /approvals",
 ]);
 
 export async function authMiddleware(c: Context, next: Next) {

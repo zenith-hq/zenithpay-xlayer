@@ -78,11 +78,12 @@ export default function SettingsPage() {
     setSaved(false);
 
     try {
+      const timestamp = Date.now();
       const message = JSON.stringify({
         agentAddress: AGENT_ADDRESS,
-        autoSwapEnabled,
-        swapSlippageTolerance,
-        timestamp: Date.now(),
+        perTxLimit: policy.perTxLimit,
+        dailyBudget: policy.dailyBudget,
+        timestamp,
       });
       const signature = await signMessageAsync({ message });
 
@@ -95,6 +96,7 @@ export default function SettingsPage() {
         autoSwapEnabled,
         swapSlippageTolerance,
         humanSignature: signature,
+        timestamp,
       });
       setPolicy(res);
       setSaved(true);

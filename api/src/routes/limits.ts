@@ -37,6 +37,7 @@ limits.post(
       autoSwapEnabled: z.boolean().optional(),
       swapSlippageTolerance: z.string().optional(),
       humanSignature: z.string().startsWith("0x"),
+      timestamp: z.number().int().positive().optional(),
     }),
   ),
   async (c) => {
@@ -48,6 +49,12 @@ limits.post(
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Limits update failed";
+      if (message.includes("Unauthorized")) {
+        return c.json({ error: "forbidden", message, status: 403 }, 403);
+      }
+      if (message.includes("not found")) {
+        return c.json({ error: "not_found", message, status: 404 }, 404);
+      }
       return c.json({ error: "internal_error", message, status: 500 }, 500);
     }
   },

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { LogoMark } from "@/components/logo-mark"
 import { Check, Copy, ExternalLink, Loader2, Shield, Wallet } from "lucide-react"
-import { linkAgent, setLimits } from "@/lib/api"
+import { setLimits } from "@/lib/api"
 
 type Step = "connect" | "policy" | "signing" | "fund" | "done"
 
@@ -87,15 +87,17 @@ export function OnboardingFlow() {
 		setSigning(true)
 		setError(null)
 		try {
+			const timestamp = Date.now()
 			const message = JSON.stringify({
 				agentAddress,
 				perTxLimit,
 				dailyBudget,
-				timestamp: Date.now(),
+				timestamp,
 			})
 			const signature = await signMessageAsync({ message })
 			setStep("signing")
-			await linkAgent({ agentAddress, ownerAddress: address })
+			// setLimits verifies the signature server-side and auto-links the agent
+			// to the signer's address if not already linked — one atomic operation
 			await setLimits({
 				agentAddress,
 				perTxLimit,
@@ -104,6 +106,7 @@ export function OnboardingFlow() {
 				autoSwapEnabled: true,
 				swapSlippageTolerance: "0.01",
 				humanSignature: signature,
+				timestamp,
 			})
 			setStep("fund")
 		} catch (err) {
