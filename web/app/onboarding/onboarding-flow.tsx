@@ -15,12 +15,20 @@ import {
   useConnection,
   useConnectors,
   useSignMessage,
+  useWaitForTransactionReceipt,
+  useWriteContract,
 } from "wagmi";
 import { LogoMark } from "@/components/logo-mark";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { setLimits } from "@/lib/api";
+import {
+  SPEND_POLICY_ABI,
+  SPEND_POLICY_ADDRESS,
+  usdcToUnits,
+  XLAYER_EXPLORER,
+} from "@/lib/contracts";
 
 type Step = "connect" | "policy" | "signing" | "fund" | "done";
 
@@ -70,8 +78,13 @@ export function OnboardingFlow() {
   const { mutate: connect, isPending: connectPending } = useConnect();
   const connectors = useConnectors();
   const { signMessageAsync } = useSignMessage();
+  const { writeContractAsync } = useWriteContract();
 
   const [step, setStep] = useState<Step>(isConnected ? "policy" : "connect");
+  const [txHash, setTxHash] = useState<`0x${string}` | undefined>(undefined);
+
+  const { isLoading: waitingForTx, isSuccess: txConfirmed } =
+    useWaitForTransactionReceipt({ hash: txHash });
 
   useEffect(() => {
     if (isConnected && step === "connect") setStep("policy");
@@ -103,7 +116,28 @@ export function OnboardingFlow() {
     if (!agentAddress || !address) return;
     setSigning(true);
     setError(null);
+    setTxHash(undefined);
+
     try {
+      setStep("signing");
+
+      // Step 1: Call registerAgent onchain — John becomes humanOwner in SpendPolicy.sol
+      const hash = await writeContractAsync({
+        address: SPEND_POLICY_ADDRESS,
+        abi: SPEND_POLICY_ABI,
+        functionName: "registerAgent",
+        args: [
+          agentAddress as `0x${string}`,
+          usdcToUnits(perTxLimit),
+          usdcToUnits(dailyBudget),
+          false, // merchantAllowlistEnabled — managed off-chain via allowlist field
+        ],
+      });
+      setTxHash(hash);
+
+      // Step 2: Sign and POST /limits for off-chain fields only
+      // (approvalThreshold, autoSwapEnabled, swapSlippageTolerance)
+      // The signature auto-links the agent to the signer's address in DB
       const timestamp = Date.now();
       const message = JSON.stringify({
         agentAddress,
@@ -112,9 +146,7 @@ export function OnboardingFlow() {
         timestamp,
       });
       const signature = await signMessageAsync({ message });
-      setStep("signing");
-      // setLimits verifies the signature server-side and auto-links the agent
-      // to the signer's address if not already linked — one atomic operation
+
       const result = await setLimits({
         agentAddress,
         perTxLimit,
@@ -125,10 +157,11 @@ export function OnboardingFlow() {
         humanSignature: signature,
         timestamp,
       });
-      // Persist the apiKey in localStorage so the dashboard can show it in Settings
+
       if (result.apiKey) {
         localStorage.setItem(`zpk_${agentAddress}`, result.apiKey);
       }
+
       setStep("fund");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to set policy");
@@ -202,7 +235,7 @@ export function OnboardingFlow() {
           </div>
         </div>
         <a
-          href={`https://www.oklink.com/xlayer/address/${agentAddress}`}
+          href={`${XLAYER_EXPLORER}/address/${agentAddress}`}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-1 text-[10px] border px-1.5 py-0.5 font-mono text-muted-foreground hover:text-foreground hover:border-foreground transition-colors shrink-0"
@@ -283,8 +316,9 @@ export function OnboardingFlow() {
             </h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            Connect your wallet to sign the spend policy and become the policy
-            owner. Only you can modify the agent’s limits.
+            Connect your wallet to register the spend policy onchain and become
+            the policy owner. Only you can modify or revoke the agent&apos;s
+            limits.
           </p>
           <Button
             className="w-full rounded-none"
@@ -412,7 +446,7 @@ export function OnboardingFlow() {
             )}
           </Button>
           <p className="text-xs text-muted-foreground text-center">
-            This deploys your policy onchain — ZenithPay cannot override it
+            Calls SpendPolicy.registerAgent() on X Layer — gas ~$0.001 in OKB
           </p>
         </div>
       )}
@@ -421,9 +455,30 @@ export function OnboardingFlow() {
       {step === "signing" && (
         <div className="border p-10 flex flex-col items-center gap-3">
           <Loader2 className="size-5 animate-spin text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">
-            Deploying spend policy to X Layer...
-          </p>
+          {txHash ? (
+            <div className="text-center space-y-2">
+              <p className="text-sm text-muted-foreground">
+                {waitingForTx
+                  ? "Waiting for confirmation on X Layer..."
+                  : txConfirmed
+                    ? "Transaction confirmed — saving policy..."
+                    : "Transaction submitted..."}
+              </p>
+              <a
+                href={`${XLAYER_EXPLORER}/tx/${txHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-1 text-[10px] font-mono text-muted-foreground hover:text-foreground underline underline-offset-4"
+              >
+                {txHash.slice(0, 10)}...{txHash.slice(-8)}
+                <ExternalLink className="size-2.5" />
+              </a>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Confirm the transaction in your wallet...
+            </p>
+          )}
         </div>
       )}
 
@@ -441,6 +496,25 @@ export function OnboardingFlow() {
               Policy Activated
             </h2>
           </div>
+
+          {txHash && (
+            <a
+              href={`${XLAYER_EXPLORER}/tx/${txHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground hover:text-foreground border border-dashed px-3 py-2"
+            >
+              <Check
+                className="size-3"
+                style={{ color: "var(--brand-accent)" }}
+              />
+              Onchain tx confirmed
+              <span className="font-mono">
+                {txHash.slice(0, 10)}...{txHash.slice(-8)}
+              </span>
+              <ExternalLink className="size-2.5 ml-auto" />
+            </a>
+          )}
 
           <p className="text-sm text-muted-foreground">
             Fund the agent wallet to start making payments:

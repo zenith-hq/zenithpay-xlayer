@@ -2,7 +2,13 @@
 
 import { ExternalLink, Loader2, Shield } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useConnection, useSignMessage } from "wagmi";
+import {
+  useConnection,
+  useReadContract,
+  useSignMessage,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
 import { useAgent } from "@/components/dashboard/agent-context";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,8 +18,13 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { type AgentPolicy, getLimitsForOwner, setLimits } from "@/lib/api";
-
-const EXPLORER_URL = "https://www.oklink.com/xlayer";
+import {
+  AgentStatus,
+  SPEND_POLICY_ABI,
+  SPEND_POLICY_ADDRESS,
+  usdcToUnits,
+  XLAYER_EXPLORER,
+} from "@/lib/contracts";
 
 const PRESETS = [
   { label: "Conservative", perTx: "5", daily: "25", threshold: "10" },
@@ -25,10 +36,13 @@ export default function LimitsPage() {
   const { address } = useConnection();
   const { agentAddress: AGENT_ADDRESS } = useAgent();
   const { signMessageAsync } = useSignMessage();
+  const { writeContractAsync } = useWriteContract();
+
   const [policy, setPolicy] = useState<AgentPolicy | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [txHash, setTxHash] = useState<`0x${string}` | undefined>(undefined);
 
   const [perTxLimit, setPerTxLimit] = useState("");
   const [dailyBudget, setDailyBudget] = useState("");
@@ -37,6 +51,18 @@ export default function LimitsPage() {
   const [swapSlippageTolerance, setSwapSlippageTolerance] = useState("0.01");
   const [allowlistInput, setAllowlistInput] = useState("");
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
+
+  // Read onchain agent status to know whether to call registerAgent or updatePolicy
+  const { data: onchainStatus } = useReadContract({
+    address: SPEND_POLICY_ADDRESS,
+    abi: SPEND_POLICY_ABI,
+    functionName: "agentStatus",
+    args: [AGENT_ADDRESS as `0x${string}`],
+    query: { enabled: Boolean(AGENT_ADDRESS) },
+  });
+
+  const { isLoading: waitingForTx, data: receipt } =
+    useWaitForTransactionReceipt({ hash: txHash });
 
   useEffect(() => {
     async function load() {
@@ -71,8 +97,42 @@ export default function LimitsPage() {
     if (!address) return;
     setSaving(true);
     setSaveError(null);
+    setTxHash(undefined);
 
     try {
+      const isRegistered =
+        onchainStatus !== undefined &&
+        onchainStatus !== AgentStatus.NotRegistered;
+
+      // Step 1: Write onchain — hard limits (perTxLimit, dailyBudget)
+      let hash: `0x${string}`;
+      if (isRegistered) {
+        hash = await writeContractAsync({
+          address: SPEND_POLICY_ADDRESS,
+          abi: SPEND_POLICY_ABI,
+          functionName: "updatePolicy",
+          args: [
+            AGENT_ADDRESS as `0x${string}`,
+            usdcToUnits(perTxLimit),
+            usdcToUnits(dailyBudget),
+          ],
+        });
+      } else {
+        hash = await writeContractAsync({
+          address: SPEND_POLICY_ADDRESS,
+          abi: SPEND_POLICY_ABI,
+          functionName: "registerAgent",
+          args: [
+            AGENT_ADDRESS as `0x${string}`,
+            usdcToUnits(perTxLimit),
+            usdcToUnits(dailyBudget),
+            false,
+          ],
+        });
+      }
+      setTxHash(hash);
+
+      // Step 2: Sign and POST /limits for off-chain fields
       const timestamp = Date.now();
       const message = JSON.stringify({
         agentAddress: AGENT_ADDRESS,
@@ -98,6 +158,7 @@ export default function LimitsPage() {
         humanSignature: signature,
         timestamp,
       });
+
       if (res.apiKey) {
         localStorage.setItem(`zpk_${AGENT_ADDRESS}`, res.apiKey);
       }
@@ -110,6 +171,9 @@ export default function LimitsPage() {
       setSaving(false);
     }
   }
+
+  const isRegistered =
+    onchainStatus !== undefined && onchainStatus !== AgentStatus.NotRegistered;
 
   return (
     <div className="space-y-6">
@@ -285,8 +349,16 @@ export default function LimitsPage() {
           <div className="space-y-4">
             <Card className="rounded-none border">
               <CardHeader>
-                <CardTitle className="text-sm font-medium uppercase tracking-wider">
+                <CardTitle className="flex items-center justify-between text-sm font-medium uppercase tracking-wider">
                   Current Policy
+                  {onchainStatus !== undefined && (
+                    <Badge
+                      variant="outline"
+                      className="rounded-none text-[10px] font-mono normal-case"
+                    >
+                      {isRegistered ? "Registered onchain" : "Not registered"}
+                    </Badge>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -338,7 +410,7 @@ export default function LimitsPage() {
                         Contract
                       </span>
                       <a
-                        href={`${EXPLORER_URL}/address/${policy.policyContract}`}
+                        href={`${XLAYER_EXPLORER}/address/${policy.policyContract}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1 font-mono hover:text-foreground text-muted-foreground underline underline-offset-4"
@@ -357,6 +429,26 @@ export default function LimitsPage() {
                 )}
               </CardContent>
             </Card>
+
+            {txHash && (
+              <a
+                href={`${XLAYER_EXPLORER}/tx/${txHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 border border-dashed p-3 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ExternalLink className="size-3 shrink-0" />
+                <span className="font-mono">
+                  {waitingForTx
+                    ? "Confirming tx..."
+                    : receipt
+                      ? "Tx confirmed"
+                      : "Tx submitted"}
+                  {" · "}
+                  {txHash.slice(0, 10)}...{txHash.slice(-8)}
+                </span>
+              </a>
+            )}
 
             {saveError && (
               <div className="border border-red-600 bg-red-500/10 p-3">
@@ -382,12 +474,19 @@ export default function LimitsPage() {
               {saving ? (
                 <>
                   <Loader2 className="size-4 animate-spin" />
-                  Signing & Saving...
+                  {waitingForTx ? "Waiting for tx..." : "Signing..."}
                 </>
+              ) : isRegistered ? (
+                "Update Policy Onchain"
               ) : (
-                "Sign & Save Policy"
+                "Register Policy Onchain"
               )}
             </Button>
+            <p className="text-[10px] text-muted-foreground text-center">
+              {isRegistered
+                ? "Calls SpendPolicy.updatePolicy() on X Layer"
+                : "Calls SpendPolicy.registerAgent() on X Layer"}
+            </p>
           </div>
         </div>
       )}
