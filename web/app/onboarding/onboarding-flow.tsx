@@ -66,7 +66,6 @@ export function OnboardingFlow() {
 	}, [isConnected, step])
 
 	const [selectedPreset, setSelectedPreset] = useState<keyof typeof PRESETS>("balanced")
-	const [agentLabel, setAgentLabel] = useState("")
 	const [perTxLimit, setPerTxLimit] = useState<string>(PRESETS.balanced.perTxLimit)
 	const [dailyBudget, setDailyBudget] = useState<string>(PRESETS.balanced.dailyBudget)
 	const [approvalThreshold, setApprovalThreshold] = useState<string>(
@@ -280,21 +279,6 @@ export function OnboardingFlow() {
 						<h2 className="text-sm font-medium uppercase tracking-wider">
 							Set Spend Policy
 						</h2>
-					</div>
-
-					{/* Agent name */}
-					<div className="space-y-1.5">
-						<Label htmlFor="agentLabel" className="text-xs uppercase tracking-wider">
-							Agent Name
-						</Label>
-						<Input
-							id="agentLabel"
-							className="rounded-none font-mono text-xs"
-							placeholder="e.g. Research Agent"
-							value={agentLabel}
-							onChange={(e) => setAgentLabel(e.target.value)}
-							maxLength={64}
-						/>
 					</div>
 
 					{/* Presets */}
