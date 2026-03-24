@@ -1,7 +1,7 @@
 /**
  * ZenithPay Demo Seller Endpoint
  *
- * GET|POST /demo/agent-intel
+ * GET|POST /sell/agent-intel
  *
  * x402-protected resource. Returns a live X Layer wallet intelligence report
  * for the ZenithPay demo agent wallet. Costs 0.01 USDG.
@@ -29,7 +29,7 @@ import * as historyProvider from "../providers/onchainos/history";
 import * as marketProvider from "../providers/onchainos/market";
 import * as tokenProvider from "../providers/onchainos/token";
 
-const demo = new Hono();
+const sell = new Hono();
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
@@ -120,7 +120,7 @@ async function verifyWithOKX(paymentHeader: string): Promise<{
       invalidReason: result.invalidReason ?? undefined,
     };
   } catch (err) {
-    console.error("[demo/verify] OKX verify failed:", err);
+    console.error("[sell/verify] OKX verify failed:", err);
     return { isValid: false, invalidReason: "verify_request_failed" };
   }
 }
@@ -152,7 +152,7 @@ async function settleWithOKX(paymentHeader: string): Promise<{
         },
         paymentRequirements: {
           scheme: "exact",
-          resource: "https://api.usezenithpay.xyz/demo/agent-intel",
+          resource: "https://api.usezenithpay.xyz/sell/agent-intel",
           description: "X Layer DeFi Intelligence — ZenithPay Demo",
           mimeType: "application/json",
           maxAmountRequired: PAYMENT_AMOUNT_ATOMIC,
@@ -170,7 +170,7 @@ async function settleWithOKX(paymentHeader: string): Promise<{
       errorReason: result.errorReason ?? undefined,
     };
   } catch (err) {
-    console.error("[demo/settle] OKX settle failed:", err);
+    console.error("[sell/settle] OKX settle failed:", err);
     return { success: false, errorReason: "settle_request_failed" };
   }
 }
@@ -276,7 +276,7 @@ async function fetchAgentIntel(): Promise<Record<string, unknown>> {
 
 // ── Route ──────────────────────────────────────────────────────────────────
 
-demo.on(["GET", "POST"], "/agent-intel", async (c) => {
+sell.on(["GET", "POST"], "/agent-intel", async (c) => {
   const paymentHeader = c.req.header("X-Payment");
 
   // Step 1: No payment → return 402 + Payment-Required
@@ -366,7 +366,7 @@ demo.on(["GET", "POST"], "/agent-intel", async (c) => {
     resourceData = await fetchAgentIntel();
   } catch (err) {
     console.error(
-      `[demo/agent-intel] ORPHAN PAYMENT: settlement succeeded but resource fetch failed. ` +
+      `[sell/agent-intel] ORPHAN PAYMENT: settlement succeeded but resource fetch failed. ` +
         `txHash=${settlement.txHash} payer=${settlement.payer} error=${err}`,
     );
     resourceData = {
@@ -405,4 +405,4 @@ demo.on(["GET", "POST"], "/agent-intel", async (c) => {
   );
 });
 
-export { demo };
+export { sell };

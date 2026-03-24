@@ -60,7 +60,7 @@ const PRESETS = {
   },
 } as const;
 
-const XLAYER_USDC = "0x4ae46a509f6b1d9056937ba4500cb143933d2dc8";
+const XLAYER_USDG = "0x4ae46a509f6b1d9056937ba4500cb143933d2dc8";
 
 const STEPS: { key: Step; label: string }[] = [
   { key: "connect", label: "Connect" },
@@ -432,7 +432,7 @@ export function OnboardingFlow() {
                 htmlFor="perTx"
                 className="text-xs uppercase tracking-wider"
               >
-                Per-Transaction Limit (USDC)
+                Per-Transaction Limit (USDG)
               </Label>
               <Input
                 id="perTx"
@@ -446,7 +446,7 @@ export function OnboardingFlow() {
                 htmlFor="daily"
                 className="text-xs uppercase tracking-wider"
               >
-                Daily Budget (USDC)
+                Daily Budget (USDG)
               </Label>
               <Input
                 id="daily"
@@ -460,7 +460,7 @@ export function OnboardingFlow() {
                 htmlFor="threshold"
                 className="text-xs uppercase tracking-wider"
               >
-                Approval Threshold (USDC)
+                Approval Threshold (USDG)
               </Label>
               <Input
                 id="threshold"
@@ -592,8 +592,8 @@ export function OnboardingFlow() {
             {[
               { label: "Network", value: "X Layer mainnet (196)" },
               {
-                label: "USDC",
-                value: `${XLAYER_USDC.slice(0, 10)}...${XLAYER_USDC.slice(-8)}`,
+                label: "USDG",
+                value: `${XLAYER_USDG.slice(0, 10)}...${XLAYER_USDG.slice(-8)}`,
               },
               {
                 label: "Gas token",
@@ -612,11 +612,11 @@ export function OnboardingFlow() {
             ))}
           </div>
 
-          <Button
-            className="w-full rounded-none"
-            onClick={() => setStep("done")}
-          >
+          <Button className="w-full rounded-none" onClick={() => setStep("done")}>
             I&apos;ve funded the wallet
+          </Button>
+          <Button variant="ghost" className="w-full rounded-none" asChild>
+            <a href="/dashboard">Continue to dashboard →</a>
           </Button>
         </div>
       )}

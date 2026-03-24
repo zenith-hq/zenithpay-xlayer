@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { getDb } from "../../db/client";
 import { agents } from "../../db/schema/agents";
 import * as agenticWallet from "../../providers/onchainos/agentic-wallet";
@@ -20,7 +20,8 @@ export async function createGenesisWallet(
   const session = await agenticWallet.akLogin();
 
   const xlayerAddr = session.addressList.find((a) => a.chainIndex === "196");
-  const agentAddress = xlayerAddr?.address ?? session.addressList[0]?.address;
+  const resolvedAddress = xlayerAddr?.address ?? session.addressList[0]?.address;
+  const agentAddress = resolvedAddress?.toLowerCase();
 
   if (!agentAddress) {
     throw new Error("No wallet address available from OKX Agentic Wallet");
@@ -61,7 +62,7 @@ export async function createGenesisWallet(
     address: agentAddress,
     apiKey,
     label: request.label ?? null,
-    ownerEoa,
+    ownerEoa: ownerEoa.toLowerCase(),
     email: request.email ?? null,
   });
 
@@ -76,7 +77,10 @@ export async function createGenesisWallet(
 
 export async function getAgentsByOwner(ownerEoa: string) {
   const db = getDb();
-  return db.select().from(agents).where(eq(agents.ownerEoa, ownerEoa));
+  return db
+    .select()
+    .from(agents)
+    .where(sql`lower(${agents.ownerEoa}) = ${ownerEoa.toLowerCase()}`);
 }
 
 export async function getAgentByAddress(agentAddress: string) {
@@ -84,7 +88,7 @@ export async function getAgentByAddress(agentAddress: string) {
   const [row] = await db
     .select()
     .from(agents)
-    .where(eq(agents.address, agentAddress.toLowerCase()));
+    .where(sql`lower(${agents.address}) = ${agentAddress.toLowerCase()}`);
   return row ?? null;
 }
 
@@ -93,19 +97,24 @@ export async function linkAgent(
   ownerAddress: string,
 ): Promise<{ agentAddress: string; ownerAddress: string }> {
   const db = getDb();
+  const agentLower = agentAddress.toLowerCase();
+  const ownerLower = ownerAddress.toLowerCase();
 
   const rows = await db
     .select()
     .from(agents)
     .where(
-      and(eq(agents.address, agentAddress), eq(agents.ownerEoa, ZERO_ADDRESS)),
+      and(
+        sql`lower(${agents.address}) = ${agentLower}`,
+        sql`lower(${agents.ownerEoa}) = ${ZERO_ADDRESS}`,
+      ),
     );
 
   if (rows.length === 0) {
     const existing = await db
       .select()
       .from(agents)
-      .where(eq(agents.address, agentAddress));
+      .where(sql`lower(${agents.address}) = ${agentLower}`);
     if (existing.length === 0) {
       throw new Error("Agent not found");
     }
@@ -114,10 +123,13 @@ export async function linkAgent(
 
   await db
     .update(agents)
-    .set({ ownerEoa: ownerAddress })
+    .set({ ownerEoa: ownerLower })
     .where(
-      and(eq(agents.address, agentAddress), eq(agents.ownerEoa, ZERO_ADDRESS)),
+      and(
+        sql`lower(${agents.address}) = ${agentLower}`,
+        sql`lower(${agents.ownerEoa}) = ${ZERO_ADDRESS}`,
+      ),
     );
 
-  return { agentAddress, ownerAddress };
+  return { agentAddress: agentLower, ownerAddress: ownerLower };
 }

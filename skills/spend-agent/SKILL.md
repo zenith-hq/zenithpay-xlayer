@@ -310,7 +310,7 @@ POST /pay
 Authorization: Bearer ${ZENITHPAY_API_KEY}
 {
   "agentAddress": "${AGENT_ADDRESS}",
-  "serviceUrl": "https://api.usezenithpay.xyz/demo/agent-intel",
+  "serviceUrl": "https://api.usezenithpay.xyz/sell/agent-intel",
   "maxAmount": "0.01",
   "intent": "Fetch live X Layer DeFi intelligence"
 }

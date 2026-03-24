@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, sql } from "drizzle-orm";
 import { createPublicClient, http, recoverMessageAddress } from "viem";
 import { xlayer } from "../../config/chains";
 import { SPEND_POLICY_ABI, SPEND_POLICY_ADDRESS } from "../../config/contracts";
@@ -22,10 +22,11 @@ const viemClient = createPublicClient({
 
 export async function getLimits(agentAddress: string): Promise<AgentPolicy> {
   const db = getDb();
+  const agentLower = agentAddress.toLowerCase();
   const [localPolicy] = await db
     .select()
     .from(policies)
-    .where(eq(policies.agentAddress, agentAddress));
+    .where(sql`lower(${policies.agentAddress}) = ${agentLower}`);
 
   let perTxLimit = "0";
   let dailyBudget = "0";
@@ -35,7 +36,7 @@ export async function getLimits(agentAddress: string): Promise<AgentPolicy> {
       address: SPEND_POLICY_ADDRESS,
       abi: SPEND_POLICY_ABI,
       functionName: "getPolicy",
-      args: [agentAddress as `0x${string}`],
+      args: [agentLower as `0x${string}`],
     })) as {
       perTxLimit: bigint;
       dailyLimit: bigint;
@@ -75,7 +76,7 @@ export async function getLimitsForOwner(
   const agentList = await db
     .select()
     .from(agents)
-    .where(eq(agents.ownerEoa, ownerEoa));
+    .where(sql`lower(${agents.ownerEoa}) = ${ownerEoa.toLowerCase()}`);
 
   const results: AgentPolicy[] = [];
   for (const agent of agentList) {
@@ -89,6 +90,7 @@ export async function setLimits(
   request: SetLimitsRequest,
 ): Promise<SetLimitsResult> {
   const db = getDb();
+  const agentLower = request.agentAddress.toLowerCase();
 
   // Browser onboarding path: verify humanSignature and auto-link if needed.
   // MCP direct call path: timestamp is absent — skip verification (zpk_ auth
@@ -109,7 +111,7 @@ export async function setLimits(
     const [agentRecord] = await db
       .select({ ownerEoa: agents.ownerEoa })
       .from(agents)
-      .where(eq(agents.address, request.agentAddress.toLowerCase()));
+      .where(sql`lower(${agents.address}) = ${agentLower}`);
 
     if (!agentRecord) {
       throw new Error("Agent not found");
@@ -123,13 +125,13 @@ export async function setLimits(
       await db
         .update(agents)
         .set({
-          ownerEoa: signer,
+          ownerEoa: signerLower,
           ...(request.label !== undefined ? { label: request.label } : {}),
         })
         .where(
           and(
-            eq(agents.address, request.agentAddress.toLowerCase()),
-            eq(agents.ownerEoa, ZERO_ADDRESS),
+            sql`lower(${agents.address}) = ${agentLower}`,
+            sql`lower(${agents.ownerEoa}) = ${ZERO_ADDRESS}`,
           ),
         );
     } else if (ownerLower !== signerLower) {
@@ -138,7 +140,7 @@ export async function setLimits(
       await db
         .update(agents)
         .set({ label: request.label })
-        .where(eq(agents.address, request.agentAddress.toLowerCase()));
+        .where(sql`lower(${agents.address}) = ${agentLower}`);
     }
   }
 
@@ -146,7 +148,7 @@ export async function setLimits(
   await db
     .insert(policies)
     .values({
-      agentAddress: request.agentAddress.toLowerCase(),
+      agentAddress: agentLower,
       perTxLimit: request.perTxLimit,
       dailyBudget: request.dailyBudget,
       allowlist: request.allowlist ?? [],
@@ -173,7 +175,7 @@ export async function setLimits(
   const [agentRow] = await db
     .select({ apiKey: agents.apiKey })
     .from(agents)
-    .where(eq(agents.address, request.agentAddress.toLowerCase()));
+    .where(sql`lower(${agents.address}) = ${agentLower}`);
 
   return {
     status: "deployed",
