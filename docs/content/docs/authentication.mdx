@@ -1,16 +1,26 @@
 ---
 title: Authentication
-description: Auth
+description: How ZenithPay authenticates REST, MCP, and onboarding flows
 ---
-ZenithPay supports three integration modes: REST API, MCP Server, and Agent Skill.
+
+ZenithPay supports three integration surfaces:
+
+- REST API (Bearer token)
+- MCP server (Bearer + agent header)
+- Agent skill bootstrap (`/skill.md`)
+
 ## REST API (Bearer auth)
-All REST endpoints require an API key passed as a Bearer token in the `Authorization` header (except `GET /health`).
+All protected REST endpoints require:
 
 ```http
 Authorization: Bearer $ZENITHPAY_API_KEY
 ```
 
-API keys are scoped to a human EOA account. Each key can manage one or more agent addresses registered under that account.
+Notes:
+
+- `GET /health` and seller challenge route are public.
+- API key is scoped to the owner account.
+- Owner can have multiple linked agent wallets.
 
 ### Example: `POST /pay`
 ```bash
@@ -25,13 +35,20 @@ curl -X POST https://api.usezenithpay.xyz/pay \
   }'
 ```
 
-## MCP Server (agent-scoped env)
-Register ZenithPay as an MCP server at:
-`https://api.usezenithpay.xyz/mcp`
+## MCP server auth
 
-Your MCP config includes:
-- `AGENT_ADDRESS`: the agent wallet address the session manages
-- `ZENITHPAY_API_KEY`: your human-scoped API key
+MCP requests are authenticated with:
+
+- `Authorization: Bearer <api-key>`
+- `X-Agent-Address: <agent-address>`
+
+MCP URL:
+
+```text
+https://api.usezenithpay.xyz/mcp
+```
+
+Example config:
 
 ```json
 {
@@ -47,11 +64,22 @@ Your MCP config includes:
 }
 ```
 
-## Agent Skill (embedded tool config)
-The skill file is served at:
-`https://api.usezenithpay.xyz/skill.md`
+## Agent skill bootstrap
 
-Agents that load this skill get the same six tools through the agent environment. In this integration mode, the agent does not directly handle your human API key.
+Skill URL:
+
+```text
+https://api.usezenithpay.xyz/skill.md
+```
+
+The skill performs one-session onboarding and prepares persistent MCP usage.
 
 ## Human approvals (REST-only)
-Approval queue actions (`GET /approvals`, `POST /approvals/:id/approve`, `POST /approvals/:id/deny`) are REST-only by design. Agents cannot approve their own payments.
+
+Approval actions are intentionally restricted to human-operated REST calls:
+
+- `GET /approvals`
+- `POST /approvals/:id/approve`
+- `POST /approvals/:id/deny`
+
+Agents cannot self-approve pending payments.

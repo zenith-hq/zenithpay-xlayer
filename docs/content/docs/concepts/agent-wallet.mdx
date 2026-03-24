@@ -30,5 +30,20 @@ curl -X POST https://api.usezenithpay.xyz/wallet/genesis \
 
 The response includes the agent wallet address and initial balances.
 
+## Owner-agent linking model
+
+ZenithPay links each agent wallet to an owner EOA during onboarding/policy activation.
+
+- owner account controls policy and approvals
+- agent wallet executes autonomous payments within those limits
+- dashboard data resolves by connected owner, then linked agents
+
 ## Agent tools (MCP + Skill)
-For agents, the wallet lifecycle is managed through tools exposed by ZenithPay's MCP server and Agent Skill (e.g. `zenithpay_balance` and `zenithpay_pay_service`).
+
+Wallet and payment operations are exposed to agents through MCP tools:
+
+- `zenithpay_balance`
+- `zenithpay_get_limits`
+- `zenithpay_verify_merchant`
+- `zenithpay_pay_service`
+- `zenithpay_ledger`

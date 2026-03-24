@@ -3,7 +3,7 @@ title: MCP Server
 description: Primary integration — persistent tools across all agent sessions
 ---
 
-ZenithPay's MCP server is the primary integration path. Once registered, the 6 policy-gated tools appear natively in Claude Code, Cursor, Windsurf, Gemini CLI, and any MCP-compatible agent — no re-reading of skill files each session.
+ZenithPay's MCP server is the primary runtime integration. Once connected, the 6 `zenithpay_*` tools are available in MCP-compatible agents without re-running onboarding.
 
 ## MCP server URL
 
@@ -13,7 +13,10 @@ https://api.usezenithpay.xyz/mcp
 
 ## Prerequisites
 
-Complete the [Agent Skill onboarding](/docs/integration/agent-skill) first to get your `agentAddress` and `apiKey`. Both are required to authenticate the MCP connection.
+Complete [Agent Skill onboarding](/docs/integration/agent-skill) first to obtain:
+
+- `agentAddress`
+- `apiKey`
 
 ## Registration by platform
 
@@ -110,7 +113,7 @@ agent = Agent(
 
 | Tool | Description |
 | --- | --- |
-| `zenithpay_balance` | USDC + OKB balances + remaining daily budget |
+| `zenithpay_balance` | USDG + OKB balances + remaining daily budget |
 | `zenithpay_get_limits` | Read current onchain spend policy |
 | `zenithpay_verify_merchant` | OKX security scan + allowlist check |
 | `zenithpay_pay_service` | Policy-gated x402 payment with auto-swap |
@@ -126,3 +129,9 @@ agent = Agent(
 4. zenithpay_pay_service()      → execute payment
 5. zenithpay_ledger()           → review audit trail at end
 ```
+
+## Notes for production
+
+- Keep `X-Agent-Address` stable per session to avoid cross-agent confusion.
+- Approval queue actions stay REST-only by design.
+- Use `zenithpay_get_limits` before autonomous spending loops.

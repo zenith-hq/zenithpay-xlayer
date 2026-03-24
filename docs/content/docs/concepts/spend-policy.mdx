@@ -5,7 +5,7 @@ description: On-chain spend limits for agents
 
 SpendPolicy.sol is an on-chain spend control contract deployed per agent on X Layer.
 
-ZenithPay uses it as the authoritative gate: policy is checked before any swap or x402 settlement happens.
+ZenithPay uses it as the authoritative gate: policy is always checked before swap or settlement.
 
 ## SpendPolicy.sol: on-chain enforcement
 
@@ -14,10 +14,10 @@ ZenithPay's spend control is enforced by `SpendPolicy.sol` on X Layer.
 ### Policy fields (v1)
 | Field | Meaning | Enforcement |
 | --- | --- | --- |
-| `perTxLimit` | Max USDC allowed per transaction | Hard block on-chain |
-| `dailyBudget` | Max cumulative USDC spend per day | Hard block on-chain |
+| `perTxLimit` | Max settlement-token amount per transaction | Hard block on-chain |
+| `dailyBudget` | Max cumulative settlement-token spend per day | Hard block on-chain |
 | `allowlist` | Allowed merchant hostnames (service URLs) | Hard block on-chain (when set) |
-| `approvalThreshold` | USDC amount above which payments require human review | Off-chain “pause” queue (not a contract override) |
+| `approvalThreshold` | Settlement-token amount above which payments require human review | Off-chain "pause" queue (not a contract override) |
 
 ### What happens when a payment is attempted
 1. **Approved**: payment passes hard policy and executes.
@@ -27,3 +27,8 @@ ZenithPay's spend control is enforced by `SpendPolicy.sol` on X Layer.
 ### On-chain proofs
 - `PaymentExecuted` for approvals
 - `PaymentBlocked` for hard rejections
+
+### Current deployment
+
+- Network: X Layer (`chainId: 196`)
+- Contract: `0x1250e52B7154E12F66e8E347ce116F463D4E248B`

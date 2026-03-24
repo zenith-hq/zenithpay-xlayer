@@ -128,7 +128,7 @@ const CODE: Record<Tab, React.ReactNode> = {
 				<Cm>{"// 6 tools exposed to your agent:"}</Cm>
 				<div className="mt-1">
 					<Acc>zenithpay_balance</Acc>
-					<Cm>{"        · USDC + OKB + remaining budget"}</Cm>
+					<Cm>{"        · USDG + OKB + remaining budget"}</Cm>
 				</div>
 				<div>
 					<Acc>zenithpay_pay_service</Acc>

@@ -92,7 +92,8 @@ const PRODUCTS = [
 const NAV_LINKS = [
 	{ label: "Features", href: "#features", isAnchor: true },
 	{ label: "How it works", href: "#how-it-works", isAnchor: true },
-	{ label: "Docs", href: "/docs", isAnchor: false },
+	{ label: "Integrations", href: "#integrations", isAnchor: true },
+	{ label: "Docs", href: "https://docs.usezenithpay.xyz", isAnchor: false },
 ]
 
 function ProductsDropdown() {

@@ -1,17 +1,24 @@
 ---
 title: Rest API
-description: Getting Started with Rest API
+description: ZenithPay REST endpoints for wallet, policy, payment, approvals, and ledger
 ---
-ZenithPay's REST API lets any backend integration trigger policy-gated x402 payments.
+
+ZenithPay REST API is the owner-facing control plane for onboarding, spend policy, and payment execution.
+
 ## Base URL
 `https://api.usezenithpay.xyz`
 
 ## Authentication
-All REST endpoints require an API key passed as a Bearer token in the `Authorization` header (except `GET /health`).
+Use Bearer auth on protected endpoints.
 
 ```http
 Authorization: Bearer $ZENITHPAY_API_KEY
 ```
+
+Public endpoints:
+
+- `GET /health`
+- `GET /sell/agent-intel` (returns x402 challenge when unpaid)
 
 ## Endpoints (high level)
 | Method | Route | Purpose |
@@ -20,13 +27,14 @@ Authorization: Bearer $ZENITHPAY_API_KEY
 | `POST` | `/wallet/genesis` | Create a TEE-secured agent wallet |
 | `GET` | `/wallet/balance` | Wallet balances + remaining daily budget |
 | `GET` | `/wallet/agents` | List agent addresses under your account |
-| `POST` | `/pay` | Policy-gated x402 payment (swap OKB->USDC if needed) |
+| `POST` | `/pay` | Policy-gated x402 payment (swap OKB->USDG if needed) |
 | `GET` | `/limits` | Read current spend policy |
 | `POST` | `/limits` | Deploy/update `SpendPolicy.sol` (requires human signature) |
 | `GET` | `/approvals` | Payments paused for human review |
 | `POST` | `/approvals/:id/approve` | Approve and execute |
 | `POST` | `/approvals/:id/deny` | Deny and cancel |
 | `GET` | `/ledger` | Transaction audit trail |
+| `GET`/`POST` | `/sell/agent-intel` | Seller-side x402 challenge + paid resource |
 
 ## Example: create an agent wallet
 ```bash
@@ -56,3 +64,14 @@ Possible `POST /pay` outcomes:
 - `approved`: returns `txHash`
 - `pending`: returns `status: \"pending\"` + `approvalId` when above `approvalThreshold`
 - `blocked`: returns `status: \"blocked\"` + hard-rejection reason (`PaymentBlocked`)
+
+## Seller route behavior (`/sell/agent-intel`)
+
+`GET /sell/agent-intel`:
+
+- unpaid request -> `402 Payment Required` with x402 payload
+- paid request with `X-PAYMENT` header -> paid JSON resource
+
+`POST /sell/agent-intel`:
+
+- same challenge/settle pattern, explicit post variant for controlled demos

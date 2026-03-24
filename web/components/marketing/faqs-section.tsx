@@ -17,9 +17,9 @@ const FAQS = [
       "The payment is blocked before it executes. The call never reaches the service. Every blocked attempt is logged on-chain so you have a full audit trail of what was tried and why it was rejected.",
   },
   {
-    question: "Does my agent need to hold USDC?",
+    question: "Does my agent need to hold USDG?",
     answer:
-      "Yes — x402 payments settle in USDC. If your agent holds another token, ZenithPay can auto-swap via OKX DEX before the payment goes out. No manual top-ups needed.",
+      "Yes — x402 payments settle in USDG on X Layer. If your agent holds another token, ZenithPay can auto-swap via OKX DEX before the payment goes out. No manual top-ups needed.",
   },
   {
     question: "What networks are supported?",

@@ -15,6 +15,7 @@
 | `GET /ledger` | None — public read |
 | `GET /approvals` | None — public read |
 | `POST /pay` | Bearer `zpk_...` required |
+| `GET/POST /sell/agent-intel` | x402 (`X-Payment` header) |
 | `POST /approvals/:id/approve` | None — authorized via `humanSignature` in body |
 | `POST /approvals/:id/deny` | None — authorized via `humanSignature` in body |
 
@@ -104,7 +105,7 @@ Can only succeed when `owner_eoa` is the zero address (prevents hijacking). Once
 ---
 
 ### GET /wallet/balance
-Get USDC + OKB balance and remaining daily budget. Public read — no auth required.
+Get USDG + OKB balance and remaining daily budget. Public read — no auth required.
 
 **Query params:** `address` (optional — filters to specific agent)
 
@@ -113,7 +114,7 @@ Get USDC + OKB balance and remaining daily budget. Public read — no auth requi
 {
   "agents": [{
     "agentAddress": "0x...",
-    "usdcBalance": "12.50",
+    "usdgBalance": "12.50",
     "okbBalance": "0.80",
     "remainingDailyBudget": "1.75"
   }]
@@ -140,7 +141,7 @@ List all agents owned by an EOA. Public read — pass `X-Owner-Address` header.
 ---
 
 ### POST /pay
-Execute a policy-gated x402 payment. SpendPolicy.sol is checked onchain before any money moves. Auto-swaps OKB → USDC internally if needed.
+Execute a policy-gated x402 payment. SpendPolicy.sol is checked onchain before any money moves. Auto-swaps OKB → USDG internally if needed.
 
 **Auth:** `Authorization: Bearer zpk_...`
 
@@ -160,7 +161,7 @@ Execute a policy-gated x402 payment. SpendPolicy.sol is checked onchain before a
   "status": "approved",
   "txHash": "0x...",
   "amount": "0.10",
-  "currency": "USDC",
+  "currency": "USDG",
   "merchant": "service.xyz",
   "swapUsed": false,
   "okbSpent": null,
@@ -199,9 +200,27 @@ Execute a policy-gated x402 payment. SpendPolicy.sol is checked onchain before a
 | `per_tx_limit_exceeded` | Amount exceeds per-transaction cap |
 | `daily_budget_exceeded` | Agent has hit daily spend limit |
 | `merchant_not_allowlisted` | Merchant not in agent's allowlist |
-| `insufficient_balance` | Insufficient USDC and OKB to cover payment + swap |
+| `insufficient_balance` | Insufficient USDG and OKB to cover payment + swap |
 | `swap_quote_failed` | OKX DEX could not produce a valid quote |
 | `payment_failed` | x402 verify or settle failed after policy cleared |
+
+---
+
+### GET|POST /sell/agent-intel
+x402-protected seller route for end-to-end buyer/seller settlement on X Layer.
+
+- Missing `X-Payment` returns `402 Payment Required` with `Payment-Required` header.
+- Valid `X-Payment` triggers verify + settle via OKX x402, then returns paid resource.
+
+**URL**
+```text
+https://api.usezenithpay.xyz/sell/agent-intel
+```
+
+**Notes**
+- No Bearer auth required.
+- Demo amount: `0.01 USDG`.
+- Demo payee (merchant): `0xa44fa8ad3e905c8ab525cd0cb14319017f1e04e5`.
 
 ---
 
@@ -221,7 +240,7 @@ Get current onchain spend policy. Public read — no auth required.
     "approvalThreshold": "0.10",
     "autoSwapEnabled": true,
     "swapSlippageTolerance": "0.01",
-    "policyContract": "0xF5875F25ccEB2edDc57F218eaF1F71c5CF161f21"
+    "policyContract": "0x1250e52B7154E12F66e8E347ce116F463D4E248B"
   }]
 }
 ```
@@ -259,7 +278,7 @@ The `humanSignature` must be an EIP-191 personal_sign of:
 ```json
 {
   "status": "deployed",
-  "policyContract": "0xF5875F25ccEB2edDc57F218eaF1F71c5CF161f21",
+  "policyContract": "0x1250e52B7154E12F66e8E347ce116F463D4E248B",
   "txHash": null,
   "agentAddress": "0x...",
   "apiKey": "zpk_...",
@@ -292,7 +311,7 @@ Full transaction audit trail. Public read — no auth required.
     "agentAddress": "0x...",
     "merchant": "exa.ai",
     "amount": "0.10",
-    "currency": "USDC",
+    "currency": "USDG",
     "intent": "Research DeFi trends",
     "status": "approved",
     "txHash": "0x...",
@@ -422,6 +441,6 @@ All errors follow this shape:
 
 | Contract | Network | Address |
 |----------|---------|---------|
-| SpendPolicy | X Layer mainnet (chain ID 196) | `0xF5875F25ccEB2edDc57F218eaF1F71c5CF161f21` |
+| SpendPolicy | X Layer mainnet (chain ID 196) | `0x1250e52B7154E12F66e8E347ce116F463D4E248B` |
 
-USDC on X Layer: `0x74b7F16337b8972027F6196A17a631aC6dE26d22`
+USDG on X Layer: `0x4ae46a509f6b1d9056937ba4500cb143933d2dc8`

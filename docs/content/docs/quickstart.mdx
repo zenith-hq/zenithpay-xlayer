@@ -1,13 +1,14 @@
 ---
 title: Quick Start
-description: Getting Started with ZenithPay
+description: Set up ZenithPay and execute a first policy-gated payment
 ---
-Get from a local checkout to a policy-gated agent in minutes.
+This guide takes you from clone to first successful payment on X Layer.
+
 ## Prerequisites
 - `bun`
 - `foundry` (`forge`)
-- OKX OnchainOS access (API key)
-- A deployed `SpendPolicy.sol` on X Layer
+- OKX API credentials (`OKX_API_KEY`, `OKX_SECRET_KEY`, `OKX_PASSPHRASE`)
+- X Layer RPC access
 
 ## 1. Clone and install
 ```bash
@@ -17,26 +18,36 @@ bun install
 ```
 
 ## 2. Configure environment variables
-Copy env templates:
+Set required variables.
+
+`api/.env`:
 ```bash
-cp api/.env.example api/.env
-cp web/.env.example web/.env.local
+XLAYER_RPC_URL=https://rpc.xlayer.tech
+OKX_API_KEY=...
+OKX_SECRET_KEY=...
+OKX_PASSPHRASE=...
+SPEND_POLICY_ADDRESS=0x...
+SUPABASE_URL=...
+SUPABASE_ANON_KEY=...
+ZENITHPAY_API_KEY_SECRET=...
 ```
 
-At minimum you need:
-- `XLAYER_RPC_URL`
-- `OKX_API_KEY`, `OKX_SECRET_KEY`, `OKX_PASSPHRASE`
-- `SPEND_POLICY_ADDRESS` (after deployment)
+`web/.env.local`:
+
+```bash
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:3001
+```
 
 ## 3. Deploy `SpendPolicy.sol`
 ```bash
 cd contracts
 forge build
 forge test
-forge script script/Deploy.s.sol --rpc-url $XLAYER_RPC_URL --broadcast --slow
+forge script script/Deploy.s.sol --rpc-url $XLAYER_RPC_URL --broadcast
 ```
 
-Copy the deployed policy address into `api/.env` as `SPEND_POLICY_ADDRESS`.
+Copy deployed address into `api/.env` as `SPEND_POLICY_ADDRESS`.
 
 ## 4. Run locally
 ```bash
@@ -44,8 +55,38 @@ cd web && bun dev   # http://localhost:3000
 cd api && bun dev   # http://localhost:3001
 ```
 
-## 5. Create an agent and pay
-- `POST /wallet/genesis`: create a TEE-secured agent wallet
-- `POST /pay`: execute a policy-gated x402 payment
+## 5. Register agent and activate policy
 
-Full request/response examples are in `REST API`.
+Open onboarding:
+
+```text
+http://localhost:3000/onboarding
+```
+
+Connect OKX wallet, sign, and activate policy for your agent.
+
+## 6. Execute first payment
+
+```bash
+curl -X POST http://localhost:3001/pay \
+  -H "Authorization: Bearer $ZENITHPAY_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agentAddress": "0xYOUR_AGENT",
+    "serviceUrl": "http://localhost:3001/sell/agent-intel",
+    "maxAmount": "0.01",
+    "intent": "Test x402 seller flow"
+  }'
+```
+
+Expected outcomes:
+
+- `approved` with `txHash`
+- `pending` with `approvalId` if above threshold
+- `blocked` with reason if policy hard-limit fails
+
+Continue with:
+
+- `Authentication` for integration modes
+- `REST API` for endpoint details
+- `MCP Server` for persistent agent tools

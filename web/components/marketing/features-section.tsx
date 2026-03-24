@@ -363,10 +363,10 @@ function MicroHeroTwo({ className }: { className?: string }) {
 function MicroHeroThree({ className }: { className?: string }) {
   const [hovered, setHovered] = useState(false);
   const swapRows = [
-    { id: "okb-usdc-okx", from: "OKB", to: "USDC", route: "OKX DEX" },
-    { id: "usdc-usdc-direct", from: "USDC", to: "USDC", route: "DIRECT SWAP" },
-    { id: "usdt-usdc-okx", from: "USDT", to: "USDC", route: "OKX DEX" },
-    { id: "any-usdc-auto", from: "ANY", to: "USDC", route: "AUTO-SWAP" },
+    { id: "okb-usdg-okx", from: "OKB", to: "USDG", route: "OKX DEX" },
+    { id: "usdg-usdg-direct", from: "USDG", to: "USDG", route: "DIRECT" },
+    { id: "usdt-usdg-okx", from: "USDT", to: "USDG", route: "OKX DEX" },
+    { id: "any-usdg-auto", from: "ANY", to: "USDG", route: "AUTO-SWAP" },
   ];
 
   return (
@@ -388,7 +388,7 @@ function MicroHeroThree({ className }: { className?: string }) {
           Auto-Swap
         </span>
         <h2 className="text-[20px] font-bold tracking-tight text-foreground leading-tight mt-1.5">
-          Any Token in, USDC Out.
+          Any Token in, USDG Out.
         </h2>
       </div>
 
