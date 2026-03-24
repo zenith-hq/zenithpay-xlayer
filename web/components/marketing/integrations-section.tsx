@@ -250,7 +250,8 @@ const TAB_DESCRIPTIONS: Record<Tab, string> = {
 	"SKILL.md":
 		"One curl command in your terminal. The agent reads SKILL.md, follows the onboarding steps automatically — creates a TEE wallet, guides policy activation onchain, then pays with full enforcement.",
 	MCP: "Register ZenithPay as an MCP server. Your agent gets 6 tools — balance check, policy-gated x402 payment, spend limit read/write, merchant verification, and full audit trail.",
-	"REST API": "Call ZenithPay directly over HTTP. Every payment request hits the onchain SpendPolicy contract before any funds move. Responses include txHash on X Layer.",
+	"REST API":
+		"Call ZenithPay directly over HTTP. Every payment request hits the onchain SpendPolicy contract before any funds move. Responses include txHash on X Layer.",
 }
 
 export function IntegrationsSection() {
@@ -374,7 +375,6 @@ export function IntegrationsSection() {
 										: activeTab === "MCP"
 											? ".claude/settings.json"
 											: "zenithpay-pay.ts"}
-
 								</span>
 							</div>
 
