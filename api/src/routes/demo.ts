@@ -35,7 +35,8 @@ const sell = new Hono();
 
 // ZenithPay demo agent wallet — OKX Agentic TEE Wallet on X Layer
 const DEMO_AGENT_ADDRESS = "0x726Cf0C4Fe559DB9A32396161694C7b88C60C947";
-const DEMO_MERCHANT_ADDRESS = DEMO_AGENT_ADDRESS;
+// Demo seller payout wallet (human owner/deployer)
+const DEMO_MERCHANT_ADDRESS = "0xa44fa8ad3e905c8ab525cd0cb14319017f1e04e5";
 
 // 0.01 USDG = 10000 atomic units (USDG has 6 decimals)
 const PAYMENT_AMOUNT_ATOMIC = "10000";
