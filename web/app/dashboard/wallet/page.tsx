@@ -18,13 +18,18 @@ function shortenAddress(addr: string): string {
 
 export default function WalletPage() {
   const { address } = useConnection();
-  const { agentAddress: AGENT_ADDRESS } = useAgent();
+  const { agentAddress: AGENT_ADDRESS, hasAgent } = useAgent();
   const [balance, setBalance] = useState<BalanceResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
+      if (!hasAgent) {
+        setBalance(null);
+        setLoading(false);
+        return;
+      }
       try {
         const res = await getBalance(AGENT_ADDRESS);
         setBalance(res);
@@ -33,7 +38,7 @@ export default function WalletPage() {
       }
     }
     load();
-  }, [AGENT_ADDRESS]);
+  }, [AGENT_ADDRESS, hasAgent]);
 
   function copyToClipboard(text: string, label: string) {
     navigator.clipboard.writeText(text);
@@ -50,8 +55,15 @@ export default function WalletPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card className="rounded-none border">
+      {!hasAgent && (
+        <div className="border border-dashed p-6 text-sm text-muted-foreground">
+          No agent linked to this wallet yet. Complete onboarding to create and link an agent wallet.
+        </div>
+      )}
+
+      {!hasAgent ? null : (
+        <div className="grid gap-4 lg:grid-cols-2">
+          <Card className="rounded-none border">
           <CardHeader>
             <CardTitle className="text-sm font-medium uppercase tracking-wider">
               Agent Wallet
@@ -118,7 +130,7 @@ export default function WalletPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-none border">
+          <Card className="rounded-none border">
           <CardHeader>
             <CardTitle className="text-sm font-medium uppercase tracking-wider">
               Balances
@@ -190,8 +202,9 @@ export default function WalletPage() {
               </>
             )}
           </CardContent>
-        </Card>
-      </div>
+          </Card>
+        </div>
+      )}
 
       {address && (
         <Card className="rounded-none border">

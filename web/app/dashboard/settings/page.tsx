@@ -36,7 +36,7 @@ import { cn } from "@/lib/utils";
 
 export default function SettingsPage() {
   const { address } = useConnection();
-  const { agentAddress: AGENT_ADDRESS, agentDisplayName } = useAgent();
+  const { agentAddress: AGENT_ADDRESS, agentDisplayName, hasAgent } = useAgent();
   const { signMessageAsync } = useSignMessage();
   const { writeContractAsync } = useWriteContract();
 
@@ -89,13 +89,21 @@ export default function SettingsPage() {
   }, [dangerTxConfirmed, refetchStatus]);
 
   useEffect(() => {
+    if (!hasAgent) {
+      setApiKey(null);
+      return;
+    }
     const stored = localStorage.getItem(`zpk_${AGENT_ADDRESS}`);
     setApiKey(stored);
-  }, [AGENT_ADDRESS]);
+  }, [AGENT_ADDRESS, hasAgent]);
 
   useEffect(() => {
     async function load() {
-      if (!address) return;
+      if (!address || !hasAgent) {
+        setPolicy(null);
+        setLoading(false);
+        return;
+      }
       try {
         const res = await getLimitsForOwner(address);
         const existing = res.agents[0];
@@ -109,7 +117,7 @@ export default function SettingsPage() {
       }
     }
     load();
-  }, [address]);
+  }, [address, hasAgent]);
 
   function copyToClipboard(text: string, label: string) {
     navigator.clipboard.writeText(text);
@@ -243,6 +251,12 @@ export default function SettingsPage() {
           Agent configuration, auto-swap, and API access
         </p>
       </div>
+
+      {!hasAgent && (
+        <div className="border border-dashed p-6 text-sm text-muted-foreground">
+          No agent linked to this wallet yet. Complete onboarding to create an agent wallet and API key.
+        </div>
+      )}
 
       {/* Active Agent card */}
       <div className="border">

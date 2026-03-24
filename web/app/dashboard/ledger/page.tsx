@@ -7,7 +7,7 @@ import {
   ShieldAlert,
   ShieldCheck,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAgent } from "@/components/dashboard/agent-context";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -92,12 +92,17 @@ function StatCell({
 }
 
 export default function LedgerPage() {
-  const { agentAddress } = useAgent();
+  const { agentAddress, hasAgent } = useAgent();
   const [transactions, setTransactions] = useState<LedgerEntry[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  async function load(isInitial = false) {
+  const load = useCallback(async (isInitial = false) => {
+    if (!hasAgent) {
+      setTransactions([]);
+      if (isInitial) setInitialLoading(false);
+      return;
+    }
     try {
       const res = await getLedger(agentAddress);
       setTransactions(res.transactions);
@@ -105,15 +110,14 @@ export default function LedgerPage() {
     } finally {
       if (isInitial) setInitialLoading(false);
     }
-  }
+  }, [agentAddress, hasAgent]);
 
   useEffect(() => {
     setInitialLoading(true);
     load(true);
     const interval = setInterval(() => load(false), REFRESH_INTERVAL);
     return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [agentAddress]);
+  }, [load]);
 
   const executed = transactions.filter((t) => t.status === "approved");
   const blocked = transactions.filter(
@@ -140,6 +144,12 @@ export default function LedgerPage() {
           </div>
         )}
       </div>
+
+      {!hasAgent && (
+        <div className="border border-dashed p-6 text-sm text-muted-foreground">
+          No agent linked to this wallet yet. Your transaction history will appear after onboarding.
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-border border border-border">
@@ -170,8 +180,8 @@ export default function LedgerPage() {
       {/* Table */}
       {initialLoading ? (
         <div className="space-y-px">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={`skel-${i}`} className="h-12 w-full rounded-none" />
+          {["a", "b", "c", "d", "e", "f"].map((id) => (
+            <Skeleton key={`ledger-skel-${id}`} className="h-12 w-full rounded-none" />
           ))}
         </div>
       ) : transactions.length === 0 ? (

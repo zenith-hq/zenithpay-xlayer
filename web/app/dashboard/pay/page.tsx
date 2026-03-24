@@ -112,7 +112,7 @@ function StatusDisplay({ result }: { result: PaymentResult }) {
 }
 
 export default function PayPage() {
-  const { agentAddress: AGENT_ADDRESS } = useAgent();
+  const { agentAddress: AGENT_ADDRESS, hasAgent } = useAgent();
   const [serviceUrl, setServiceUrl] = useState("");
   const [maxAmount, setMaxAmount] = useState("");
   const [intent, setIntent] = useState("");
@@ -127,6 +127,9 @@ export default function PayPage() {
     setError(null);
 
     try {
+      if (!hasAgent) {
+        throw new Error("No agent linked to this wallet. Complete onboarding first.");
+      }
       const res = await executePayment({
         agentAddress: AGENT_ADDRESS,
         serviceUrl,
@@ -150,6 +153,12 @@ export default function PayPage() {
           In production, your agent executes this automatically via the skill.
         </p>
       </div>
+
+      {!hasAgent && (
+        <div className="border border-dashed p-6 text-sm text-muted-foreground">
+          No agent linked to this wallet yet. Complete onboarding before executing payments.
+        </div>
+      )}
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="rounded-none border">
@@ -219,7 +228,7 @@ export default function PayPage() {
               <Button
                 type="submit"
                 className="w-full rounded-none"
-                disabled={submitting}
+                disabled={submitting || !hasAgent}
               >
                 {submitting ? (
                   <>

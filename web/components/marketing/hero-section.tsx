@@ -11,10 +11,10 @@ import { LogoMark } from "@/components/logo-mark"
 import { TechGrid } from "@/components/tech-grid"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { AGENT_QUICK_INSTALL } from "@/lib/agent-quick-install"
 import { cn } from "@/lib/utils"
 
-const SKILL_INSTALL =
-	"# Paste this into your AI agent to install ZenithPay\ncurl -s https://api.usezenithpay.xyz/skill.md"
+const SKILL_INSTALL = AGENT_QUICK_INSTALL
 
 function HeroBadge() {
 	return (
@@ -286,8 +286,8 @@ export function HeroSection() {
 						transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
 						className="mt-5 max-w-md text-base leading-relaxed text-muted-foreground sm:text-[18px]"
 					>
-						The spend governance layer for AI agents. Give any agent a wallet, a
-						budget, and an audit trail — safe, controlled, and enforced onchain.
+						The spend governance layer for AI agents. Give any agent a wallet, a budget,
+						and an audit trail — safe, controlled, and enforced onchain.
 					</motion.p>
 
 					<motion.div

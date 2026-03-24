@@ -39,7 +39,7 @@ function statusBadgeClass(status: LedgerEntry["status"]): string {
 
 export default function DashboardPage() {
   const { address } = useConnection();
-  const { agentAddress: AGENT_ADDRESS } = useAgent();
+  const { agentAddress: AGENT_ADDRESS, hasAgent } = useAgent();
   const [balance, setBalance] = useState<BalanceResult | null>(null);
   const [policies, setPolicies] = useState<AgentPolicy[]>([]);
   const [transactions, setTransactions] = useState<LedgerEntry[]>([]);
@@ -48,6 +48,15 @@ export default function DashboardPage() {
   useEffect(() => {
     let cancelled = false;
     async function load() {
+      if (!hasAgent) {
+        if (!cancelled) {
+          setBalance(null);
+          setPolicies([]);
+          setTransactions([]);
+          setInitialLoading(false);
+        }
+        return;
+      }
       try {
         const [balRes, limRes, ledRes] = await Promise.allSettled([
           getBalance(AGENT_ADDRESS),
@@ -69,7 +78,7 @@ export default function DashboardPage() {
     return () => {
       cancelled = true;
     };
-  }, [address, AGENT_ADDRESS]);
+  }, [address, AGENT_ADDRESS, hasAgent]);
 
   const [copied, setCopied] = useState(false);
 
@@ -107,6 +116,12 @@ export default function DashboardPage() {
           Agent wallets, spend policies, and recent agent activity
         </p>
       </div>
+
+      {!hasAgent && (
+        <div className="border border-dashed p-6 text-sm text-muted-foreground">
+          No agent linked to this wallet yet. Create a wallet in onboarding to see balances, limits, and activity.
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="rounded-none border">
@@ -300,9 +315,9 @@ export default function DashboardPage() {
           <CardContent>
             {initialLoading ? (
               <div className="space-y-2">
-                {Array.from({ length: 3 }).map((_, i) => (
+                {["a", "b", "c"].map((id) => (
                   <Skeleton
-                    key={`skel-${i}`}
+                    key={`overview-tx-skel-${id}`}
                     className="h-8 w-full rounded-none"
                   />
                 ))}

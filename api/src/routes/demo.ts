@@ -6,7 +6,7 @@
  * x402-protected resource. Returns a live X Layer wallet intelligence report
  * for the ZenithPay demo agent wallet. Costs 0.01 USDG.
  *
- * Seller flow (SYNAI reference pattern):
+ * Seller flow:
  * 1. No X-Payment header → 402 + Payment-Required header (base64 JSON)
  * 2. X-Payment header present:
  *    a. Decode + validate amount + payee (before calling OKX — prevents orphan payments)
