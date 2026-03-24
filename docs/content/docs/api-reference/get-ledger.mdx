@@ -1,0 +1,46 @@
+---
+title: GET /ledger
+description: Query payment and approval ledger entries
+---
+
+## Endpoint
+
+```text
+GET https://api.usezenithpay.xyz/ledger
+```
+
+## Auth
+
+Bearer API key required.
+
+## Query parameters
+
+- `address` (optional): filter by agent address
+- `limit` (optional)
+- `offset` (optional)
+- `status` (optional): `approved`, `blocked`, `pending`, `denied`
+
+## Response shape
+
+```json
+{
+  "transactions": [
+    {
+      "id": "txn_01abc",
+      "agentAddress": "0x...",
+      "merchant": "service.xyz",
+      "amount": "0.10",
+      "currency": "USDG",
+      "intent": "Research DeFi trends",
+      "status": "approved",
+      "txHash": "0x...",
+      "swapUsed": false,
+      "okbSpent": null,
+      "createdAt": "2026-01-01T00:00:00Z"
+    }
+  ],
+  "total": 1,
+  "limit": 50,
+  "offset": 0
+}
+```

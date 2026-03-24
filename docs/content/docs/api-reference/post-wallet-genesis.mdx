@@ -1,0 +1,47 @@
+---
+title: POST /wallet/genesis
+description: Create (or return) a TEE-secured agent wallet and API key
+---
+
+## Endpoint
+
+```text
+POST https://api.usezenithpay.xyz/wallet/genesis
+```
+
+## Auth
+
+Bearer API key required.
+
+## Request body
+
+```json
+{
+  "email": "agent@domain.com",
+  "label": "research-agent-01"
+}
+```
+
+`email` and `label` are optional but recommended for operations traceability.
+
+## Response shape (201)
+
+```json
+{
+  "agentAddress": "0x...",
+  "apiKey": "zpk_...",
+  "label": "research-agent-01",
+  "createdAt": "2026-01-01T00:00:00Z",
+  "message": "Wallet created. Activate at https://usezenithpay.xyz/onboarding?agent=0x..."
+}
+```
+
+## Error shape
+
+```json
+{
+  "error": "conflict",
+  "message": "Agent already registered ...",
+  "status": 409
+}
+```

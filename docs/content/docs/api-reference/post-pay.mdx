@@ -1,0 +1,68 @@
+---
+title: POST /pay
+description: Execute policy-gated payment orchestration (policy -> swap -> x402 settle)
+---
+
+## Endpoint
+
+```text
+POST https://api.usezenithpay.xyz/pay
+```
+
+## Auth
+
+Bearer API key required.
+
+## Request body
+
+```json
+{
+  "agentAddress": "0x...",
+  "serviceUrl": "https://api.usezenithpay.xyz/sell/agent-intel",
+  "maxAmount": "0.01",
+  "intent": "Fetch paid seller intelligence"
+}
+```
+
+## Success response shapes
+
+### `approved` (200)
+
+```json
+{
+  "status": "approved",
+  "txHash": "0x...",
+  "amount": "0.01",
+  "currency": "USDG",
+  "merchant": "api.usezenithpay.xyz",
+  "swapUsed": false,
+  "okbSpent": null,
+  "remainingDailyBudget": "1.65",
+  "settledAt": "2026-03-24T12:00:00.000Z"
+}
+```
+
+### `pending` (202)
+
+```json
+{
+  "status": "pending",
+  "approvalId": "apr_01abc",
+  "amount": "0.50",
+  "merchant": "service.xyz",
+  "intent": "Research",
+  "message": "Payment exceeds approval threshold. Awaiting human review at GET /approvals."
+}
+```
+
+### `blocked` (422)
+
+```json
+{
+  "status": "blocked",
+  "reason": "daily_budget_exceeded",
+  "amount": "0.10",
+  "merchant": "service.xyz",
+  "onchainEvent": "PaymentBlocked"
+}
+```

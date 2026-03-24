@@ -4,6 +4,12 @@ description: Agent-first onboarding from zero to first policy-gated x402 payment
 ---
 This guide is the real operator flow: you start inside your AI agent, run skill onboarding once, activate policy as the human owner, then execute the first policy-gated payment.
 
+## Production base URL
+
+```text
+https://api.usezenithpay.xyz
+```
+
 ## Who does what
 
 - **Agent** handles automated setup and payment tool calls.
@@ -30,6 +36,27 @@ From the skill flow, the agent will:
 4. save local config
 5. register ZenithPay MCP server using your credentials
 6. return a policy-activation onboarding link for the human owner
+
+### Local config written by onboarding
+
+The skill stores credentials in:
+
+```text
+~/.zenithpay/config.json
+```
+
+Typical shape:
+
+```json
+{
+  "agentAddress": "0x...",
+  "apiKey": "zpk_...",
+  "label": "research-agent-01",
+  "createdAt": "2026-01-01T00:00:00Z"
+}
+```
+
+This file is then used to register the MCP server and persist agent identity across sessions.
 
 ## 3) Human owner activates policy on dashboard
 
@@ -71,6 +98,12 @@ Check:
 - `GET /ledger` for payment records
 - `GET /limits` for active policy state
 - `GET /wallet/balance` for remaining daily budget and wallet balances
+
+Example balance check:
+
+```bash
+curl -s "https://api.usezenithpay.xyz/wallet/balance?address=0xYOUR_AGENT"
+```
 
 ## 6) Move to persistent MCP usage
 
