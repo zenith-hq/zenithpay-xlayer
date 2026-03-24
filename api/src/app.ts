@@ -7,6 +7,7 @@ import { mcpServer, registerTools } from "./mcp/server";
 import { authMiddleware } from "./middleware/auth";
 import { agentsRoute } from "./routes/agents";
 import { approvalsRoute } from "./routes/approvals";
+import { demo } from "./routes/demo";
 import { ledgerRoute } from "./routes/ledger";
 import { limits } from "./routes/limits";
 import { pay } from "./routes/pay";
@@ -27,6 +28,7 @@ const ENDPOINT_LIST = [
   "/mcp",
   "/skill.md",
   "/references/api_docs.md",
+  "/demo/agent-intel",
 ];
 
 const app = new Hono();
@@ -113,6 +115,8 @@ app.route("/pay", pay);
 app.route("/limits", limits);
 app.route("/ledger", ledgerRoute);
 app.route("/approvals", approvalsRoute);
+// Demo seller endpoint — x402 is the auth, no API key required
+app.route("/demo", demo);
 
 // Global error handler — structured JSON for all unhandled errors
 app.onError((err, c) => {

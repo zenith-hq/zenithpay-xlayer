@@ -13,6 +13,9 @@ export interface LedgerEntry {
   swapUsed: boolean;
   okbSpent?: string | null;
   createdAt: string;
+  network?: string | null;
+  asset?: string | null;
+  chainId?: string | null;
 }
 
 export interface LedgerQuery {

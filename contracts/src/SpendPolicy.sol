@@ -178,7 +178,8 @@ contract SpendPolicy is ReentrancyGuard, Pausable {
     // Constructor
     // ─────────────────────────────────────────────────────────
 
-    /// @param _usdc  USDC token address on X Layer (0x74b7f16337b8972027f6196a17a631ac6de26d22)
+    /// @param _usdc  USDG token address on X Layer — OKX x402 supported token (eip155:196)
+    ///               USDG contract: 0x4ae46a509f6b1d9056937ba4500cb143933d2dc8 (6 decimals)
     constructor(address _usdc) {
         if (_usdc == address(0)) revert ZeroAddress();
         protocolOwner = msg.sender;

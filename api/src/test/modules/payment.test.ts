@@ -65,7 +65,7 @@ describe("Payment service", () => {
   it("approved path: sufficient USDC, no swap needed", async () => {
     mockGetTokenBalances.mockResolvedValue([
       {
-        tokenContractAddress: "0x74b7f16337b8972027f6196a17a631ac6de26d22",
+        tokenContractAddress: "0x4ae46a509f6b1d9056937ba4500cb143933d2dc8",
         symbol: "USDC",
         balance: "5.00",
       },
@@ -98,7 +98,7 @@ describe("Payment service", () => {
   it("blocked path: insufficient balance (no OKB)", async () => {
     mockGetTokenBalances.mockResolvedValue([
       {
-        tokenContractAddress: "0x74b7f16337b8972027f6196a17a631ac6de26d22",
+        tokenContractAddress: "0x4ae46a509f6b1d9056937ba4500cb143933d2dc8",
         symbol: "USDC",
         balance: "0.01",
       },
@@ -157,7 +157,7 @@ describe("Payment service", () => {
   it("auto-swap triggered when USDC insufficient but OKB available", async () => {
     mockGetTokenBalances.mockResolvedValue([
       {
-        tokenContractAddress: "0x74b7f16337b8972027f6196a17a631ac6de26d22",
+        tokenContractAddress: "0x4ae46a509f6b1d9056937ba4500cb143933d2dc8",
         symbol: "USDC",
         balance: "0.01",
       },
@@ -207,7 +207,7 @@ describe("Payment service", () => {
   it("swap NOT triggered when USDC is sufficient", async () => {
     mockGetTokenBalances.mockResolvedValue([
       {
-        tokenContractAddress: "0x74b7f16337b8972027f6196a17a631ac6de26d22",
+        tokenContractAddress: "0x4ae46a509f6b1d9056937ba4500cb143933d2dc8",
         symbol: "USDC",
         balance: "10.00",
       },
@@ -241,7 +241,7 @@ describe("Payment service", () => {
   it("blocked path: x402 payment failure", async () => {
     mockGetTokenBalances.mockResolvedValue([
       {
-        tokenContractAddress: "0x74b7f16337b8972027f6196a17a631ac6de26d22",
+        tokenContractAddress: "0x4ae46a509f6b1d9056937ba4500cb143933d2dc8",
         symbol: "USDC",
         balance: "5.00",
       },

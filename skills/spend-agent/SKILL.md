@@ -8,7 +8,7 @@ description: >
   first time setup, I don't have a wallet, zenithpay setup, activate agent.
   Trigger on: pay for service, execute payment, check balance, check funds,
   verify merchant, set limits, update policy, spending policy, view ledger,
-  audit trail, approve payment, deny payment, x402 payment, USDC payment,
+  audit trail, approve payment, deny payment, x402 payment, USDG payment,
   agent wallet, spend policy, daily budget, per-transaction limit, merchant
   allowlist, approval threshold, ZenithPay, zenithpay_pay_service,
   zenithpay_balance, zenithpay_get_limits, zenithpay_set_limits,
@@ -278,9 +278,9 @@ GET /wallet/balance?address=${AGENT_ADDRESS}
 Authorization: Bearer ${ZENITHPAY_API_KEY}
 ```
 
-Returns: `USDC` balance, `OKB` balance, `remainingDailyBudget`
+Returns: `USDG` balance, `OKB` balance, `remainingDailyBudget`
 
-If USDC balance is insufficient, ZenithPay will auto-swap OKB to USDC internally — but only if OKB balance is sufficient to cover the swap. If both are zero, do not proceed.
+If USDG balance is insufficient, ZenithPay will auto-swap OKB to USDG internally — but only if OKB balance is sufficient to cover the swap. If both are zero, do not proceed.
 
 ---
 
@@ -303,16 +303,16 @@ If `allowlisted: false` and the agent policy has an allowlist set — the paymen
 
 ### zenithpay_pay_service
 
-Execute a policy-gated x402 payment. The onchain SpendPolicy contract is checked before any money moves. Auto-swap from OKB to USDC happens internally if needed.
+Execute a policy-gated x402 payment. The onchain SpendPolicy contract is checked before any money moves. Auto-swap from OKB to USDG happens internally if needed.
 
 ```
 POST /pay
 Authorization: Bearer ${ZENITHPAY_API_KEY}
 {
   "agentAddress": "${AGENT_ADDRESS}",
-  "serviceUrl": "https://service.xyz/api",
-  "maxAmount": "0.25",
-  "intent": "Research DeFi trends on X Layer"
+  "serviceUrl": "https://api.usezenithpay.xyz/demo/agent-intel",
+  "maxAmount": "0.01",
+  "intent": "Fetch live X Layer DeFi intelligence"
 }
 ```
 
@@ -330,7 +330,7 @@ Block reasons:
 - `per_tx_limit_exceeded` — amount is above the per-transaction cap. Reduce `maxAmount`.
 - `daily_budget_exceeded` — agent has spent its daily budget. Wait for reset or ask human to raise the limit.
 - `merchant_not_allowlisted` — this merchant is not on the agent's allowlist. Ask human to add it.
-- `insufficient_balance` — not enough USDC or OKB to cover the payment and any swap.
+- `insufficient_balance` — not enough USDG or OKB to cover the payment and any swap.
 - `swap_quote_failed` — OKX DEX could not produce a swap quote. Try again later.
 - `payment_failed` — x402 settlement failed after policy cleared. Try again.
 

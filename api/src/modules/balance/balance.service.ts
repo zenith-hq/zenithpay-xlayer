@@ -57,7 +57,7 @@ export async function getBalance(agentAddress: string): Promise<AgentBalance> {
   return {
     address: agentAddress,
     label: agent?.label ?? null,
-    balances: { USDC: usdcBalance, OKB: okbBalance },
+    balances: { USDG: usdcBalance, OKB: okbBalance },
     remainingDailyBudget,
   };
 }
