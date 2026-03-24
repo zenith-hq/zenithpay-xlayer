@@ -1,0 +1,11 @@
+{
+  "title": "ZenithPay Docs",
+  "pages": [
+    "index",
+    "quickstart",
+    "authentication",
+    "integration",
+    "concepts",
+    "api-reference"
+  ]
+}
