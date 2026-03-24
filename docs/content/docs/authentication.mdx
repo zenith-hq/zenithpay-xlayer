@@ -9,6 +9,12 @@ ZenithPay supports three integration surfaces:
 - MCP server (Bearer + agent header)
 - Agent skill bootstrap (`/skill.md`)
 
+## Base URL
+
+```text
+https://api.usezenithpay.xyz
+```
+
 ## REST API (Bearer auth)
 All protected REST endpoints require:
 
@@ -21,6 +27,17 @@ Notes:
 - `GET /health` and seller challenge route are public.
 - API key is scoped to the owner account.
 - Owner can have multiple linked agent wallets.
+
+### Auth matrix
+
+| Endpoint family | Auth mode |
+| --- | --- |
+| `GET /health` | None |
+| `GET /skill.md`, `GET /references/api_docs.md` | None |
+| `GET|POST /sell/agent-intel` | x402 via `X-Payment` |
+| `POST /pay` | Bearer API key |
+| `POST /wallet/genesis` | Bearer API key |
+| `GET /wallet/*`, `GET /limits`, `POST /limits`, `GET /ledger`, `GET /approvals`, `POST /approvals/*` | Bearer API key |
 
 ### Example: `POST /pay`
 ```bash

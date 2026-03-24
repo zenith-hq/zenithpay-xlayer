@@ -1,9 +1,9 @@
 ---
-title: API Reference
-description: REST endpoint reference and OpenAPI spec
+title: Overview
+description: Full API map for ZenithPay with endpoint-per-page documentation
 ---
 
-ZenithPay's REST endpoints are described in `openapi.yaml` and grouped below for fast navigation.
+Use the sidebar to open each endpoint as its own page with detailed request/response shapes.
 
 ## OpenAPI
 
@@ -11,13 +11,13 @@ ZenithPay's REST endpoints are described in `openapi.yaml` and grouped below for
 
 ## Endpoint groups
 
-- **Health**: `GET /health`
-- **Wallet**: `POST /wallet/genesis`, `GET /wallet/agents`, `GET /wallet/balance`
-- **Payments**: `POST /pay`
+- **System**: `GET /health`, `GET /skill.md`, `GET /references/api_docs.md`, `ALL /mcp`
+- **Agent lifecycle**: `POST /wallet/genesis`, `POST /agents/link`
+- **Wallet reads**: `GET /wallet/agents`, `GET /wallet/balance`
+- **Payments**: `POST /pay`, `GET|POST /sell/agent-intel`
 - **Policy**: `GET /limits`, `POST /limits`
 - **Approvals**: `GET /approvals`, `POST /approvals/:id/approve`, `POST /approvals/:id/deny`
 - **Ledger**: `GET /ledger`
-- **Seller x402**: `GET|POST /sell/agent-intel`
 
 For request/response examples and the payment flow walkthrough, also see:
 

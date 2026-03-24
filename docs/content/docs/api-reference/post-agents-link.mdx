@@ -1,0 +1,37 @@
+---
+title: POST /agents/link
+description: Link an existing agent address to a human owner EOA
+---
+
+## Endpoint
+
+```text
+POST https://api.usezenithpay.xyz/agents/link
+```
+
+## Auth
+
+No Bearer token. Linking is validated server-side.
+
+## Request body
+
+```json
+{
+  "agentAddress": "0x726cf0c4fe559db9a32396161694c7b88c60c947",
+  "ownerAddress": "0xa44fa8ad3e905c8ab525cd0cb14319017f1e04e5"
+}
+```
+
+## Response shape (200)
+
+```json
+{
+  "agentAddress": "0x726cf0c4fe559db9a32396161694c7b88c60c947",
+  "ownerAddress": "0xa44fa8ad3e905c8ab525cd0cb14319017f1e04e5"
+}
+```
+
+## Common errors
+
+- `409 conflict`: agent already linked
+- `404 not_found`: agent not found

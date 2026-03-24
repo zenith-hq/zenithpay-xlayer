@@ -1,0 +1,38 @@
+---
+title: ALL /mcp
+description: Streamable HTTP MCP endpoint exposing zenithpay tools
+---
+
+## Endpoint
+
+```text
+ALL https://api.usezenithpay.xyz/mcp
+```
+
+## Auth
+
+Required headers:
+
+- `Authorization: Bearer zpk_...`
+- `X-Agent-Address: 0x...`
+
+## Description
+
+MCP transport endpoint for persistent `zenithpay_*` tools.
+
+## Minimal MCP config
+
+```json
+{
+  "mcpServers": {
+    "zenithpay": {
+      "type": "http",
+      "url": "https://api.usezenithpay.xyz/mcp",
+      "headers": {
+        "Authorization": "Bearer zpk_...",
+        "X-Agent-Address": "0x..."
+      }
+    }
+  }
+}
+```

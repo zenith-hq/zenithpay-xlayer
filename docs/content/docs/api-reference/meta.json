@@ -1,0 +1,22 @@
+{
+  "title": "API Reference",
+  "pages": [
+    "index",
+    "get-health",
+    "get-skill-md",
+    "get-references-api-docs-md",
+    "all-mcp",
+    "post-wallet-genesis",
+    "post-agents-link",
+    "get-wallet-agents",
+    "get-wallet-balance",
+    "post-pay",
+    "get-post-sell-agent-intel",
+    "get-limits",
+    "post-limits",
+    "get-ledger",
+    "get-approvals",
+    "post-approvals-id-approve",
+    "post-approvals-id-deny"
+  ]
+}

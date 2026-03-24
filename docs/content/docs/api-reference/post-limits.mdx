@@ -1,0 +1,60 @@
+---
+title: POST /limits
+description: Set or update spend policy with human signature authorization
+---
+
+## Endpoint
+
+```text
+POST https://api.usezenithpay.xyz/limits
+```
+
+## Auth
+
+Bearer API key required.
+
+## Request body
+
+```json
+{
+  "agentAddress": "0x...",
+  "perTxLimit": "0.25",
+  "dailyBudget": "3.00",
+  "allowlist": ["exa.ai", "firecrawl.dev"],
+  "approvalThreshold": "0.10",
+  "autoSwapEnabled": true,
+  "swapSlippageTolerance": "0.01",
+  "humanSignature": "0x...",
+  "timestamp": 1711234567890
+}
+```
+
+## Signature message
+
+`humanSignature` is recovered against:
+
+```json
+{
+  "agentAddress": "0x...",
+  "perTxLimit": "0.25",
+  "dailyBudget": "3.00",
+  "timestamp": 1711234567890
+}
+```
+
+## Response shape (201)
+
+```json
+{
+  "status": "deployed",
+  "policyContract": "0x1250e52B7154E12F66e8E347ce116F463D4E248B",
+  "txHash": null,
+  "agentAddress": "0x...",
+  "apiKey": "zpk_...",
+  "perTxLimit": "0.25",
+  "dailyBudget": "3.00",
+  "allowlist": ["exa.ai", "firecrawl.dev"],
+  "autoSwapEnabled": true,
+  "swapSlippageTolerance": "0.01"
+}
+```

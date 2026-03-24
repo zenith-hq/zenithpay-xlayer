@@ -1,0 +1,38 @@
+---
+title: GET /approvals
+description: List pending human-approval payment requests
+---
+
+## Endpoint
+
+```text
+GET https://api.usezenithpay.xyz/approvals
+```
+
+## Auth
+
+Bearer API key required.
+
+## Query parameters
+
+- `address` (optional): filter by agent
+
+## Response shape
+
+```json
+{
+  "approvals": [
+    {
+      "id": "apr_01abc",
+      "agentAddress": "0x...",
+      "merchant": "service.xyz",
+      "serviceUrl": "https://service.xyz/api",
+      "amount": "0.50",
+      "intent": "Research DeFi trends",
+      "status": "pending",
+      "requestedAt": "2026-01-01T00:01:00Z",
+      "resolvedAt": null
+    }
+  ]
+}
+```

@@ -1,0 +1,38 @@
+---
+title: GET /limits
+description: Read active spend policy per agent
+---
+
+## Endpoint
+
+```text
+GET https://api.usezenithpay.xyz/limits
+```
+
+## Auth
+
+Bearer API key required.
+
+## Request
+
+- Optional query: `address=0x...`
+- Optional header: `X-Owner-Address: 0x...`
+
+## Response shape
+
+```json
+{
+  "agents": [
+    {
+      "address": "0x...",
+      "perTxLimit": "0.25",
+      "dailyBudget": "3.00",
+      "allowlist": ["exa.ai", "firecrawl.dev"],
+      "approvalThreshold": "0.10",
+      "autoSwapEnabled": true,
+      "swapSlippageTolerance": "0.01",
+      "policyContract": "0x1250e52B7154E12F66e8E347ce116F463D4E248B"
+    }
+  ]
+}
+```

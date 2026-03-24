@@ -1,0 +1,4 @@
+{
+  "title": "Integration",
+  "pages": ["agent-skill", "mcp-server", "rest-api"]
+}

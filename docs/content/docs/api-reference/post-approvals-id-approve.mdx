@@ -1,0 +1,46 @@
+---
+title: POST /approvals/:id/approve
+description: Approve and execute a pending payment
+---
+
+## Endpoint
+
+```text
+POST https://api.usezenithpay.xyz/approvals/:id/approve
+```
+
+## Auth
+
+Bearer API key required.
+
+## Request body
+
+```json
+{
+  "humanSignature": "0x...",
+  "timestamp": 1711234567890
+}
+```
+
+Signature payload:
+
+```json
+{
+  "action": "approve",
+  "approvalId": "apr_01abc",
+  "timestamp": 1711234567890
+}
+```
+
+## Response shape
+
+```json
+{
+  "id": "apr_01abc",
+  "status": "approved",
+  "txHash": "0x...",
+  "amount": "0.50",
+  "merchant": "service.xyz",
+  "settledAt": "2026-03-24T12:00:00.000Z"
+}
+```

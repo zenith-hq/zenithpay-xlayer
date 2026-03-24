@@ -1,0 +1,36 @@
+---
+title: GET /wallet/balance
+description: Get USDG/OKB balances and remaining budget per linked agent
+---
+
+## Endpoint
+
+```text
+GET https://api.usezenithpay.xyz/wallet/balance
+```
+
+## Auth
+
+Bearer API key required.
+
+## Request
+
+- Optional query: `address=0x...`
+- Optional header: `X-Owner-Address: 0x...`
+
+## Response shape
+
+```json
+{
+  "agents": [
+    {
+      "agentAddress": "0x...",
+      "usdcBalance": "12.50",
+      "okbBalance": "0.80",
+      "remainingDailyBudget": "1.75"
+    }
+  ]
+}
+```
+
+Note: field name `usdcBalance` is a legacy key and currently represents settlement stable balance (USDG in production narrative).
