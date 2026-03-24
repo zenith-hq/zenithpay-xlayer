@@ -268,7 +268,7 @@ export default function LimitsPage() {
                     htmlFor="perTxLimit"
                     className="text-xs uppercase tracking-wider"
                   >
-                    Per-Transaction Limit (USDC)
+                    Per-Transaction Limit (USDG)
                   </Label>
                   <Input
                     id="perTxLimit"
@@ -287,7 +287,7 @@ export default function LimitsPage() {
                     htmlFor="dailyBudget"
                     className="text-xs uppercase tracking-wider"
                   >
-                    Daily Budget (USDC)
+                    Daily Budget (USDG)
                   </Label>
                   <Input
                     id="dailyBudget"
@@ -306,7 +306,7 @@ export default function LimitsPage() {
                     htmlFor="approvalThreshold"
                     className="text-xs uppercase tracking-wider"
                   >
-                    Approval Threshold (USDC)
+                    Approval Threshold (USDG)
                   </Label>
                   <Input
                     id="approvalThreshold"
@@ -350,9 +350,9 @@ export default function LimitsPage() {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium">OKB → USDC Auto-Swap</p>
+                    <p className="text-sm font-medium">OKB → USDG Auto-Swap</p>
                     <p className="text-[10px] text-muted-foreground mt-0.5">
-                      Swap OKB when USDC balance is insufficient
+                      Swap OKB when USDG balance is insufficient
                     </p>
                   </div>
                   <Switch

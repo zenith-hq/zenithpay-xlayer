@@ -60,7 +60,7 @@ const PRESETS = {
   },
 } as const;
 
-const XLAYER_USDC = "0x74b7f16337b8972027f6196a17a631ac6de26d22";
+const XLAYER_USDC = "0x4ae46a509f6b1d9056937ba4500cb143933d2dc8";
 
 const STEPS: { key: Step; label: string }[] = [
   { key: "connect", label: "Connect" },

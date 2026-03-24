@@ -362,15 +362,15 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="border border-dashed p-3 text-xs text-muted-foreground">
-            Auto-swap exchanges OKB for USDC when the agent wallet has
-            insufficient USDC. Only the exact amount needed is swapped.
+            Auto-swap exchanges OKB for USDG when the agent wallet has
+            insufficient USDG. Only the exact amount needed is swapped.
           </div>
 
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium">Auto-Swap OKB → USDC</p>
+              <p className="text-sm font-medium">Auto-Swap OKB → USDG</p>
               <p className="text-[10px] text-muted-foreground mt-0.5">
-                Automatically acquire USDC before payments
+                Automatically acquire USDG before payments
               </p>
             </div>
             <Switch
@@ -395,7 +395,7 @@ export default function SettingsPage() {
               disabled={!autoSwapEnabled}
             />
             <p className="text-[10px] text-muted-foreground">
-              e.g. 0.01 = 1% max slippage on OKB→USDC swaps
+              e.g. 0.01 = 1% max slippage on OKB→USDG swaps
             </p>
           </div>
 

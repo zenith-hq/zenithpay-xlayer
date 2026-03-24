@@ -44,6 +44,9 @@ export async function getTransactions(
     txHash: r.txHash,
     swapUsed: r.swapUsed,
     okbSpent: r.okbSpent,
+    network: r.network,
+    asset: r.asset,
+    chainId: r.chainId,
     createdAt: r.timestamp.toISOString(),
   }));
 
@@ -74,6 +77,9 @@ export async function writeTransaction(
     txHash: entry.txHash ?? null,
     swapUsed: entry.swapUsed,
     okbSpent: entry.okbSpent ?? null,
+    network: entry.network ?? null,
+    asset: entry.asset ?? null,
+    chainId: entry.chainId ?? null,
     timestamp: now,
   });
 

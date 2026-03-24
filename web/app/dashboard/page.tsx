@@ -112,7 +112,7 @@ export default function DashboardPage() {
         <Card className="rounded-none border">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
-              USDC Balance
+              USDG Balance
             </CardTitle>
             <Shield className="size-4 text-muted-foreground" />
           </CardHeader>
@@ -213,7 +213,7 @@ export default function DashboardPage() {
             <div className="space-y-0">
               <div className="flex items-center justify-between border-b border-dashed py-2.5">
                 <span className="text-xs text-muted-foreground uppercase tracking-wider">
-                  USDC
+                  USDG
                 </span>
                 {initialLoading ? (
                   <Skeleton className="h-4 w-20 rounded-none" />
@@ -279,7 +279,7 @@ export default function DashboardPage() {
             </button>
 
             <p className="text-[10px] text-muted-foreground text-center">
-              Send USDC or OKB to the address above on X Layer
+              Send USDG or OKB to the address above on X Layer
             </p>
           </CardContent>
         </Card>

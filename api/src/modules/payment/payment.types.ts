@@ -18,6 +18,9 @@ export interface PaymentApproved {
   okbSpent: string | null;
   remainingDailyBudget: string;
   settledAt: string;
+  asset?: string;
+  network?: string;
+  chainId?: string;
 }
 
 export interface PaymentPending {

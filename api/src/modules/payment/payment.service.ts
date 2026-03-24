@@ -1,5 +1,10 @@
 import { createPublicClient, http } from "viem";
-import { OKB_NATIVE, XLAYER_USDC, xlayer } from "../../config/chains";
+import {
+  OKB_NATIVE,
+  XLAYER_CHAIN_ID,
+  XLAYER_USDC,
+  xlayer,
+} from "../../config/chains";
 import { SPEND_POLICY_ABI, SPEND_POLICY_ADDRESS } from "../../config/contracts";
 import * as balanceProvider from "../../providers/onchainos/balance";
 import * as paymentsProvider from "../../providers/onchainos/payments";
@@ -55,7 +60,7 @@ export async function executePayment(
         agentAddress,
         merchant,
         amount: maxAmount,
-        currency: "USDC",
+        currency: "USDG",
         intent,
         status: "blocked",
         reason: blockReason,
@@ -78,7 +83,7 @@ export async function executePayment(
       agentAddress,
       merchant,
       amount: maxAmount,
-      currency: "USDC",
+      currency: "USDG",
       intent,
       status: "blocked",
       reason: "policy_check_failed",
@@ -153,7 +158,7 @@ export async function executePayment(
         agentAddress,
         merchant,
         amount: maxAmount,
-        currency: "USDC",
+        currency: "USDG",
         intent,
         status: "blocked",
         reason: "auto_swap_disabled",
@@ -174,7 +179,7 @@ export async function executePayment(
         agentAddress,
         merchant,
         amount: maxAmount,
-        currency: "USDC",
+        currency: "USDG",
         intent,
         status: "blocked",
         reason: "insufficient_balance",
@@ -211,7 +216,7 @@ export async function executePayment(
           agentAddress,
           merchant,
           amount: maxAmount,
-          currency: "USDC",
+          currency: "USDG",
           intent,
           status: "blocked",
           reason: "swap_slippage_exceeded",
@@ -239,7 +244,7 @@ export async function executePayment(
         agentAddress,
         merchant,
         amount: maxAmount,
-        currency: "USDC",
+        currency: "USDG",
         intent,
         status: "blocked",
         reason: "swap_quote_failed",
@@ -258,6 +263,8 @@ export async function executePayment(
 
   // ── STEP 4: x402 payment ──
   let txHash: string;
+  let settledNetwork = "eip155:196";
+  let settledAsset: string = XLAYER_USDC;
   try {
     await paymentsProvider.verifyX402(serviceUrl, agentAddress, maxAmount);
     const settleResult = await paymentsProvider.settleX402(
@@ -267,12 +274,14 @@ export async function executePayment(
       "", // signature handled by OKX Payments API internally
     );
     txHash = settleResult.txHash;
+    settledNetwork = settleResult.network ?? "eip155:196";
+    settledAsset = settleResult.asset ?? XLAYER_USDC;
   } catch {
     await ledgerService.writeTransaction({
       agentAddress,
       merchant,
       amount: maxAmount,
-      currency: "USDC",
+      currency: "USDG",
       intent,
       status: "blocked",
       reason: "payment_failed",
@@ -294,12 +303,15 @@ export async function executePayment(
     agentAddress,
     merchant,
     amount: maxAmount,
-    currency: "USDC",
+    currency: "USDG",
     intent,
     status: "approved",
     txHash,
     swapUsed,
     okbSpent,
+    network: settledNetwork,
+    asset: settledAsset,
+    chainId: XLAYER_CHAIN_ID,
   });
 
   // ── STEP 6: Return response ──
@@ -320,13 +332,16 @@ export async function executePayment(
     status: "approved",
     txHash,
     amount: maxAmount,
-    currency: "USDC",
+    currency: "USDG",
     merchant,
     intent,
     swapUsed,
     okbSpent,
     remainingDailyBudget,
     settledAt: new Date().toISOString(),
+    network: settledNetwork,
+    asset: settledAsset,
+    chainId: XLAYER_CHAIN_ID,
   };
 }
 

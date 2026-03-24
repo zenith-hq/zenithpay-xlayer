@@ -134,9 +134,9 @@ export default function WalletPage() {
               <>
                 <div className="flex items-center justify-between border p-3">
                   <div>
-                    <p className="text-sm font-medium">USDC</p>
+                    <p className="text-sm font-medium">USDG</p>
                     <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                      Stablecoin
+                      OKX Stablecoin
                     </p>
                   </div>
                   <p className="text-lg font-bold font-mono">

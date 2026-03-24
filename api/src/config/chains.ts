@@ -13,6 +13,11 @@ export const xlayer = defineChain({
 });
 
 export const XLAYER_CHAIN_ID = "196";
+// USDG on X Layer — OKX's stablecoin, supported by OKX x402 Payments API
+// Contract: https://www.oklink.com/xlayer/address/0x4ae46a509f6b1d9056937ba4500cb143933d2dc8
 export const XLAYER_USDC =
-  "0x74b7f16337b8972027f6196a17a631ac6de26d22" as const;
+  "0x4ae46a509f6b1d9056937ba4500cb143933d2dc8" as const;
+export const XLAYER_USDG = XLAYER_USDC; // alias — USDG is the canonical x402 settlement token
+export const XLAYER_USDG_DECIMALS = 6;
+export const XLAYER_X402_NETWORK = "eip155:196" as const;
 export const OKB_NATIVE = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" as const;

@@ -6,7 +6,8 @@ import "../src/SpendPolicy.sol";
 
 contract DeploySpendPolicy is Script {
     function run() external {
-        address usdc = vm.envAddress("USDC_ADDRESS");
+        // USDG on X Layer — 0x4ae46a509f6b1d9056937ba4500cb143933d2dc8
+        address usdc = vm.envAddress("USDG_ADDRESS");
         uint256 deployerKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
 
         vm.startBroadcast(deployerKey);

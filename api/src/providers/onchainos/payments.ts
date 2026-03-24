@@ -1,6 +1,10 @@
 import crypto from "node:crypto";
 import { Aead, CipherSuite, Kdf, Kem } from "hpke-js";
-import { XLAYER_CHAIN_ID } from "../../config/chains";
+import {
+  XLAYER_CHAIN_ID,
+  XLAYER_USDC,
+  XLAYER_X402_NETWORK,
+} from "../../config/chains";
 import { akLogin } from "./agentic-wallet";
 
 interface X402VerifyResult {
@@ -17,6 +21,8 @@ interface X402SettleResult {
   status: string;
   amount: string;
   currency: string;
+  network?: string;
+  asset?: string;
 }
 
 interface X402Authorization {
@@ -153,7 +159,7 @@ export async function verifyX402(
             valid: true,
             paymentRequired: true,
             amount: accepted.amount,
-            currency: "USDC",
+            currency: "USDG",
             network: accepted.network,
             receiver: accepted.payTo,
           };
@@ -165,7 +171,7 @@ export async function verifyX402(
       valid: true,
       paymentRequired: false,
       amount: _maxAmount,
-      currency: "USDC",
+      currency: "USDG",
       network: "unknown",
       receiver: "unknown",
     };
@@ -174,7 +180,7 @@ export async function verifyX402(
       valid: false,
       paymentRequired: false,
       amount: _maxAmount,
-      currency: "USDC",
+      currency: "USDG",
       network: "unknown",
       receiver: "unknown",
     };
@@ -324,10 +330,35 @@ export async function settleX402(
     throw new Error("No payment options in 402 response");
   }
 
-  // Pick the first EVM option (prefer Base for AgentCash services)
-  const accepted =
-    decoded.accepts.find((a) => a.network.startsWith("eip155:")) ??
-    decoded.accepts[0];
+  // Enforce X Layer — prefer eip155:196, fall back to first option
+  const xlayerAccepted = decoded.accepts.find(
+    (a: X402PaymentRequirement) =>
+      a.network === XLAYER_X402_NETWORK ||
+      a.network === `eip155:${XLAYER_CHAIN_ID}`,
+  );
+  const accepted = xlayerAccepted ?? decoded.accepts[0];
+
+  // Ensure USDG asset is set — required for OKX x402 facilitator
+  if (!accepted.asset || accepted.asset === "") {
+    accepted.asset = XLAYER_USDC;
+  }
+  if (!accepted.network || accepted.network === "unknown") {
+    accepted.network = XLAYER_X402_NETWORK;
+  }
+  // USDG extra field — required by OKX facilitator
+  if (!accepted.extra || Object.keys(accepted.extra).length === 0) {
+    accepted.extra = { name: "USDG", version: "2" };
+  }
+
+  // Amount ceiling check — prevent underpayment (SYNAI guard pattern)
+  const requestedUnits = BigInt(accepted.amount);
+  const maxUnits = BigInt(Math.floor(Number.parseFloat(_amount) * 1_000_000));
+  if (requestedUnits > maxUnits) {
+    throw new Error(
+      `x402 amount mismatch: seller requests ${accepted.amount} units, ` +
+        `buyer maxAmount covers ${maxUnits} units`,
+    );
+  }
 
   // Step 2: Sign via OKX TEE
   const proof = await signX402(payerAddress, accepted);
@@ -386,6 +417,8 @@ export async function settleX402(
     txHash,
     status: "settled",
     amount: accepted.amount,
-    currency: "USDC",
+    currency: "USDG",
+    network: accepted.network,
+    asset: accepted.asset,
   };
 }
