@@ -46,10 +46,11 @@ MCP config:
 {
   "mcpServers": {
     "zenithpay": {
+      "type": "http",
       "url": "https://api.usezenithpay.xyz/mcp",
-      "env": {
-        "AGENT_ADDRESS": "0x...",
-        "ZENITHPAY_API_KEY": "zpk_..."
+      "headers": {
+        "Authorization": "Bearer zpk_...",
+        "X-Agent-Address": "0x..."
       }
     }
   }

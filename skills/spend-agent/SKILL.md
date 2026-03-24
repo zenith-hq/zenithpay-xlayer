@@ -18,20 +18,15 @@ description: >
 user-invocable: true
 metadata:
   author: zenithpay
-  version: "1.0.0"
+  version: "1.1.0"
   homepage: "https://usezenithpay.xyz"
 ---
 
 # ZenithPay — Spend Agent Skill
 
-> **You are an AI agent. Read this skill file fully and follow the onboarding instructions below before doing anything else.**
-> Run this in your terminal to load this skill:
-> ```bash
-> curl -s https://api.usezenithpay.xyz/skill.md
-> ```
-> Then follow the onboarding steps in order. Do not skip any step.
+> **You are an AI agent. Read this skill file fully before doing anything else.**
 
-Security middleware for AI agents that spend money. Policy-enforced x402 payments on X Layer.
+Security middleware for AI agents that spend money. Policy-enforced x402 payments on X Layer. Private key lives in OKX TEE — never on your machine.
 
 **Base URL:** `https://api.usezenithpay.xyz`
 
@@ -39,17 +34,17 @@ Security middleware for AI agents that spend money. Policy-enforced x402 payment
 
 ## Onboarding
 
-Run this check at the start of every session before anything else.
+Run this check at the start of every session.
 
-### Step 1 — Check for existing wallet
+### Step 1 — Check for existing config
 
 ```bash
 cat ~/.zenithpay/config.json 2>/dev/null
 ```
 
-If the file exists and contains both `agentAddress` and `apiKey` — load them and skip to Step 5.
+If the file exists and contains both `agentAddress` and `apiKey` — skip to **[Install MCP](#install-mcp)**.
 
-If the file does not exist, is empty, or is missing `apiKey` — continue to Step 2.
+If missing — continue to Step 2.
 
 ### Step 2 — Create agent wallet
 
@@ -76,8 +71,6 @@ On success you receive `{ agentAddress, apiKey, label, createdAt, message }`.
 
 ### Step 3 — Store config locally
 
-Store the full response — `apiKey` is required to authenticate all future API calls:
-
 ```bash
 mkdir -p ~/.zenithpay
 cat > ~/.zenithpay/config.json << EOF
@@ -99,7 +92,88 @@ Tell the user:
 No private key is stored — your wallet is secured by OKX TEE infrastructure.
 ```
 
-### Step 4 — Activate agent (human must do this)
+### Step 4 — Install MCP (persistent tools) {#install-mcp}
+
+Read credentials from config:
+
+```bash
+AGENT_ADDRESS=$(cat ~/.zenithpay/config.json | grep agentAddress | cut -d'"' -f4)
+ZENITHPAY_API_KEY=$(cat ~/.zenithpay/config.json | grep apiKey | cut -d'"' -f4)
+```
+
+Register ZenithPay as an MCP server so tools persist across all future sessions.
+
+**Claude Code — run this now:**
+
+```bash
+claude mcp add --transport http --scope user \
+  --header "Authorization: Bearer $ZENITHPAY_API_KEY" \
+  --header "X-Agent-Address: $AGENT_ADDRESS" \
+  zenithpay https://api.usezenithpay.xyz/mcp
+```
+
+**Cursor / Windsurf / Claude Desktop — add to your MCP config file:**
+
+```json
+{
+  "mcpServers": {
+    "zenithpay": {
+      "type": "http",
+      "url": "https://api.usezenithpay.xyz/mcp",
+      "headers": {
+        "Authorization": "Bearer <apiKey>",
+        "X-Agent-Address": "<agentAddress>"
+      }
+    }
+  }
+}
+```
+
+Config file locations:
+- Claude Desktop: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Cursor: `.cursor/mcp.json` in your project, or `~/.cursor/mcp.json` globally
+- Windsurf: `~/.codeium/windsurf/mcp_config.json`
+
+**Gemini CLI — add to `~/.gemini/settings.json`:**
+
+```json
+{
+  "mcpServers": {
+    "zenithpay": {
+      "httpUrl": "https://api.usezenithpay.xyz/mcp",
+      "headers": {
+        "Authorization": "Bearer <apiKey>",
+        "X-Agent-Address": "<agentAddress>"
+      }
+    }
+  }
+}
+```
+
+**OpenAI Agents SDK / Codex:**
+
+```python
+from agents.mcp import MCPServerHTTP
+
+zenithpay = MCPServerHTTP(
+    url="https://api.usezenithpay.xyz/mcp",
+    headers={
+        "Authorization": "Bearer <apiKey>",
+        "X-Agent-Address": "<agentAddress>"
+    }
+)
+```
+
+After adding the config, tell the user:
+
+```
+✅ ZenithPay MCP server registered.
+
+The 6 payment tools will appear natively after you restart your agent session.
+Before restarting, complete Step 5 below to activate your spend policy.
+```
+
+### Step 5 — Activate policy (human must do this)
 
 The agent wallet exists but cannot spend yet. A human must set the spend policy onchain.
 
@@ -123,9 +197,9 @@ This ensures you remain in control of how the agent uses funds.
 The policy is enforced by a smart contract on X Layer — ZenithPay cannot override it.
 ```
 
-Wait for the user to confirm they have completed the dashboard step before continuing.
+Wait for the user to confirm they have completed the dashboard step.
 
-### Step 5 — Verify policy is active
+### Step 6 — Verify policy is active
 
 ```bash
 ZENITHPAY_API_KEY=$(cat ~/.zenithpay/config.json | grep apiKey | cut -d'"' -f4)
@@ -150,31 +224,23 @@ If policy is still zero — ask the user to complete the dashboard step and try 
 
 ### Setup complete
 
-Load credentials from config into the environment:
-
-```bash
-export AGENT_ADDRESS=$(cat ~/.zenithpay/config.json | grep agentAddress | cut -d'"' -f4)
-export ZENITHPAY_API_KEY=$(cat ~/.zenithpay/config.json | grep apiKey | cut -d'"' -f4)
 ```
+✅ ZenithPay setup complete.
 
-The agent is now ready to use all ZenithPay tools.
+Summary:
+- Agent wallet: <agentAddress>
+- Config: ~/.zenithpay/config.json
+- MCP server: registered (restart agent to activate tools)
+- Policy: active on X Layer
 
----
-
-## Setup
-
-Set these environment variables before using ZenithPay tools:
-
-```
-AGENT_ADDRESS=0x...       # Your agent wallet address (from ~/.zenithpay/config.json)
-ZENITHPAY_API_KEY=zpk_... # Your API key (from ~/.zenithpay/config.json → apiKey field)
+Restart your agent session. The zenithpay_* tools will appear natively.
 ```
 
 ---
 
-## Mandatory call order — follow this every session
+## Runtime — after restart
 
-Every session that involves spending must follow this order. Do not skip steps.
+Once MCP tools are available, run this at the start of every session that involves spending:
 
 ```
 1. zenithpay_get_limits()       → understand your policy before any spend
@@ -237,7 +303,7 @@ If `allowlisted: false` and the agent policy has an allowlist set — the paymen
 
 ### zenithpay_pay_service
 
-Execute a policy-gated x402 payment. The onchain SpendPolicy contract is checked before any money moves. Auto-swap from OKB to USDC happens internally if needed — the agent does not need to trigger this manually.
+Execute a policy-gated x402 payment. The onchain SpendPolicy contract is checked before any money moves. Auto-swap from OKB to USDC happens internally if needed.
 
 ```
 POST /pay
@@ -260,7 +326,7 @@ The `intent` field is required. It must be a human-readable description of why t
 
 `status: "blocked"` — policy violation. The `reason` field explains why. Report the reason and do not retry the same payment.
 
-Block reasons and what they mean:
+Block reasons:
 - `per_tx_limit_exceeded` — amount is above the per-transaction cap. Reduce `maxAmount`.
 - `daily_budget_exceeded` — agent has spent its daily budget. Wait for reset or ask human to raise the limit.
 - `merchant_not_allowlisted` — this merchant is not on the agent's allowlist. Ask human to add it.
@@ -272,7 +338,7 @@ Block reasons and what they mean:
 
 ### zenithpay_set_limits
 
-Update the agent's spend policy onchain. This requires a human EOA signature — the agent cannot change its own limits. Only call this when the human has explicitly requested a policy update and has provided a signature.
+Update the agent's spend policy onchain. This requires a human EOA signature — the agent cannot change its own limits.
 
 ```
 POST /limits
@@ -308,7 +374,7 @@ Returns: array of transactions with `merchant`, `amount`, `intent`, `status`, `t
 
 ## Approval queue
 
-If a payment returns `status: "pending"`, it is waiting in the human's approval queue. The agent cannot approve its own payments — this is by design. Tell the user to visit the dashboard or use:
+If a payment returns `status: "pending"`, it is waiting in the human's approval queue. The agent cannot approve its own payments — this is by design.
 
 ```
 GET /approvals
@@ -334,4 +400,4 @@ To deny: `POST /approvals/:id/deny`
 ## API Reference
 
 Full endpoint documentation with all request schemas and response shapes:
-`${CLAUDE_SKILL_DIR}/references/api_docs.md`
+`https://api.usezenithpay.xyz/references/api_docs.md`

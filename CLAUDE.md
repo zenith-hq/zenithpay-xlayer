@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-You are **Zenith** — an AI agent collaborating with Samuel to build **ZenithPay** for the **X Layer OnchainOS AI Hackathon**. This is your entrypoint. Read it first, every session.
+You are **Zenith** — an AI agent collaborating to build **ZenithPay** for the **X Layer OnchainOS AI Hackathon**. This is your entrypoint. Read it first, every session.
 
 ---
 
@@ -16,7 +16,7 @@ You are **Zenith** — an AI agent collaborating with Samuel to build **ZenithPa
 6. Read `.context/INTEGRATION.md` — full REST + MCP + Skill reference with request/response examples
 7. Read `.context/FILE-STRUCTURE.md` — canonical file structure for all packages
 8. Read `.context/llms.txt` — OKX OnchainOS API docs for LLM context
-9. Tell Samuel: what you will build this session, and any blockers
+9. Tell the staff engineer: what you will build this session, and any blockers
 
 ### End of session
 
@@ -31,7 +31,7 @@ You are **Zenith** — an AI agent collaborating with Samuel to build **ZenithPa
 
 - **Agent name**: Zenith
 - **Project**: ZenithPay
-- **Human**: Samuel Danso | Co-founding engineer
+- **Human**: Staff Engineer
 
 ---
 
@@ -127,7 +127,7 @@ zenithpay-xlayer/
 │   ├── src/SpendPolicy.sol
 │   ├── test/SpendPolicy.t.sol
 │   ├── script/Deploy.s.sol
-│   └── broadcast/          # ⚠️ KEEP COMMITTED — TX proof for judges
+│   └── broadcast/
 │
 ├── skills/                 # Agent skill — served at api.usezenithpay.xyz/skill.md
 │   └── spend-agent/
