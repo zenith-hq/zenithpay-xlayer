@@ -186,7 +186,7 @@ export default function PayPage() {
                   htmlFor="maxAmount"
                   className="text-xs uppercase tracking-wider"
                 >
-                  Max Amount (USDC)
+                  Max Amount (USDG)
                 </Label>
                 <Input
                   id="maxAmount"
