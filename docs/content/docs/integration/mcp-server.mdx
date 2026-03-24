@@ -1,34 +1,128 @@
 ---
 title: MCP Server
-description: Getting Started via MCP Server
+description: Primary integration — persistent tools across all agent sessions
 ---
-ZenithPay can be registered as an MCP server so MCP-compatible agents (Claude Code, Cursor, Codex, etc.) can call policy-gated tools.
+
+ZenithPay's MCP server is the primary integration path. Once registered, the 6 policy-gated tools appear natively in Claude Code, Cursor, Windsurf, Gemini CLI, and any MCP-compatible agent — no re-reading of skill files each session.
+
 ## MCP server URL
-`https://api.usezenithpay.xyz/mcp`
 
-## Required env vars
-- `AGENT_ADDRESS`: the agent wallet address this MCP session manages
-- `ZENITHPAY_API_KEY`: your human-scoped REST API key (used for authorization on the server side)
+```
+https://api.usezenithpay.xyz/mcp
+```
 
-## Example MCP config
+## Prerequisites
+
+Complete the [Agent Skill onboarding](/docs/integration/agent-skill) first to get your `agentAddress` and `apiKey`. Both are required to authenticate the MCP connection.
+
+## Registration by platform
+
+### Claude Code
+
+```bash
+AGENT_ADDRESS=$(cat ~/.zenithpay/config.json | grep agentAddress | cut -d'"' -f4)
+ZENITHPAY_API_KEY=$(cat ~/.zenithpay/config.json | grep apiKey | cut -d'"' -f4)
+
+claude mcp add --transport http --scope user \
+  --header "Authorization: Bearer $ZENITHPAY_API_KEY" \
+  --header "X-Agent-Address: $AGENT_ADDRESS" \
+  zenithpay https://api.usezenithpay.xyz/mcp
+```
+
+Restart Claude Code. The `zenithpay_*` tools appear in your tool list immediately.
+
+### Cursor / Windsurf
+
+Add to `.cursor/mcp.json` (project) or `~/.cursor/mcp.json` (global):
+
 ```json
 {
   "mcpServers": {
     "zenithpay": {
+      "type": "http",
       "url": "https://api.usezenithpay.xyz/mcp",
-      "env": {
-        "AGENT_ADDRESS": "0xcadf...1a9",
-        "ZENITHPAY_API_KEY": "your_api_key_here"
+      "headers": {
+        "Authorization": "Bearer <your-api-key>",
+        "X-Agent-Address": "<your-agent-address>"
       }
     }
   }
 }
 ```
 
-## Tools exposed to your agent
-- `zenithpay_balance`: returns `{ USDC, OKB, remainingDailyBudget }`
-- `zenithpay_get_limits`: returns the agent's on-chain `perTxLimit`, `dailyBudget`, and `allowlist`
-- `zenithpay_verify_merchant`: OKX security scan + allowlist check for a merchant URL
-- `zenithpay_pay_service`: policy-gated x402 payment to an x402-compatible service (includes OKB -> USDC auto-swap when needed)
-- `zenithpay_set_limits`: deploy/update `SpendPolicy.sol` (human EOA authorized)
-- `zenithpay_ledger`: on-chain + internal audit trail for the agent's payments
+### Claude Desktop
+
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "zenithpay": {
+      "type": "http",
+      "url": "https://api.usezenithpay.xyz/mcp",
+      "headers": {
+        "Authorization": "Bearer <your-api-key>",
+        "X-Agent-Address": "<your-agent-address>"
+      }
+    }
+  }
+}
+```
+
+### Gemini CLI
+
+Add to `~/.gemini/settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "zenithpay": {
+      "httpUrl": "https://api.usezenithpay.xyz/mcp",
+      "headers": {
+        "Authorization": "Bearer <your-api-key>",
+        "X-Agent-Address": "<your-agent-address>"
+      }
+    }
+  }
+}
+```
+
+### OpenAI Agents SDK
+
+```python
+from agents.mcp import MCPServerHTTP
+
+zenithpay = MCPServerHTTP(
+    url="https://api.usezenithpay.xyz/mcp",
+    headers={
+        "Authorization": "Bearer <your-api-key>",
+        "X-Agent-Address": "<your-agent-address>"
+    }
+)
+
+agent = Agent(
+    name="spending-agent",
+    mcp_servers=[zenithpay],
+)
+```
+
+## Tools exposed
+
+| Tool | Description |
+| --- | --- |
+| `zenithpay_balance` | USDC + OKB balances + remaining daily budget |
+| `zenithpay_get_limits` | Read current onchain spend policy |
+| `zenithpay_verify_merchant` | OKX security scan + allowlist check |
+| `zenithpay_pay_service` | Policy-gated x402 payment with auto-swap |
+| `zenithpay_set_limits` | Deploy/update SpendPolicy.sol (human EOA required) |
+| `zenithpay_ledger` | Full transaction audit trail |
+
+## Required call order every session
+
+```
+1. zenithpay_get_limits()       → understand policy before any spend
+2. zenithpay_balance()          → confirm funds available
+3. zenithpay_verify_merchant()  → safety check the merchant
+4. zenithpay_pay_service()      → execute payment
+5. zenithpay_ledger()           → review audit trail at end
+```

@@ -2,8 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useConnect, useConnection, useConnectors } from "wagmi";
+import { toast } from "sonner";
+import { useChainId, useConnect, useConnection, useConnectors, useSwitchChain } from "wagmi";
 import { LogoMark } from "@/components/logo-mark";
+import { getOkxConnector, hasOkxWallet, XLAYER_CHAIN_ID } from "@/lib/okx-wallet";
 import ModeToggle from "./theme-toggle/mode-toggle";
 import { Button } from "./ui/button";
 
@@ -13,7 +15,9 @@ export default function SignIn({
   onProviderClick?: () => void;
 } = {}) {
   const { isConnected } = useConnection();
-  const { mutate: connect, isPending } = useConnect();
+  const { connectAsync, isPending } = useConnect();
+  const { switchChainAsync } = useSwitchChain();
+  const chainId = useChainId();
   const connectors = useConnectors();
   const router = useRouter();
 
@@ -23,9 +27,29 @@ export default function SignIn({
     }
   }, [isConnected, router]);
 
-  function handleSignIn() {
+  async function handleSignIn() {
     onProviderClick?.();
-    connect({ connector: connectors[0] });
+    if (!hasOkxWallet()) {
+      toast.error("OKX Wallet extension not detected", {
+        description: "Install OKX Wallet to connect to ZenithPay.",
+      });
+      return;
+    }
+
+    const okxConnector = getOkxConnector(connectors);
+    if (!okxConnector) {
+      toast.error("OKX Wallet connector unavailable");
+      return;
+    }
+
+    try {
+      await connectAsync({ connector: okxConnector });
+      if (chainId !== XLAYER_CHAIN_ID) {
+        await switchChainAsync({ chainId: XLAYER_CHAIN_ID });
+      }
+    } catch {
+      toast.error("Wallet connection was cancelled or failed");
+    }
   }
 
   return (

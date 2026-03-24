@@ -10,11 +10,14 @@ import {
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import {
+  useChainId,
   useConnect,
   useConnection,
   useConnectors,
   useSignMessage,
+  useSwitchChain,
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
@@ -29,6 +32,7 @@ import {
   usdcToUnits,
   XLAYER_EXPLORER,
 } from "@/lib/contracts";
+import { getOkxConnector, hasOkxWallet, XLAYER_CHAIN_ID } from "@/lib/okx-wallet";
 
 type Step = "connect" | "policy" | "signing" | "fund" | "done";
 
@@ -75,7 +79,9 @@ export function OnboardingFlow() {
   const agentAddress = searchParams.get("agent");
 
   const { address, isConnected } = useConnection();
-  const { mutate: connect, isPending: connectPending } = useConnect();
+  const { connectAsync, isPending: connectPending } = useConnect();
+  const { switchChainAsync } = useSwitchChain();
+  const chainId = useChainId();
   const connectors = useConnectors();
   const { signMessageAsync } = useSignMessage();
   const { writeContractAsync } = useWriteContract();
@@ -111,6 +117,30 @@ export function OnboardingFlow() {
     setPerTxLimit(PRESETS[key].perTxLimit);
     setDailyBudget(PRESETS[key].dailyBudget);
     setApprovalThreshold(PRESETS[key].approvalThreshold);
+  }
+
+  async function handleConnect() {
+    if (!hasOkxWallet()) {
+      toast.error("OKX Wallet extension not detected", {
+        description: "Install OKX Wallet to continue onboarding.",
+      });
+      return;
+    }
+
+    const okxConnector = getOkxConnector(connectors);
+    if (!okxConnector) {
+      toast.error("OKX Wallet connector unavailable");
+      return;
+    }
+
+    try {
+      await connectAsync({ connector: okxConnector });
+      if (chainId !== XLAYER_CHAIN_ID) {
+        await switchChainAsync({ chainId: XLAYER_CHAIN_ID });
+      }
+    } catch {
+      toast.error("Wallet connection was cancelled or failed");
+    }
   }
 
   async function handleSign() {
@@ -324,7 +354,7 @@ export function OnboardingFlow() {
           </p>
           <Button
             className="w-full rounded-none"
-            onClick={() => connect({ connector: connectors[0] })}
+            onClick={handleConnect}
             disabled={connectPending}
           >
             {connectPending ? (

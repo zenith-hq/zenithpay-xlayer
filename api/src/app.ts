@@ -26,6 +26,7 @@ const ENDPOINT_LIST = [
   "/approvals",
   "/mcp",
   "/skill.md",
+  "/references/api_docs.md",
 ];
 
 const app = new Hono();
@@ -56,6 +57,16 @@ app.get("/health", (c) =>
 app.get("/skill.md", async (c) => {
   const res = await fetch(
     "https://raw.githubusercontent.com/zenith-hq/zenithpay-xlayer/main/skills/spend-agent/SKILL.md",
+  );
+  const content = await res.text();
+  return c.text(content, 200, {
+    "Content-Type": "text/markdown; charset=utf-8",
+  });
+});
+
+app.get("/references/api_docs.md", async (c) => {
+  const res = await fetch(
+    "https://raw.githubusercontent.com/zenith-hq/zenithpay-xlayer/main/skills/spend-agent/references/api_docs.md",
   );
   const content = await res.text();
   return c.text(content, 200, {

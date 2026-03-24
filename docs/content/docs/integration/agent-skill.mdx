@@ -1,27 +1,62 @@
 ---
 title: Agent Skill
-description: Integration via skill.md
+description: One-session onboarding — wallet, MCP setup, and policy activation
 ---
-The fastest integration: your agent loads a single skill file and gains access to ZenithPay's six policy-gated tools.
-## Skill URL
-`https://api.usezenithpay.xyz/skill.md`
 
-Your agent reads the skill file as context and gets immediate access to ZenithPay's six tools (via the agent environment).
+The skill is the onboarding layer. Your agent reads it once, completes the full setup in that session — wallet creation, config storage, MCP registration, policy activation — then restarts with persistent tools available.
+
+## Skill URL
+
+```
+https://api.usezenithpay.xyz/skill.md
+```
+
+## What the skill does
+
+The skill guides your agent through a single onboarding session:
+
+| Step | What happens | How |
+| --- | --- | --- |
+| 1 | Check for existing config | `cat ~/.zenithpay/config.json` |
+| 2 | Create agent wallet | `POST /wallet/genesis` via curl |
+| 3 | Store credentials locally | Writes `~/.zenithpay/config.json` |
+| 4 | Register MCP server | `claude mcp add --transport http ...` |
+| 5 | Activate policy | Human opens dashboard link, signs onchain |
+| 6 | Verify policy active | `GET /limits` via curl |
+
+After this single session, the agent tells the user to restart. On the next session, the 6 `zenithpay_*` MCP tools appear natively — no skill re-reading required.
+
+## Loading the skill
+
+**Claude Code:**
+
+```bash
+curl -s https://api.usezenithpay.xyz/skill.md
+```
+
+**Any agent:**
+
+Fetch `https://api.usezenithpay.xyz/skill.md` as context and follow the onboarding steps in order.
+
+## After onboarding
+
+The skill is not needed again. Tools persist via MCP. See [MCP Server](/docs/integration/mcp-server) for the full tool reference and per-platform configuration.
+
+## What the skill enforces at runtime
+
+Once tools are installed, the skill's reasoning patterns guide the agent to:
+
+- Always call `zenithpay_get_limits` before any spend
+- Always call `zenithpay_verify_merchant` on new merchants
+- Include a meaningful `intent` string in every payment
+- Never retry a blocked payment — report the reason and stop
+- Never approve its own pending payments — those go to the human
 
 ## Tools exposed
+
 - `zenithpay_balance`
 - `zenithpay_pay_service`
 - `zenithpay_set_limits`
 - `zenithpay_ledger`
 - `zenithpay_get_limits`
 - `zenithpay_verify_merchant`
-
-## How the skill guides the agent
-The skill is written to enforce safe spending habits:
-- Check policy limits before spending (`zenithpay_get_limits`)
-- Verify new merchants (`zenithpay_verify_merchant`)
-- Check wallet balance before paying (`zenithpay_balance`)
-- Include a clear `intent` string in every payment
-- Handle blocked payments without retrying the same request
-
-Approval threshold actions (`GET /approvals`, approve/deny) are REST-only; the agent does not approve its own payments.

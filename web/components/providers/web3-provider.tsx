@@ -20,7 +20,16 @@ const xlayer = defineChain({
 
 const wagmiConfig = createConfig({
   chains: [xlayer],
-  connectors: [injected()],
+  connectors: [
+    injected({
+      target: {
+        id: "okx",
+        name: "OKX Wallet",
+        provider: () =>
+          typeof window !== "undefined" ? window.okxwallet : undefined,
+      },
+    }),
+  ],
   transports: {
     [xlayer.id]: http(),
   },

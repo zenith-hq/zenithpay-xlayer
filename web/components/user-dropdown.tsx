@@ -2,10 +2,12 @@
 
 import { LayoutDashboard, LogOut } from "lucide-react";
 import Link from "next/link";
-import { useConnect, useConnection, useConnectors, useDisconnect } from "wagmi";
+import { toast } from "sonner";
+import { useChainId, useConnect, useConnection, useConnectors, useDisconnect, useSwitchChain } from "wagmi";
 import { useAgent } from "@/components/dashboard/agent-context";
 import ModeToggle from "@/components/theme-toggle/mode-toggle";
 import { Button } from "@/components/ui/button";
+import { getOkxConnector, hasOkxWallet, XLAYER_CHAIN_ID } from "@/lib/okx-wallet";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,7 +23,9 @@ function truncateAddress(address: string) {
 
 export function UserDropdown() {
   const { address, isConnected, status } = useConnection();
-  const { mutate: connect } = useConnect();
+  const { connectAsync } = useConnect();
+  const { switchChainAsync } = useSwitchChain();
+  const chainId = useChainId();
   const connectors = useConnectors();
   const { mutate: disconnect } = useDisconnect();
   const { agentDisplayName } = useAgent();
@@ -31,12 +35,36 @@ export function UserDropdown() {
     return <div className="size-8 rounded-none bg-muted animate-pulse" />;
   }
 
+  async function handleConnect() {
+    if (!hasOkxWallet()) {
+      toast.error("OKX Wallet extension not detected", {
+        description: "Install OKX Wallet to connect to ZenithPay.",
+      });
+      return;
+    }
+
+    const okxConnector = getOkxConnector(connectors);
+    if (!okxConnector) {
+      toast.error("OKX Wallet connector unavailable");
+      return;
+    }
+
+    try {
+      await connectAsync({ connector: okxConnector });
+      if (chainId !== XLAYER_CHAIN_ID) {
+        await switchChainAsync({ chainId: XLAYER_CHAIN_ID });
+      }
+    } catch {
+      toast.error("Wallet connection was cancelled or failed");
+    }
+  }
+
   if (!isConnected) {
     return (
       <Button
         variant="ghost"
         className="rounded-none"
-        onClick={() => connect({ connector: connectors[0] })}
+        onClick={handleConnect}
       >
         Sign in
       </Button>
