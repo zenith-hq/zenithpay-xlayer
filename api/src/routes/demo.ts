@@ -56,7 +56,7 @@ interface AcceptedPayment {
 
 interface DecodedPaymentHeader {
   x402Version: number;
-  scheme: string;
+  scheme?: string;
   payload: { signature: string; authorization: Record<string, string> };
   accepted: AcceptedPayment;
 }
@@ -102,7 +102,7 @@ async function verifyWithOKX(paymentHeader: string): Promise<{
         chainIndex: XLAYER_CHAIN_ID,
         paymentPayload: {
           x402Version: decoded.x402Version,
-          scheme: decoded.scheme,
+          scheme: decoded.scheme ?? "exact",
           payload: decoded.payload,
         },
         paymentRequirements: {
@@ -148,7 +148,7 @@ async function settleWithOKX(paymentHeader: string): Promise<{
         syncSettle: true,
         paymentPayload: {
           x402Version: decoded.x402Version,
-          scheme: decoded.scheme,
+          scheme: decoded.scheme ?? "exact",
           payload: decoded.payload,
         },
         paymentRequirements: {
