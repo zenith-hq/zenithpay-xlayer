@@ -35,7 +35,7 @@ const PRESETS = [
 
 export default function LimitsPage() {
   const { address } = useConnection();
-  const { agentAddress: AGENT_ADDRESS } = useAgent();
+  const { agentAddress: AGENT_ADDRESS, hasAgent } = useAgent();
   const { signMessageAsync } = useSignMessage();
   const { writeContractAsync } = useWriteContract();
 
@@ -75,7 +75,11 @@ export default function LimitsPage() {
 
   useEffect(() => {
     async function load() {
-      if (!address) return;
+      if (!address || !hasAgent) {
+        setPolicy(null);
+        setLoading(false);
+        return;
+      }
       try {
         const res = await getLimitsForOwner(address);
         const existing = res.agents[0];
@@ -93,7 +97,7 @@ export default function LimitsPage() {
       }
     }
     load();
-  }, [address]);
+  }, [address, hasAgent]);
 
   // Populate form inputs from onchain when DB lookup returned nothing
   // biome-ignore lint/correctness/useExhaustiveDependencies: only run when onchainPolicy loads
@@ -221,6 +225,12 @@ export default function LimitsPage() {
           Configure your agent spend policy, enforced on-chain
         </p>
       </div>
+
+      {!hasAgent && (
+        <div className="border border-dashed p-6 text-sm text-muted-foreground">
+          No agent linked to this wallet yet. Complete onboarding to register an agent and set limits.
+        </div>
+      )}
 
       {loading ? (
         <div className="space-y-4">
@@ -499,7 +509,7 @@ export default function LimitsPage() {
             <Button
               className="w-full rounded-none"
               onClick={handleSave}
-              disabled={saving || !perTxLimit || !dailyBudget || !address}
+              disabled={saving || !perTxLimit || !dailyBudget || !address || !hasAgent}
             >
               {saving ? (
                 <>

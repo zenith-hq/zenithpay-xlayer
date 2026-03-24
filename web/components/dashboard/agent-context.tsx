@@ -8,40 +8,39 @@ import {
   useState,
 } from "react";
 import { useConnection } from "wagmi";
-import { getAgentByAddress, getAgentsByOwner } from "@/lib/api";
-
-const FALLBACK_AGENT =
-  process.env.NEXT_PUBLIC_AGENT_ADDRESS ??
-  "0x726Cf0C4Fe559DB9A32396161694C7b88C60C947";
+import { getAgentsByOwner } from "@/lib/api";
 
 function deriveDisplayName(label: string | null, address: string): string {
+  if (!address) return "No agent";
   if (label) return label;
   return `Agent ${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
 interface AgentContextValue {
   agentAddress: string;
+  hasAgent: boolean;
   agentLabel: string | null;
   agentDisplayName: string;
   loading: boolean;
 }
 
 const AgentContext = createContext<AgentContextValue>({
-  agentAddress: FALLBACK_AGENT,
+  agentAddress: "",
+  hasAgent: false,
   agentLabel: null,
-  agentDisplayName: deriveDisplayName(null, FALLBACK_AGENT),
+  agentDisplayName: "No agent",
   loading: false,
 });
 
 export function AgentProvider({ children }: { children: ReactNode }) {
   const { address, isConnected } = useConnection();
-  const [agentAddress, setAgentAddress] = useState(FALLBACK_AGENT);
+  const [agentAddress, setAgentAddress] = useState("");
   const [agentLabel, setAgentLabel] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!isConnected || !address) {
-      setAgentAddress(FALLBACK_AGENT);
+      setAgentAddress("");
       setAgentLabel(null);
       return;
     }
@@ -50,7 +49,7 @@ export function AgentProvider({ children }: { children: ReactNode }) {
     setLoading(true);
 
     getAgentsByOwner(address)
-      .then(async (res) => {
+      .then((res) => {
         if (cancelled) return;
         const first = res.agents[0];
         if (first) {
@@ -58,19 +57,12 @@ export function AgentProvider({ children }: { children: ReactNode }) {
           setAgentLabel(first.label);
           return;
         }
-        // owner_eoa mismatch — look up by known agent address directly
-        try {
-          const byAddr = await getAgentByAddress(FALLBACK_AGENT);
-          if (!cancelled && byAddr.agents[0]) {
-            setAgentLabel(byAddr.agents[0].label);
-          }
-        } catch {
-          // no-op — label stays null, address stays FALLBACK_AGENT
-        }
+        setAgentAddress("");
+        setAgentLabel(null);
       })
       .catch(() => {
         if (!cancelled) {
-          setAgentAddress(FALLBACK_AGENT);
+          setAgentAddress("");
           setAgentLabel(null);
         }
       })
@@ -84,10 +76,11 @@ export function AgentProvider({ children }: { children: ReactNode }) {
   }, [address, isConnected]);
 
   const agentDisplayName = deriveDisplayName(agentLabel, agentAddress);
+  const hasAgent = Boolean(agentAddress);
 
   return (
     <AgentContext.Provider
-      value={{ agentAddress, agentLabel, agentDisplayName, loading }}
+      value={{ agentAddress, hasAgent, agentLabel, agentDisplayName, loading }}
     >
       {children}
     </AgentContext.Provider>

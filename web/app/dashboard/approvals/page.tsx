@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, Loader2, ShieldCheck, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSignMessage } from "wagmi";
 import { useAgent } from "@/components/dashboard/agent-context";
 import { Button } from "@/components/ui/button";
@@ -24,14 +24,19 @@ function formatDate(iso: string): string {
 }
 
 export default function ApprovalsPage() {
-  const { agentAddress } = useAgent();
+  const { agentAddress, hasAgent } = useAgent();
   const { signMessageAsync } = useSignMessage();
   const [approvals, setApprovals] = useState<PendingApproval[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [signError, setSignError] = useState<string | null>(null);
 
-  async function loadApprovals() {
+  const loadApprovals = useCallback(async () => {
+    if (!hasAgent) {
+      setApprovals([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const res = await getApprovals(agentAddress);
@@ -39,12 +44,11 @@ export default function ApprovalsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [agentAddress, hasAgent]);
 
   useEffect(() => {
     loadApprovals();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [agentAddress]);
+  }, [loadApprovals]);
 
   async function handleApprove(id: string) {
     setProcessingId(id);
@@ -98,6 +102,12 @@ export default function ApprovalsPage() {
         </p>
       </div>
 
+      {!hasAgent && (
+        <div className="border border-dashed p-6 text-sm text-muted-foreground">
+          No agent linked to this wallet yet. Create and activate an agent policy first.
+        </div>
+      )}
+
       {signError && (
         <div className="border border-red-600 bg-red-500/10 p-3">
           <p className="text-xs font-mono text-red-700 dark:text-red-400">
@@ -119,9 +129,9 @@ export default function ApprovalsPage() {
         <CardContent>
           {loading ? (
             <div className="space-y-3">
-              {Array.from({ length: 3 }).map((_, i) => (
+              {["a", "b", "c"].map((id) => (
                 <Skeleton
-                  key={`skel-${i}`}
+                  key={`approvals-skel-${id}`}
                   className="h-24 w-full rounded-none"
                 />
               ))}
