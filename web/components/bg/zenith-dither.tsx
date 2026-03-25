@@ -14,7 +14,7 @@ export function ZenithDither({ opacity = 0.28, className }: ZenithDitherProps) {
   return (
     <div
       aria-hidden="true"
-      className={`absolute inset-0 size-full pointer-events-none ${className ?? ""}`}
+      className={`absolute inset-0 size-full pointer-events-none [&_canvas]:pointer-events-none ${className ?? ""}`}
       style={
         {
           "--dither-opacity": opacity,
