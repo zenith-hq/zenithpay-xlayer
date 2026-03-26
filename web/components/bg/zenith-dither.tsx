@@ -14,7 +14,9 @@ export function ZenithDither({ opacity = 0.28, className }: ZenithDitherProps) {
   return (
     <div
       aria-hidden="true"
-      className={`absolute inset-0 size-full pointer-events-none [&_canvas]:pointer-events-none ${className ?? ""}`}
+      // biome-ignore lint/a11y/noAriaHiddenOnFocusable: decorative canvas, inert prevents all interaction
+      inert
+      className={`absolute inset-0 size-full pointer-events-none [&>*]:pointer-events-none ${className ?? ""}`}
       style={
         {
           "--dither-opacity": opacity,
