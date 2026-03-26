@@ -1,6 +1,6 @@
 ---
 title: Introduction
-description: Policy-gated agent payments on X Layer with OKX OnchainOS + x402
+description: Welcome
 ---
 
 ZenithPay is a spend governance layer for AI agents on X Layer.
@@ -8,18 +8,18 @@ ZenithPay is a spend governance layer for AI agents on X Layer.
 ![ZenithPay banner](/banner.png)
 
 <Cards>
-  <Card title="Quick Start" href="/docs/quickstart">
-    Zero to first policy-gated x402 payment using the agent onboarding flow.
-  </Card>
-  <Card title="Authentication" href="/docs/authentication">
-    Base URL, Bearer auth model, MCP headers, and approval signature flow.
-  </Card>
-  <Card title="API Reference" href="/docs/api-reference">
-    Endpoint-by-endpoint reference with request and response shapes.
-  </Card>
-  <Card title="MCP Server" href="/docs/integration/mcp-server">
-    Persistent `zenithpay_*` tools for Claude Code, Cursor, Windsurf, and more.
-  </Card>
+	<Card title="Quick Start" href="/docs/quickstart">
+		Zero to first policy-gated x402 payment using the agent onboarding flow.
+	</Card>
+	<Card title="Authentication" href="/docs/authentication">
+		Base URL, Bearer auth model, MCP headers, and approval signature flow.
+	</Card>
+	<Card title="API Reference" href="/docs/api-reference">
+		Endpoint-by-endpoint reference with request and response shapes.
+	</Card>
+	<Card title="MCP Server" href="/docs/integration/mcp-server">
+		Persistent `zenithpay_*` tools for Claude Code, Cursor, Windsurf, and more.
+	</Card>
 </Cards>
 
 It combines:
@@ -43,15 +43,15 @@ ZenithPay gives all three with onchain policy enforcement first, then payment ex
 ## System components
 
 1. **Agent Wallet**
-   - OKX Agentic Wallet (TEE), no raw private key handling in app code.
+    - OKX Agentic Wallet (TEE), no raw private key handling in app code.
 2. **Policy Engine**
-   - SpendPolicy.sol enforces per-tx and daily constraints on X Layer.
+    - SpendPolicy.sol enforces per-tx and daily constraints on X Layer.
 3. **Payment Engine**
-   - `POST /pay` orchestrates check -> optional swap -> x402 settlement.
+    - `POST /pay` orchestrates check -> optional swap -> x402 settlement.
 4. **Seller Route**
-   - `/sell/agent-intel` implements x402 seller flow (`402` challenge, verify, settle, paid response).
+    - `/sell/agent-intel` implements x402 seller flow (`402` challenge, verify, settle, paid response).
 5. **Control Plane**
-   - approvals queue, ledger, and MCP tools for operational control.
+    - approvals queue, ledger, and MCP tools for operational control.
 
 ## Payment lifecycle (high level)
 
@@ -68,6 +68,7 @@ ZenithPay gives all three with onchain policy enforcement first, then payment ex
 - SpendPolicy: `0x1250e52B7154E12F66e8E347ce116F463D4E248B`
 
 ## Minimal pay example
+
 ```bash
 curl -X POST https://api.usezenithpay.xyz/pay \
   -H "Authorization: Bearer $ZENITHPAY_API_KEY" \
