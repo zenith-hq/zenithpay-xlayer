@@ -4,6 +4,8 @@
 
 <br/>
 
+> **Note for judges:** If the OKX Wallet extension shows a phishing warning on `usezenithpay.xyz`, this is a **false positive** — new `.xyz` domains are flagged heuristically. The site is safe. Click **"Continue anyway"** or disable the extension temporarily. A whitelist request has been submitted to OKX Web3 Security.
+
 # ZenithPay
 
 > Your Agent Spends. You Own the Rules.
