@@ -7,18 +7,24 @@ import { useConnection } from "wagmi";
 
 interface AuthGateProps {
   children: ReactNode;
+  isDemo?: boolean;
 }
 
-export function AuthGate({ children }: AuthGateProps) {
+export function AuthGate({ children, isDemo }: AuthGateProps) {
   const { isConnected, status } = useConnection();
   const router = useRouter();
   const isReady = status !== "connecting" && status !== "reconnecting";
 
   useEffect(() => {
+    if (isDemo) return;
     if (isReady && !isConnected) {
       router.push("/signin");
     }
-  }, [isReady, isConnected, router]);
+  }, [isReady, isConnected, router, isDemo]);
+
+  if (isDemo) {
+    return <>{children}</>;
+  }
 
   if (!isReady) {
     return (

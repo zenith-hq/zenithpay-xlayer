@@ -22,6 +22,7 @@ interface AgentContextValue {
   agentLabel: string | null;
   agentDisplayName: string;
   loading: boolean;
+  isDemo: boolean;
 }
 
 const AgentContext = createContext<AgentContextValue>({
@@ -30,15 +31,20 @@ const AgentContext = createContext<AgentContextValue>({
   agentLabel: null,
   agentDisplayName: "No agent",
   loading: false,
+  isDemo: false,
 });
 
-export function AgentProvider({ children }: { children: ReactNode }) {
+const DEMO_AGENT_ADDRESS = "0x726cf0c4fe559db9a32396161694c7b88c60c947";
+const DEMO_AGENT_LABEL = "intel-agent";
+
+export function AgentProvider({ children, isDemo }: { children: ReactNode; isDemo?: boolean }) {
   const { address, isConnected } = useConnection();
   const [agentAddress, setAgentAddress] = useState("");
   const [agentLabel, setAgentLabel] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (isDemo) return;
     if (!isConnected || !address) {
       setAgentAddress("");
       setAgentLabel(null);
@@ -73,14 +79,23 @@ export function AgentProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [address, isConnected]);
+  }, [address, isConnected, isDemo]);
 
-  const agentDisplayName = deriveDisplayName(agentLabel, agentAddress);
-  const hasAgent = Boolean(agentAddress);
+  const resolvedAddress = isDemo ? DEMO_AGENT_ADDRESS : agentAddress;
+  const resolvedLabel = isDemo ? DEMO_AGENT_LABEL : agentLabel;
+  const agentDisplayName = deriveDisplayName(resolvedLabel, resolvedAddress);
+  const hasAgent = isDemo ? true : Boolean(agentAddress);
 
   return (
     <AgentContext.Provider
-      value={{ agentAddress, hasAgent, agentLabel, agentDisplayName, loading }}
+      value={{
+        agentAddress: resolvedAddress,
+        hasAgent,
+        agentLabel: resolvedLabel,
+        agentDisplayName,
+        loading: isDemo ? false : loading,
+        isDemo: isDemo ?? false,
+      }}
     >
       {children}
     </AgentContext.Provider>
